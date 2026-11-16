@@ -167,7 +167,7 @@ const SABOTAGE_CARDS = [
 
 // Random Events
 const RANDOM_EVENTS = [
-  { id: 'ghubar', title: '🌪️ موجة غبار موسمية!', desc: 'كل المتسابقين يدفعون 2 ر.س صيانة وتنظيف عاجل لمشروعهم.', effect: (room) => {
+  { id: 'ghubar', title: '🌪️ موجة غبار موسمية!', desc: 'كل اللاعبين يدفعون 2 ر.س صيانة وتنظيف عاجل لمشروعهم.', effect: (room) => {
     room.players.forEach(p => { p.budget = Math.max(0, p.budget - 2); });
   }},
   { id: 'baladiya', title: '📋 تفتيش بلدي مفاجئ!', desc: 'المشروع الأقل نقاطاً يحصل على مخالفة 3 ر.س، والأعلى يحصل على ترخيص ذهبي (+15 نقطة)!', effect: (room) => {
@@ -177,7 +177,7 @@ const RANDOM_EVENTS = [
     const lowest = sorted[sorted.length - 1];
     lowest.budget = Math.max(0, lowest.budget - 3);
   }},
-  { id: 'cashback', title: '💳 يوم الكاش باك البنكي!', desc: 'مكافأة 4 ر.س كاش باك تُضاف فوراً لجميع المتسابقين لدعم ميزانياتهم!', effect: (room) => {
+  { id: 'cashback', title: '💳 يوم الكاش باك البنكي!', desc: 'مكافأة 4 ر.س كاش باك تُضاف فوراً لجميع اللاعبين لدعم ميزانياتهم!', effect: (room) => {
     room.players.forEach(p => { p.budget += 4; });
   }},
   { id: 'trend', title: '🔥 ترند تيك توك وسناب شات!', desc: 'جميع المشاريع تحصل على +10 نقاط شهرة إضافية بدون أي تكلفة!', effect: (room) => {
@@ -806,7 +806,7 @@ function resolveAuction(room) {
       desc: room.auctionData.desc,
       isAuctionAsset: true
     });
-    resultMsg = `🔨 مبروك للمتسابق ${winner.avatar} ${winner.name}! فاز بالمزاد بمبلغ ${highestBid} ر.س وأضاف (+${room.auctionData.scoreBonus} نقطة)!`;
+    resultMsg = `🔨 مبروك للاعب ${winner.avatar} ${winner.name}! فاز بالمزاد بمبلغ ${highestBid} ر.س وأضاف (+${room.auctionData.scoreBonus} نقطة)!`;
   }
 
   room.auctionData = null;
@@ -851,7 +851,7 @@ function endGame(room) {
   const third = room.players[2] || null;
 
   // Generate witty, analytical AI commentary
-  let aiCommentary = `🏆 **حكم الـ AI:** يتوّج المتسابق **${champion.name}** بطلاً للجلسة بنسبة **${champion.percentage}%**! `;
+  let aiCommentary = `🏆 **حكم الـ AI:** يتوّج اللاعب **${champion.name}** بطلاً للجلسة بنسبة **${champion.percentage}%**! `;
   if (champion.budget >= 5) {
     aiCommentary += `أظهر ذكاءً استثمارياً نادراً باقتناء قطع ذات وزن نوعي لـ (${themeData.title}) واحتفظ بـ (${champion.budget} ر.س) كرصيد طوارئ منعه من الطفرة. `;
   } else {
@@ -1066,7 +1066,7 @@ wss.on('connection', (ws) => {
           broadcastRoom(room, {
             type: 'AI_BOT_ADDED',
             botName: botPlayer.name,
-            message: `🤖 انضم المتسابق الذكي (${botPlayer.name}) للغرفة!`
+            message: `🤖 انضم اللاعب الذكي (${botPlayer.name}) للغرفة!`
           });
           break;
         }
@@ -1127,7 +1127,7 @@ wss.on('connection', (ws) => {
           broadcastRoom(room, {
             type: 'PLAYER_KICKED',
             kickedName: targetPlayer.name,
-            message: `🚪 تم طرد المتسابق (${targetPlayer.name}) من الغرفة.`
+            message: `🚪 تم طرد اللاعب (${targetPlayer.name}) من الغرفة.`
           });
           break;
         }
@@ -1236,7 +1236,7 @@ wss.on('connection', (ws) => {
 
           if (card.type === 'budget_cut') {
             target.budget = Math.max(0, target.budget - card.val);
-            eventDescription = `📸 رصد ساهر مخالفة على المتسابق ${target.avatar} ${target.name} وخصم ${card.val} ر.س من ميزانيته بتوجيه من ${user.name}!`;
+            eventDescription = `📸 رصد ساهر مخالفة على اللاعب ${target.avatar} ${target.name} وخصم ${card.val} ر.س من ميزانيته بتوجيه من ${user.name}!`;
           } else if (card.type === 'sell_last') {
             if (target.upgrades.length > 0) {
               const removed = target.upgrades.pop();
@@ -1249,7 +1249,7 @@ wss.on('connection', (ws) => {
             }
           } else if (card.type === 'freeze_turn') {
             target.frozen = true;
-            eventDescription = `🧿 عين حسود! جمّد ${user.name} خيار الشراء للمتسابق ${target.name} لهذه الجولة!`;
+            eventDescription = `🧿 عين حسود! جمّد ${user.name} خيار الشراء للاعب ${target.name} لهذه الجولة!`;
           } else if (card.type === 'swap_piece') {
             if (user.upgrades.length > 0 && target.upgrades.length > 0) {
               const myPiece = user.upgrades.pop();

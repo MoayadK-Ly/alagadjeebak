@@ -272,7 +272,7 @@
         </div>
 
         <div class="text-center sm:text-left bg-slate-950/80 border border-slate-800 px-4 py-2 rounded-2xl">
-          <span class="text-xs text-slate-400 font-bold block">المتسابقون المتصلون</span>
+          <span class="text-xs text-slate-400 font-bold block">اللاعبون المتصلون</span>
           <div class="text-lg font-black text-white">
             <span id="lobbyPlayerCount" class="text-emerald-400">1</span> / 8 لاعبين
           </div>
@@ -288,7 +288,7 @@
             <div class="flex items-center justify-between pb-2 border-b border-slate-800">
               <h4 class="text-xs font-black text-slate-200 flex items-center gap-1.5">
                 <span>👥</span>
-                <span>قائمة المتسابقين في الغرفة</span>
+                <span>قائمة اللاعبين في الغرفة</span>
               </h4>
               <span class="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20 font-bold">
                 <span id="lobbySidePlayerCount">1</span> / 8 لاعبين
@@ -877,7 +877,7 @@
       const hAvatar = document.getElementById('hAvatar');
       const hTag = document.getElementById('hTag');
       const hWins = document.getElementById('hWins');
-      if (hName) hName.innerText = myProfile.name || 'متسابق جديد';
+      if (hName) hName.innerText = myProfile.name || 'لاعب جديد';
       if (hAvatar) hAvatar.innerText = myProfile.avatar || '🏎️';
       if (hTag) hTag.innerText = myProfile.tag || '#KSA-101';
       if (hWins) hWins.innerText = myProfile.wins || 0;
@@ -1158,7 +1158,7 @@
         case 'AI_BOT_REMOVED':
         case 'PLAYER_KICKED':
           playSoundEffect('skip');
-          showFloatingNotification(msg.message || '🚪 تم استبعاد المتسابق');
+          showFloatingNotification(msg.message || '🚪 تم استبعاد اللاعب');
           break;
 
         case 'KICKED_FROM_ROOM':
@@ -1237,7 +1237,7 @@
           break;
 
         case 'PLAYER_PASSED':
-          showFloatingNotification(`🏳️ ${msg.playerName || 'أحد المتسابقين'} تخلى عن المزايدة`);
+          showFloatingNotification(`🏳️ ${msg.playerName || 'أحد اللاعبين'} تخلى عن المزايدة`);
           break;
 
         case 'AUCTION_ITEM_WON':
@@ -1707,7 +1707,7 @@
 
     function handleKickPlayer(playerId, playerName) {
       if (!gameState.isHost) return;
-      if (!confirm(`هل أنت متأكد من طرد المتسابق (${playerName}) من الغرفة؟`)) return;
+      if (!confirm(`هل أنت متأكد من طرد اللاعب (${playerName}) من الغرفة؟`)) return;
       playSoundEffect('skip');
       if (isConnected && ws && ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({ 
@@ -1728,7 +1728,7 @@
 
     function handleAddAiBotClick() {
       if (!gameState.isHost) {
-        showFloatingNotification('⚠️ المضيف فقط يمكنه إضافة متسابقين ذكاء اصطناعي!');
+        showFloatingNotification('⚠️ المضيف فقط يمكنه إضافة لاعبين ذكاء اصطناعي!');
         return;
       }
       if (gameState.players.length >= 8) {
@@ -1737,7 +1737,7 @@
       }
 
       playSoundEffect('buy');
-      showFloatingNotification('🤖 جاري إضافة متسابق ذكي للغرفة...');
+      showFloatingNotification('🤖 جاري إضافة لاعب ذكي للغرفة...');
 
       if (isConnected && ws && ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({ 
@@ -1766,7 +1766,7 @@
 
         renderLobbyPlayers();
         document.getElementById('lobbyPlayerCount').innerText = gameState.players.length;
-        showFloatingNotification(`🤖 تم إضافة المتسابق الذكي (${p.name})!`);
+        showFloatingNotification(`🤖 تم إضافة اللاعب الذكي (${p.name})!`);
       }
     }
 
@@ -2967,7 +2967,7 @@
       const p2 = gameState.players[1];
       const p3 = gameState.players[2] || null;
 
-      const commentary = `🏆 يتوّج الذكاء الاصطناعي المتسابق "${p1.name}" بالمركز الأول بنسبة ${p1.percentage}%! تميز في هندسة وتطوير (${themeData.title}) واحتفظ بـ (${p1.budget} ر.س) كرصيد استراتيجي منعته من الطفرة!`;
+      const commentary = `🏆 يتوّج الذكاء الاصطناعي اللاعب "${p1.name}" بالمركز الأول بنسبة ${p1.percentage}%! تميز في هندسة وتطوير (${themeData.title}) واحتفظ بـ (${p1.budget} ر.س) كرصيد استراتيجي منعته من الطفرة!`;
 
       renderGrandReveal({
         podium: {
