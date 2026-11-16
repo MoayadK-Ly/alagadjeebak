@@ -34,6 +34,64 @@
     .neon-border {
       animation: pulseNeon 3s infinite;
     }
+    @keyframes flyingItemSwoop {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.3) rotate(-20deg);
+      }
+      35% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.35) rotate(6deg);
+        box-shadow: 0 0 50px rgba(245, 158, 11, 0.9), 0 0 80px rgba(16, 185, 129, 0.6);
+      }
+      75% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.1) rotate(0deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.4) translateY(60px);
+      }
+    }
+    .fly-swoop-anim {
+      animation: flyingItemSwoop 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+    @keyframes shockwavePulse {
+      0% {
+        transform: scale(0.2);
+        opacity: 1;
+        border-color: #38bdf8;
+      }
+      60% {
+        border-color: #f59e0b;
+        opacity: 0.8;
+      }
+      100% {
+        transform: scale(2.4);
+        opacity: 0;
+        border-color: #f43f5e;
+      }
+    }
+    .shockwave-ring {
+      animation: shockwavePulse 0.9s cubic-bezier(0, 0, 0.2, 1) forwards;
+    }
+    @keyframes projectLockIn {
+      0% { transform: scale(1); filter: brightness(1); }
+      25% { transform: scale(1.14) translateY(-8px); filter: brightness(1.8) drop-shadow(0 0 35px #f59e0b); }
+      50% { transform: scale(0.94) translateY(4px); filter: brightness(1.4); }
+      75% { transform: scale(1.05) translateY(-2px); }
+      100% { transform: scale(1); filter: brightness(1); }
+    }
+    .project-snap-active {
+      animation: projectLockIn 0.85s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes sparkBurst {
+      0% { transform: scale(0) rotate(0deg); opacity: 1; }
+      100% { transform: scale(1.8) rotate(180deg); opacity: 0; }
+    }
+    .spark-anim {
+      animation: sparkBurst 0.8s ease-out forwards;
+    }
     /* Custom scrollbar */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: #020617; }
@@ -842,6 +900,11 @@
         // Wooden auction gavel strike
         playTone(280, 'square', 0.08, 0.35);
         setTimeout(() => playTone(160, 'sawtooth', 0.12, 0.3), 30);
+      } else if (name === 'mechanical_snap') {
+        // Metallic lock-in clank + pneumatic hiss
+        playTone(320, 'square', 0.08, 0.4);
+        setTimeout(() => playTone(540, 'triangle', 0.12, 0.35), 40);
+        setTimeout(() => playTone(880, 'sine', 0.25, 0.35), 90);
       } else if (name === 'sabotage') {
         // Dramatic low buzz
         playTone(180, 'sawtooth', 0.25, 0.3);
@@ -1002,8 +1065,12 @@
           break;
 
         case 'AUCTION_ITEM_WON':
-          playSoundEffect('victory');
-          showFloatingNotification(msg.message);
+          triggerEpicAttachmentAnimation(
+            msg.winnerId === gameState.myPlayerId,
+            msg.winnerName,
+            msg.offer,
+            msg.amount
+          );
           if (msg.winnerId === gameState.myPlayerId) {
             const me = gameState.players.find(p => p.id === gameState.myPlayerId);
             if (me) {
@@ -2223,6 +2290,81 @@
       }, 2000);
     }
 
+    function triggerEpicAttachmentAnimation(isMe, winnerName, offer, bidAmount) {
+      if (!offer) return;
+
+      if (isMe) {
+        // 1. Create flying hologram badge in center of screen
+        const holo = document.createElement('div');
+        holo.className = 'fixed top-1/2 left-1/2 z-50 pointer-events-none fly-swoop-anim bg-slate-900 border-2 border-amber-400 rounded-3xl p-5 shadow-2xl flex flex-col items-center gap-2 text-center';
+        holo.innerHTML = `
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 to-emerald-500 flex items-center justify-center text-3xl shadow-lg">
+            ⚡
+          </div>
+          <div>
+            <span class="text-[10px] font-black text-emerald-400 bg-emerald-500/20 px-2.5 py-0.5 rounded-full block mb-1">
+              🎉 فزت بالمزاد بـ (${bidAmount} ر.س)!
+            </span>
+            <span class="text-base font-black text-white block">${offer.name}</span>
+            <span class="text-xs font-mono font-bold text-amber-300 block">+${offer.score} نقطة تميز</span>
+          </div>
+        `;
+        document.body.appendChild(holo);
+
+        // 2. Play initial victory sound
+        playSoundEffect('victory');
+
+        // 3. At impact timing (700ms in):
+        setTimeout(() => {
+          // Play mechanical snap impact sound
+          playSoundEffect('mechanical_snap');
+
+          // Impact shockwave on SVG Viewport
+          const viewport = document.getElementById('svgViewport');
+          if (viewport) {
+            viewport.classList.remove('project-snap-active');
+            void viewport.offsetWidth; // trigger reflow
+            viewport.classList.add('project-snap-active');
+
+            // Shockwave Ring
+            const ring = document.createElement('div');
+            ring.className = 'absolute inset-0 m-auto w-32 h-32 rounded-full border-4 border-amber-400 pointer-events-none shockwave-ring z-20';
+            viewport.parentElement.appendChild(ring);
+            setTimeout(() => ring.remove(), 1000);
+
+            // Floating Impact Sparks
+            for (let i = 0; i < 8; i++) {
+              const spark = document.createElement('span');
+              spark.className = 'absolute text-lg pointer-events-none spark-anim z-30';
+              spark.innerText = ['✨', '💥', '⚡', '🌟'][i % 4];
+              spark.style.left = (40 + Math.random() * 20) + '%';
+              spark.style.top = (40 + Math.random() * 20) + '%';
+              viewport.parentElement.appendChild(spark);
+              setTimeout(() => spark.remove(), 800);
+            }
+          }
+
+          // Confetti burst for winner
+          if (typeof confetti === 'function') {
+            try { confetti({ particleCount: 60, spread: 60, origin: { y: 0.5 } }); } catch(e){}
+          }
+
+          showFloatingNotification(`⚡ تم تركيب (${offer.name}) في مشروعك بنجاح!`);
+        }, 700);
+
+        setTimeout(() => holo.remove(), 1300);
+      } else {
+        // Competitor won: show swooping notification to competitors card
+        playSoundEffect('buy');
+        showFloatingNotification(`🔨 فاز ${winnerName} بـ (${offer.name}) وركّبها في مشروعه!`);
+        const compGrid = document.getElementById('competitorsGrid');
+        if (compGrid) {
+          compGrid.classList.add('project-snap-active');
+          setTimeout(() => compGrid.classList.remove('project-snap-active'), 800);
+        }
+      }
+    }
+
     function resolveLocalAuction() {
       if (localAuctionTimerInt) clearInterval(localAuctionTimerInt);
       localAuctionActive = false;
@@ -2233,8 +2375,13 @@
           winner.budget = Math.max(0, winner.budget - currentHighestBid);
           winner.score += gameState.currentOffer.score;
           winner.upgrades.push({ ...gameState.currentOffer, winningBid: currentHighestBid });
-          playSoundEffect('victory');
-          showFloatingNotification(`🔨 رسا المزاد رسمياً على ${winner.avatar} ${winner.name} بمبلغ ${currentHighestBid} ر.س!`);
+          
+          triggerEpicAttachmentAnimation(
+            winner.id === 'p_me' || winner.name === myProfile.name,
+            winner.name,
+            gameState.currentOffer,
+            currentHighestBid
+          );
         }
       } else {
         playSoundEffect('skip');
@@ -2243,7 +2390,7 @@
 
       updateMyProjectView();
       renderCompetitorsGrid();
-      setTimeout(() => startLocalRound(), 2500);
+      setTimeout(() => startLocalRound(), 2800);
     }
 
     function handleLocalSabotage(cardId, targetId) {
