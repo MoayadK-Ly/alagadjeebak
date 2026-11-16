@@ -1379,6 +1379,8 @@
 
         case 'AUCTION_ROUND_STARTED':
         case 'ROUND_STARTED':
+          if (msg.theme && THEMES[msg.theme]) gameState.theme = msg.theme;
+          if (msg.room && msg.room.theme && THEMES[msg.room.theme]) gameState.theme = msg.room.theme;
           gameState.round = msg.round;
           gameState.totalRounds = msg.totalRounds;
           gameState.currentOffer = msg.offer;
@@ -1974,7 +1976,11 @@
       if (isConnected && ws && ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({ 
           type: 'START_GAME',
-          code: gameState.roomCode 
+          code: gameState.roomCode,
+          theme: gameState.theme,
+          budget: gameState.budget,
+          mode: gameState.mode,
+          curtain: gameState.curtain
         }));
       } else if (isOfflineDemo) {
         startLocalRound();
@@ -2187,7 +2193,8 @@
 
       document.getElementById('playMyBudget').innerText = `${me.budget} ر.س`;
       document.getElementById('myProjectName').innerText = `${me.name} (مشروعك)`;
-      document.getElementById('myProjectAvatar').innerText = me.avatar || '🏎️';
+      const themeIcons = { car: '🏎️', villa: '🏡', cafe: '☕', restaurant: '🍔', tower: '🏢', jet: '✈️' };
+      document.getElementById('myProjectAvatar').innerText = me.avatar || themeIcons[gameState.theme] || '🏡';
       document.getElementById('myProjectScore').innerText = `💎 ${me.score || 10} نقطة فخامة`;
 
       // Render Dynamic SVG for current theme

@@ -768,6 +768,7 @@ function startNextRound(room) {
   broadcastRoom(room, {
     type: 'AUCTION_ROUND_STARTED',
     round: room.round,
+    theme: room.theme,
     totalRounds: room.totalRounds,
     offer: room.currentOffer,
     event: triggeredEvent,
@@ -1240,6 +1241,15 @@ wss.on('connection', (ws) => {
           const roomCode = playerSession.roomCode || (data.code ? String(data.code).replace('#', '').trim() : null);
           const room = rooms.get(roomCode);
           if (!room || room.hostId !== playerSession.id || room.state !== 'lobby') return;
+          if (data.theme && THEMES[data.theme]) {
+            room.theme = data.theme;
+          }
+          if (data.budget && [25, 50, 100, 200].includes(Number(data.budget))) {
+            room.budget = Number(data.budget);
+            room.totalRounds = calculateRounds(room.budget);
+          }
+          if (data.mode) room.mode = data.mode;
+          if (typeof data.curtain === 'boolean') room.curtain = data.curtain;
           startGame(room);
           break;
         }
