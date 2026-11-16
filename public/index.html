@@ -1070,30 +1070,42 @@
     function handleServerMessage(msg) {
       console.log('📩 Msg from server:', msg.type, msg);
 
+      // CRITICAL: Always synchronize room whenever msg.room is provided
+      if (msg.room) {
+        applyRoomUpdate(msg.room);
+      }
+
       switch (msg.type) {
         case 'ERROR':
           alert(msg.message || 'حدث خطأ!');
           break;
 
+        case 'AI_BOT_ADDED':
+          playSoundEffect('buy');
+          showFloatingNotification(msg.message || '🤖 تم إضافة ذكاء اصطناعي للغرفة!');
+          break;
+
+        case 'AI_BOT_REMOVED':
+          playSoundEffect('skip');
+          showFloatingNotification(msg.message || '🚪 تم استبعاد المتسابق');
+          break;
+
         case 'ROOM_CREATED':
           gameState.myPlayerId = msg.playerId;
           gameState.isHost = true;
-          applyRoomUpdate(msg.room);
           switchScreen('screenLobby');
-          startLobbyCodeTimer(msg.room.codeExpiresIn || 600);
+          startLobbyCodeTimer(msg.room?.codeExpiresIn || 600);
           break;
 
         case 'JOINED_SUCCESS':
           gameState.myPlayerId = msg.playerId;
-          gameState.isHost = (msg.room.hostId === msg.playerId);
+          gameState.isHost = (msg.room?.hostId === msg.playerId);
           closeJoinModal();
-          applyRoomUpdate(msg.room);
           switchScreen('screenLobby');
-          startLobbyCodeTimer(msg.room.codeExpiresIn || 600);
+          startLobbyCodeTimer(msg.room?.codeExpiresIn || 600);
           break;
 
         case 'ROOM_UPDATE':
-          applyRoomUpdate(msg.room);
           break;
 
         case 'CODE_RENEWED':
@@ -1524,16 +1536,25 @@
     }
 
     function handleAddAiBotClick() {
-      if (!gameState.isHost) return;
+      if (!gameState.isHost) {
+        showFloatingNotification('⚠️ المضيف فقط يمكنه إضافة متسابقين ذكاء اصطناعي!');
+        return;
+      }
       if (gameState.players.length >= 8) {
         showFloatingNotification('⚠️ الغرفة مكتملة بالحد الأقصى (8 لاعبين)!');
         return;
       }
 
-      if (isConnected && ws) {
-        ws.send(JSON.stringify({ type: 'ADD_AI_BOT' }));
+      playSoundEffect('buy');
+      showFloatingNotification('🤖 جاري إضافة متسابق ذكي للغرفة...');
+
+      if (isConnected && ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ 
+          type: 'ADD_AI_BOT',
+          code: gameState.roomCode 
+        }));
       } else {
-        // Offline demo mode
+        // Local fallback / Offline demo mode
         const existingNames = new Set(gameState.players.map(p => p.name));
         const available = AI_PERSONAS.filter(p => !existingNames.has(p.name));
         const p = available.length > 0 ? available[0] : { name: 'سلطان الـ AI 👑', avatar: '👑', persona: 'استراتيجي محنك', style: 'strategic' };
@@ -1552,7 +1573,6 @@
           sabotageCards: [{ id: 'saher', name: 'ساهر 📸', desc: 'خصم مخالفة فورية 4 ر.س' }]
         });
 
-        playSoundEffect('buy');
         renderLobbyPlayers();
         document.getElementById('lobbyPlayerCount').innerText = gameState.players.length;
         showFloatingNotification(`🤖 تم إضافة المتسابق الذكي (${p.name})!`);
@@ -1561,13 +1581,17 @@
 
     function handleRemoveAiBot(botId) {
       if (!gameState.isHost) return;
-      if (isConnected && ws) {
-        ws.send(JSON.stringify({ type: 'REMOVE_AI_BOT', botId }));
+      playSoundEffect('skip');
+      if (isConnected && ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ 
+          type: 'REMOVE_AI_BOT', 
+          botId: botId,
+          code: gameState.roomCode 
+        }));
       } else {
         const idx = gameState.players.findIndex(p => p.id === botId);
         if (idx !== -1) {
           const removed = gameState.players.splice(idx, 1)[0];
-          playSoundEffect('skip');
           renderLobbyPlayers();
           document.getElementById('lobbyPlayerCount').innerText = gameState.players.length;
           showFloatingNotification(`🚪 تم استبعاد (${removed.name})`);

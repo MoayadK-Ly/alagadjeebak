@@ -1022,8 +1022,11 @@ wss.on('connection', (ws) => {
 
         // 4b. ADD AI BOT (HOST ONLY)
         case 'ADD_AI_BOT': {
-          const room = rooms.get(playerSession.roomCode);
-          if (!room || room.hostId !== playerSession.id || room.state !== 'lobby') return;
+          const roomCode = playerSession.roomCode || (data.code ? String(data.code).replace('#', '').trim() : null);
+          const room = rooms.get(roomCode);
+          if (!room || room.state !== 'lobby') {
+            return ws.send(JSON.stringify({ type: 'ERROR', message: 'لم يتم العثور على الغرفة!' }));
+          }
           if (room.players.length >= 8) {
             return ws.send(JSON.stringify({ type: 'ERROR', message: 'الغرفة ممتلئة بالكامل (8 لاعبين)!' }));
           }
@@ -1065,8 +1068,9 @@ wss.on('connection', (ws) => {
 
         // 4c. REMOVE AI BOT (HOST ONLY)
         case 'REMOVE_AI_BOT': {
-          const room = rooms.get(playerSession.roomCode);
-          if (!room || room.hostId !== playerSession.id || room.state !== 'lobby') return;
+          const roomCode = playerSession.roomCode || (data.code ? String(data.code).replace('#', '').trim() : null);
+          const room = rooms.get(roomCode);
+          if (!room || room.state !== 'lobby') return;
           const botIdx = room.players.findIndex(p => p.id === data.botId && p.isBot);
           if (botIdx !== -1) {
             const removed = room.players.splice(botIdx, 1)[0];
