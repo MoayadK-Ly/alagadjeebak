@@ -357,36 +357,75 @@
         <!-- Current Offer & Competitors Curtain Bar -->
         <div class="lg:col-span-5 flex flex-col gap-4">
           
-          <!-- Current Round Offer Card -->
-          <div class="bg-slate-900 border-2 border-indigo-500/50 rounded-3xl p-5 space-y-3 shadow-xl">
+          <!-- Live Bidding Arena Card -->
+          <div class="bg-slate-900 border-2 border-amber-500/60 rounded-3xl p-5 space-y-3 shadow-xl relative overflow-hidden">
             <div class="flex items-center justify-between">
-              <span class="text-[10px] font-bold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full">عرض الجولة الحالي</span>
-              <span id="offerPrice" class="text-sm font-black font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/30">
-                السعر: 4 ر.س
+              <span class="text-[10px] font-black text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/30 flex items-center gap-1">
+                <span>🔨</span> حراج ومزايدة حية
+              </span>
+              <span id="offerScoreBonus" class="text-xs font-bold text-emerald-400">
+                +20 نقطة تميز
               </span>
             </div>
 
             <div>
               <h3 id="offerName" class="text-base font-black text-white">جنوط سبور مقاس 20</h3>
-              <p id="offerDesc" class="text-xs text-slate-400 mt-1">ثبات خرافي على المنعطفات ويعطي شكل هجومي للسيارة</p>
+              <p id="offerDesc" class="text-xs text-slate-400 mt-0.5">ثبات خرافي على المنعطفات ويعطي شكل هجومي للسيارة</p>
             </div>
 
-            <div class="text-[11px] text-emerald-400 font-bold flex items-center gap-1">
-              <span>⭐ الفائدة:</span>
-              <span id="offerScoreBonus">+20 نقطة تميز</span>
+            <!-- Spotlight: Current Highest Bid -->
+            <div class="bg-slate-950 border border-amber-500/40 rounded-2xl p-3 flex items-center justify-between shadow-inner">
+              <div class="text-right">
+                <span class="text-[10px] text-slate-400 block font-bold">أعلى سومة حالياً:</span>
+                <div class="flex items-center gap-1">
+                  <span id="liveHighestBidVal" class="text-2xl font-black font-mono text-amber-300">0</span>
+                  <span class="text-xs font-bold text-amber-400">ر.س</span>
+                </div>
+              </div>
+
+              <div class="text-left bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl">
+                <span class="text-[9px] text-slate-400 block font-bold">المتصدر بالسومة:</span>
+                <span id="liveHighestBidderName" class="text-xs font-black text-white flex items-center gap-1">
+                  لا توجد سومة بعد
+                </span>
+              </div>
             </div>
 
-            <!-- Choice Action Buttons -->
-            <div class="grid grid-cols-2 gap-2 pt-2">
-              <button id="btnBuy" onclick="handleMakeChoice('buy')" class="py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl text-xs md:text-sm shadow-lg shadow-emerald-600/30 transition active:scale-95 flex items-center justify-center gap-1.5">
-                <span>شراء ✅</span>
-              </button>
-              <button id="btnSkip" onclick="handleMakeChoice('skip')" class="py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs md:text-sm border border-slate-700 transition active:scale-95 flex items-center justify-center gap-1.5">
-                <span>تخطي ❌</span>
-              </button>
+            <!-- Bidding Controls: Stepper & Quick Boosts -->
+            <div id="bidControlsArea" class="space-y-2 pt-1">
+              <!-- Stepper -->
+              <div class="flex items-center justify-between bg-slate-950 border border-slate-800 rounded-2xl px-3 py-1.5">
+                <span class="text-xs font-bold text-slate-300">سومتي القادمة:</span>
+                <div class="flex items-center gap-2">
+                  <button type="button" onclick="adjustProposedBid(-1)" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-base flex items-center justify-center transition active:scale-90">-</button>
+                  <span id="proposedBidVal" class="text-lg font-mono font-black text-amber-300 w-12 text-center">1</span>
+                  <span class="text-xs text-slate-400 font-bold">ر.س</span>
+                  <button type="button" onclick="adjustProposedBid(1)" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-base flex items-center justify-center transition active:scale-90">+</button>
+                </div>
+              </div>
+
+              <!-- Quick Boost Chips -->
+              <div class="flex items-center gap-1.5 justify-center">
+                <span class="text-[10px] text-slate-400 font-bold">زيادة سريعة:</span>
+                <button type="button" onclick="quickBoostBid(1)" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs font-bold text-amber-300 border border-slate-700 transition active:scale-95">+1 ر.س</button>
+                <button type="button" onclick="quickBoostBid(2)" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs font-bold text-amber-300 border border-slate-700 transition active:scale-95">+2 ر.س</button>
+                <button type="button" onclick="quickBoostBid(5)" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs font-bold text-amber-300 border border-slate-700 transition active:scale-95">+5 ر.س</button>
+              </div>
+
+              <!-- Main Bidding Action Buttons -->
+              <div class="grid grid-cols-2 gap-2 pt-1">
+                <button id="btnSubmitBid" onclick="handleSubmitBid()" class="py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black rounded-xl text-xs md:text-sm shadow-lg shadow-emerald-600/30 transition active:scale-95 flex items-center justify-center gap-1.5 border border-emerald-400/40">
+                  <span>🔨 زِد السومة</span>
+                  <span id="btnBidPriceText" class="font-mono text-emerald-100">(1 ر.س)</span>
+                </button>
+                <button id="btnPassBid" onclick="handlePassBid()" class="py-3 bg-slate-800 hover:bg-rose-950/60 hover:border-rose-500/50 text-slate-300 hover:text-rose-300 font-bold rounded-xl text-xs md:text-sm border border-slate-700 transition active:scale-95 flex items-center justify-center gap-1">
+                  <span>❌ ماني مزايد / خلها له</span>
+                </button>
+              </div>
             </div>
 
-            <p id="choiceWaitNotice" class="text-[10px] text-amber-300 text-center font-bold min-h-[14px]"></p>
+            <!-- Status Notice -->
+            <p id="bidStatusNotice" class="text-xs text-center font-bold min-h-[16px] text-amber-300"></p>
           </div>
 
           <!-- Competitors Grid with Secret Curtain & Peek 👁️ -->
@@ -799,6 +838,10 @@
       } else if (name === 'tick') {
         // Clock tick
         playTone(880, 'sine', 0.04, 0.08);
+      } else if (name === 'hammer') {
+        // Wooden auction gavel strike
+        playTone(280, 'square', 0.08, 0.35);
+        setTimeout(() => playTone(160, 'sawtooth', 0.12, 0.3), 30);
       } else if (name === 'sabotage') {
         // Dramatic low buzz
         playTone(180, 'sawtooth', 0.25, 0.3);
@@ -917,33 +960,65 @@
           showFloatingNotification(msg.message || '🔄 تم تجديد الكود');
           break;
 
+        case 'AUCTION_ROUND_STARTED':
         case 'ROUND_STARTED':
           gameState.round = msg.round;
           gameState.totalRounds = msg.totalRounds;
           gameState.currentOffer = msg.offer;
-          gameState.timer = msg.timer || 20;
+          gameState.timer = msg.timer || 15;
+          currentHighestBid = msg.highestBid || 0;
+          currentHighestBidder = msg.highestBidderName || 'لا توجد سومة بعد';
+          currentProposedBid = currentHighestBid + 1;
+          myHasPassed = false;
           switchScreen('screenPlay');
-          renderPlayRound();
+          renderAuctionRound();
           if (msg.event) {
             triggerEventBanner(msg.event.title, msg.event.desc);
           }
           break;
 
+        case 'AUCTION_TIMER_TICK':
         case 'TIMER_TICK':
           updateVisualTimer(msg.timer);
+          if (typeof msg.highestBid === 'number') {
+            currentHighestBid = msg.highestBid;
+            if (msg.highestBidderName) currentHighestBidder = msg.highestBidderName;
+            updateLiveBidSpotlight();
+          }
           break;
 
-        case 'ROUND_ENDED':
-          playSoundEffect('skip');
+        case 'BID_PLACED':
+          playSoundEffect('hammer');
+          currentHighestBid = msg.highestBid;
+          currentHighestBidder = `${msg.highestBidderAvatar || ''} ${msg.highestBidderName || ''}`;
+          currentProposedBid = Math.max(currentProposedBid, currentHighestBid + 1);
+          updateLiveBidSpotlight();
+          updateProposedBidDisplay();
+          showFloatingNotification(msg.message || `🔨 سومة جديدة: ${msg.highestBid} ر.س`);
           break;
 
-        case 'AUCTION_STARTED':
-          openAuctionModal(msg.item);
+        case 'PLAYER_PASSED':
+          showFloatingNotification(`🏳️ ${msg.playerName || 'أحد المتسابقين'} تخلى عن المزايدة`);
           break;
 
-        case 'AUCTION_RESOLVED':
-          closeAuctionModal();
+        case 'AUCTION_ITEM_WON':
+          playSoundEffect('victory');
           showFloatingNotification(msg.message);
+          if (msg.winnerId === gameState.myPlayerId) {
+            const me = gameState.players.find(p => p.id === gameState.myPlayerId);
+            if (me) {
+              me.budget = Math.max(0, me.budget - msg.amount);
+              me.score += msg.offer.score;
+              me.upgrades.push({ ...msg.offer, winningBid: msg.amount });
+            }
+          }
+          updateMyProjectView();
+          renderCompetitorsGrid();
+          break;
+
+        case 'AUCTION_ITEM_PASSED':
+          playSoundEffect('skip');
+          showFloatingNotification(msg.message || '❌ تم تخطي القطعة لعدم وجود مزايدة');
           break;
 
         case 'PEEK_SNAPSHOT':
@@ -1285,19 +1360,116 @@
         document.getElementById('offerScoreBonus').innerText = `+${off.score} نقطة تميز`;
       }
 
-      // Re-enable choice buttons
-      const btnBuy = document.getElementById('btnBuy');
-      const btnSkip = document.getElementById('btnSkip');
-      const waitNotice = document.getElementById('choiceWaitNotice');
-      btnBuy.disabled = false;
-      btnSkip.disabled = false;
-      btnBuy.classList.remove('opacity-50');
-      btnSkip.classList.remove('opacity-50');
-      waitNotice.innerText = '';
+    let currentProposedBid = 1;
+    let myHasPassed = false;
+    let currentHighestBid = 0;
+    let currentHighestBidder = 'لا توجد سومة بعد';
 
+    function renderAuctionRound() {
+      const themeData = THEMES[gameState.theme] || THEMES.car;
+      document.getElementById('playThemeTitle').innerText = themeData.title;
+      document.getElementById('currentRoundNum').innerText = gameState.round;
+      document.getElementById('totalRoundsNum').innerText = gameState.totalRounds;
+
+      // Update Offer
+      const off = gameState.currentOffer;
+      if (off) {
+        document.getElementById('offerName').innerText = off.name;
+        document.getElementById('offerDesc').innerText = off.desc;
+        document.getElementById('offerScoreBonus').innerText = `+${off.score} نقطة تميز`;
+      }
+
+      currentProposedBid = currentHighestBid + 1;
+      myHasPassed = false;
+
+      const btnSubmit = document.getElementById('btnSubmitBid');
+      const btnPass = document.getElementById('btnPassBid');
+      btnSubmit.disabled = false;
+      btnPass.disabled = false;
+      btnSubmit.classList.remove('opacity-40');
+      btnPass.classList.remove('opacity-40');
+
+      updateLiveBidSpotlight();
+      updateProposedBidDisplay();
       updateMyProjectView();
       renderCompetitorsGrid();
-      startRoundTimerCountdown(gameState.timer || 20);
+      startRoundTimerCountdown(gameState.timer || 15);
+    }
+
+    function updateProposedBidDisplay() {
+      const valEl = document.getElementById('proposedBidVal');
+      const btnText = document.getElementById('btnBidPriceText');
+      if (valEl) valEl.innerText = currentProposedBid;
+      if (btnText) btnText.innerText = `(${currentProposedBid} ر.س)`;
+    }
+
+    function adjustProposedBid(delta) {
+      if (myHasPassed) return;
+      const minBid = currentHighestBid + 1;
+      const me = gameState.players.find(p => p.id === gameState.myPlayerId) || { budget: gameState.budget };
+      const maxBid = me.budget || 25;
+
+      currentProposedBid = Math.max(minBid, Math.min(maxBid, currentProposedBid + delta));
+      updateProposedBidDisplay();
+    }
+
+    function quickBoostBid(amt) {
+      if (myHasPassed) return;
+      const me = gameState.players.find(p => p.id === gameState.myPlayerId) || { budget: gameState.budget };
+      const maxBid = me.budget || 25;
+
+      currentProposedBid = Math.min(maxBid, currentHighestBid + amt);
+      updateProposedBidDisplay();
+    }
+
+    function updateLiveBidSpotlight() {
+      const valEl = document.getElementById('liveHighestBidVal');
+      const bidderEl = document.getElementById('liveHighestBidderName');
+      if (valEl) valEl.innerText = currentHighestBid;
+      if (bidderEl) bidderEl.innerText = currentHighestBidder;
+
+      const notice = document.getElementById('bidStatusNotice');
+      if (myHasPassed) {
+        if (notice) notice.innerText = '🏳️ لقد انسحبت من المزايدة على هذه القطعة!';
+      } else if (currentHighestBidder.includes(myProfile.name)) {
+        if (notice) notice.innerText = '👑 أنت صاحب أعلى سومة حالياً! بانتظار المطرقة...';
+      } else {
+        if (notice) notice.innerText = '';
+      }
+    }
+
+    function handleSubmitBid() {
+      if (myHasPassed) return;
+      const me = gameState.players.find(p => p.id === gameState.myPlayerId) || { budget: gameState.budget };
+      if (currentProposedBid <= currentHighestBid) {
+        alert(`يجب أن تزايد بمبلغ أعلى من ${currentHighestBid} ر.س!`);
+        return;
+      }
+      if (currentProposedBid > me.budget) {
+        alert('ميزانيتك لا تكفي لهذه السومة!');
+        return;
+      }
+
+      if (isConnected && ws) {
+        ws.send(JSON.stringify({ type: 'PLACE_BID', amount: currentProposedBid }));
+      } else if (isOfflineDemo) {
+        handleLocalPlaceBid(currentProposedBid);
+      }
+    }
+
+    function handlePassBid() {
+      myHasPassed = true;
+      document.getElementById('bidStatusNotice').innerText = '🏳️ لقد انسحبت من المزايدة على هذه القطعة!';
+      document.getElementById('btnSubmitBid').disabled = true;
+      document.getElementById('btnSubmitBid').classList.add('opacity-40');
+      document.getElementById('btnPassBid').disabled = true;
+      document.getElementById('btnPassBid').classList.add('opacity-40');
+
+      if (isConnected && ws) {
+        ws.send(JSON.stringify({ type: 'PASS_BID' }));
+      } else if (isOfflineDemo) {
+        handleLocalPassBid();
+      }
     }
 
     function startRoundTimerCountdown(totalSec) {
@@ -1322,39 +1494,15 @@
       const barEl = document.getElementById('roundTimerBar');
       if (numEl) numEl.innerText = `${sec}s`;
       if (barEl) {
-        const pct = Math.max(0, Math.min(100, (sec / 20) * 100));
+        const pct = Math.max(0, Math.min(100, (sec / 15) * 100));
         barEl.style.width = pct + '%';
-        if (sec <= 5) {
+        if (sec <= 4) {
           barEl.className = 'h-full bg-rose-500 transition-all duration-1000';
           numEl.className = 'text-xl font-black font-mono text-rose-500 animate-ping';
         } else {
           barEl.className = 'h-full bg-gradient-to-r from-emerald-500 via-amber-500 to-rose-500 transition-all duration-1000';
           numEl.className = 'text-xl font-black font-mono text-rose-400';
         }
-      }
-    }
-
-    function handleMakeChoice(action) {
-      const btnBuy = document.getElementById('btnBuy');
-      const btnSkip = document.getElementById('btnSkip');
-      const waitNotice = document.getElementById('choiceWaitNotice');
-      btnBuy.disabled = true;
-      btnSkip.disabled = true;
-      btnBuy.classList.add('opacity-50');
-      btnSkip.classList.add('opacity-50');
-
-      if (action === 'buy') {
-        playSoundEffect('buy');
-        waitNotice.innerText = '✅ تم اختيار شراء الترقية! بانتظار البقية...';
-      } else {
-        playSoundEffect('skip');
-        waitNotice.innerText = '❌ تم اختيار التخطي! بانتظار البقية...';
-      }
-
-      if (isConnected && ws) {
-        ws.send(JSON.stringify({ type: 'MAKE_CHOICE', action: action }));
-      } else if (isOfflineDemo) {
-        handleLocalPlayerChoice(action);
       }
     }
 
@@ -1607,7 +1755,9 @@
     // ==========================================
     function renderGrandReveal(data) {
       playSoundEffect('victory');
-      confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+      if (typeof confetti === 'function') {
+        try { confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } }); } catch(e){}
+      }
 
       const p1 = data.podium.first;
       const p2 = data.podium.second;
@@ -1979,54 +2129,121 @@
       showFloatingNotification('🕹️ بدأت الغرفة التجريبية بنجاح!');
     }
 
+    let localAuctionTimerInt = null;
+    let localAuctionActive = false;
+
     function startLocalRound() {
+      if (localAuctionTimerInt) clearInterval(localAuctionTimerInt);
       gameState.round++;
       if (gameState.round > gameState.totalRounds) {
         endLocalGame();
         return;
       }
 
-      // Midway auction check
-      if (gameState.round === Math.floor(gameState.totalRounds / 2)) {
-        openAuctionModal({
-          name: 'لوحة ملكية « ق د ك 1 »',
-          desc: 'أندر لوحة فردية تعطي فخامة أسطورية',
-          bonus: 45
-        });
-        return;
-      }
-
       const themeData = THEMES[gameState.theme];
       const off = themeData.upgrades[(gameState.round - 1) % themeData.upgrades.length];
       gameState.currentOffer = off;
-      gameState.timer = 20;
+      gameState.timer = 15;
+      currentHighestBid = 0;
+      currentHighestBidder = 'لا توجد سومة بعد';
+      currentProposedBid = 1;
+      myHasPassed = false;
+      localAuctionActive = true;
+
+      // Reset players passed
+      gameState.players.forEach(p => p.hasPassed = false);
 
       switchScreen('screenPlay');
-      renderPlayRound();
+      renderAuctionRound();
+
+      // Start local countdown
+      localAuctionTimerInt = setInterval(() => {
+        gameState.timer--;
+        updateVisualTimer(gameState.timer);
+        if (gameState.timer <= 0) {
+          resolveLocalAuction();
+        }
+      }, 1000);
+
+      // Simulate a bot bidding with delay if budget allows
+      setTimeout(() => {
+        if (!localAuctionActive || currentHighestBid >= 6) return;
+        const bots = gameState.players.slice(1).filter(b => !b.hasPassed && b.budget > currentHighestBid + 1);
+        if (bots.length > 0 && Math.random() < 0.7) {
+          const randomBot = bots[Math.floor(Math.random() * bots.length)];
+          const newBid = currentHighestBid + (Math.random() < 0.5 ? 1 : 2);
+          if (newBid <= randomBot.budget) {
+            playSoundEffect('hammer');
+            currentHighestBid = newBid;
+            currentHighestBidder = `${randomBot.avatar} ${randomBot.name}`;
+            currentProposedBid = currentHighestBid + 1;
+            updateLiveBidSpotlight();
+            updateProposedBidDisplay();
+            showFloatingNotification(`🔨 رفع ${randomBot.name} السومة إلى ${newBid} ر.س!`);
+          }
+        }
+      }, 3500);
     }
 
-    function handleLocalPlayerChoice(action) {
-      const me = gameState.players[0];
-      const off = gameState.currentOffer;
+    function handleLocalPlaceBid(amount) {
+      playSoundEffect('hammer');
+      currentHighestBid = amount;
+      currentHighestBidder = `${myProfile.avatar} ${myProfile.name}`;
+      currentProposedBid = currentHighestBid + 1;
+      updateLiveBidSpotlight();
+      updateProposedBidDisplay();
+      showFloatingNotification(`🔨 رفعتَ السومة إلى ${amount} ر.س!`);
 
-      if (action === 'buy' && me.budget >= off.price) {
-        me.budget -= off.price;
-        me.score += off.score;
-        me.upgrades.push(off);
+      // Chance a bot counters you if they have budget
+      setTimeout(() => {
+        if (!localAuctionActive) return;
+        const bots = gameState.players.slice(1).filter(b => !b.hasPassed && b.budget > currentHighestBid + 1);
+        if (bots.length > 0 && Math.random() < 0.6) {
+          const counterBot = bots[Math.floor(Math.random() * bots.length)];
+          const counterBid = currentHighestBid + 1;
+          if (counterBid <= counterBot.budget) {
+            playSoundEffect('hammer');
+            currentHighestBid = counterBid;
+            currentHighestBidder = `${counterBot.avatar} ${counterBot.name}`;
+            currentProposedBid = currentHighestBid + 1;
+            updateLiveBidSpotlight();
+            updateProposedBidDisplay();
+            showFloatingNotification(`🔨 زايد عليك ${counterBot.name} بـ ${counterBid} ر.س!`);
+            if (gameState.timer < 5) gameState.timer = 5;
+          }
+        }
+      }, 2500);
+    }
+
+    function handleLocalPassBid() {
+      myHasPassed = true;
+      showFloatingNotification('🏳️ انسحبت من المزايدة على هذه القطعة!');
+      setTimeout(() => {
+        resolveLocalAuction();
+      }, 2000);
+    }
+
+    function resolveLocalAuction() {
+      if (localAuctionTimerInt) clearInterval(localAuctionTimerInt);
+      localAuctionActive = false;
+
+      if (currentHighestBid > 0) {
+        let winner = gameState.players.find(p => currentHighestBidder.includes(p.name));
+        if (winner) {
+          winner.budget = Math.max(0, winner.budget - currentHighestBid);
+          winner.score += gameState.currentOffer.score;
+          winner.upgrades.push({ ...gameState.currentOffer, winningBid: currentHighestBid });
+          playSoundEffect('victory');
+          showFloatingNotification(`🔨 رسا المزاد رسمياً على ${winner.avatar} ${winner.name} بمبلغ ${currentHighestBid} ر.س!`);
+        }
+      } else {
+        playSoundEffect('skip');
+        showFloatingNotification('❌ لم يزايد أحد، تم تخطي القطعة!');
       }
 
-      // Simulate opponents
-      gameState.players.slice(1).forEach(comp => {
-        if (comp.budget >= off.price && Math.random() < 0.65) {
-          comp.budget -= off.price;
-          comp.score += off.score;
-          comp.upgrades.push(off);
-        }
-      });
-
-      setTimeout(() => {
-        startLocalRound();
-      }, 1200);
+      updateMyProjectView();
+      renderCompetitorsGrid();
+      setTimeout(() => startLocalRound(), 2500);
     }
 
     function handleLocalSabotage(cardId, targetId) {

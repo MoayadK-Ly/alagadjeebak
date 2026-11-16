@@ -289,6 +289,7 @@ function getSafeRoomView(room, forPlayerId) {
       score: p.score,
       isAlive: p.isAlive,
       hasChosen: p.hasChosen,
+      hasPassed: p.hasPassed || false,
       upgradesCount: p.upgrades.length,
       frozen: p.frozen,
       // Only reveal full upgrades to self, or when curtain is off, or game finished
@@ -311,6 +312,14 @@ function getSafeRoomView(room, forPlayerId) {
     totalRounds: room.totalRounds,
     codeExpiresIn: remainingCodeSeconds,
     currentOffer: room.currentOffer,
+    liveAuction: room.liveAuction ? {
+      offer: room.liveAuction.currentOffer,
+      highestBid: room.liveAuction.highestBid,
+      highestBidderId: room.liveAuction.highestBidderId,
+      highestBidderName: room.liveAuction.highestBidderName,
+      highestBidderAvatar: room.liveAuction.highestBidderAvatar,
+      timerSec: room.liveAuction.timerSec
+    } : null,
     auctionData: room.auctionData ? {
       name: room.auctionData.name,
       desc: room.auctionData.desc,
@@ -366,13 +375,6 @@ function startNextRound(room) {
     return;
   }
 
-  // Check midway auction (e.g. at round 3 for 6 rounds, round 4 for 8, round 5 for 10)
-  const auctionRound = Math.floor(room.totalRounds / 2);
-  if (room.round === auctionRound && !room.hasHadAuction) {
-    triggerAuction(room);
-    return;
-  }
-
   // Check random emergency event (25% chance on rounds > 1)
   let triggeredEvent = null;
   if (room.round > 1 && Math.random() < 0.35) {
@@ -385,56 +387,99 @@ function startNextRound(room) {
   const offerIndex = (room.round - 1) % themeData.upgrades.length;
   room.currentOffer = themeData.upgrades[offerIndex];
 
-  // Reset choices
+  // Setup Live Auction for this item
+  room.liveAuction = {
+    currentOffer: room.currentOffer,
+    highestBid: 0,
+    highestBidderId: null,
+    highestBidderName: null,
+    highestBidderAvatar: null,
+    timerSec: 15
+  };
+
+  // Reset player choices for this round
   room.players.forEach(p => {
     p.hasChosen = false;
-    // unfreeze turn if was frozen
+    p.hasPassed = false;
     if (p.frozen) p.frozen = false;
   });
 
-  room.roundTimerSec = 20;
-
   broadcastRoom(room, {
-    type: 'ROUND_STARTED',
+    type: 'AUCTION_ROUND_STARTED',
     round: room.round,
     totalRounds: room.totalRounds,
     offer: room.currentOffer,
     event: triggeredEvent,
-    timer: room.roundTimerSec
+    highestBid: 0,
+    highestBidderName: 'لا توجد سومة حتى الآن',
+    timer: room.liveAuction.timerSec
   });
 
-  // 20-second active timer
+  // Active 15-second countdown with sniper-extension
   room.roundTimerInterval = setInterval(() => {
-    room.roundTimerSec--;
+    room.liveAuction.timerSec--;
 
     // Broadcast timer tick
     room.players.forEach(p => {
       if (p.ws && p.ws.readyState === WebSocket.OPEN) {
-        p.ws.send(JSON.stringify({ type: 'TIMER_TICK', timer: room.roundTimerSec }));
+        p.ws.send(JSON.stringify({
+          type: 'AUCTION_TIMER_TICK',
+          timer: room.liveAuction.timerSec,
+          highestBid: room.liveAuction.highestBid,
+          highestBidderName: room.liveAuction.highestBidderName
+        }));
       }
     });
 
-    if (room.roundTimerSec <= 0) {
-      clearInterval(room.roundTimerInterval);
-      // Auto skip for players who haven't chosen
-      room.players.forEach(p => {
-        if (!p.hasChosen) {
-          p.hasChosen = true;
-        }
-      });
-      broadcastRoom(room, { type: 'ROUND_ENDED', reason: 'timeout' });
-      setTimeout(() => startNextRound(room), 1500);
+    if (room.liveAuction.timerSec <= 0) {
+      resolveLiveAuction(room);
     }
   }, 1000);
 }
 
-function checkAllPlayersDecided(room) {
+function resolveLiveAuction(room) {
+  if (room.roundTimerInterval) clearInterval(room.roundTimerInterval);
+
+  if (room.liveAuction && room.liveAuction.highestBidderId) {
+    const winner = room.players.find(p => p.id === room.liveAuction.highestBidderId);
+    if (winner) {
+      winner.budget = Math.max(0, winner.budget - room.liveAuction.highestBid);
+      winner.score += room.liveAuction.currentOffer.score;
+      winner.upgrades.push({
+        ...room.liveAuction.currentOffer,
+        winningBid: room.liveAuction.highestBid,
+        roundWon: room.round
+      });
+
+      broadcastRoom(room, {
+        type: 'AUCTION_ITEM_WON',
+        winnerId: winner.id,
+        winnerName: winner.name,
+        winnerAvatar: winner.avatar,
+        amount: room.liveAuction.highestBid,
+        offer: room.liveAuction.currentOffer,
+        message: `🔨 رسا المزاد رسمياً على ${winner.avatar} ${winner.name} بمبلغ ${room.liveAuction.highestBid} ر.س!`
+      });
+    }
+  } else {
+    broadcastRoom(room, {
+      type: 'AUCTION_ITEM_PASSED',
+      offer: room.liveAuction ? room.liveAuction.currentOffer : null,
+      message: '❌ انتهى الوقت ولم يزايد أحد على هذه القطعة، تم التخطي للمرحلة القادمة!'
+    });
+  }
+
+  // Proceed to next round after 2.5 seconds
+  setTimeout(() => startNextRound(room), 2500);
+}
+
+function checkAuctionAllPassed(room) {
   const activePlayers = room.players.filter(p => p.isAlive);
-  const allDone = activePlayers.every(p => p.hasChosen);
-  if (allDone) {
-    clearInterval(room.roundTimerInterval);
-    broadcastRoom(room, { type: 'ROUND_ENDED', reason: 'all_decided' });
-    setTimeout(() => startNextRound(room), 1200);
+  const remainingBidders = activePlayers.filter(p => !p.hasPassed);
+
+  // If everyone passed except the highest bidder (or all passed with no bids)
+  if (remainingBidders.length === 0 || (remainingBidders.length === 1 && remainingBidders[0].id === room.liveAuction.highestBidderId)) {
+    resolveLiveAuction(room);
   }
 }
 
@@ -711,32 +756,59 @@ wss.on('connection', (ws) => {
           break;
         }
 
-        // 6. PLAYER CHOICE: BUY OR SKIP
-        case 'MAKE_CHOICE': {
+        // 6. LIVE BIDDING: SUBMIT BID
+        case 'PLACE_BID': {
           const room = rooms.get(playerSession.roomCode);
-          if (!room || room.state !== 'playing' || !room.currentOffer) return;
+          if (!room || room.state !== 'playing' || !room.liveAuction) return;
           const player = room.players.find(p => p.id === playerSession.id);
-          if (!player || player.hasChosen || !player.isAlive) return;
+          if (!player || !player.isAlive || player.frozen || player.hasPassed) return;
 
-          const action = data.action; // 'buy' or 'skip'
-
-          if (action === 'buy' && !player.frozen) {
-            if (player.budget >= room.currentOffer.price) {
-              player.budget -= room.currentOffer.price;
-              player.score += room.currentOffer.score;
-              player.upgrades.push({ ...room.currentOffer, boughtAtRound: room.round });
-            }
+          const amount = parseInt(data.amount) || 0;
+          if (amount <= room.liveAuction.highestBid) {
+            return ws.send(JSON.stringify({ type: 'ERROR', message: `السومة يجب أن تكون أعلى من ${room.liveAuction.highestBid} ر.س!` }));
+          }
+          if (amount > player.budget) {
+            return ws.send(JSON.stringify({ type: 'ERROR', message: 'ميزانيتك لا تكفي لهذه السومة!' }));
           }
 
-          player.hasChosen = true;
+          room.liveAuction.highestBid = amount;
+          room.liveAuction.highestBidderId = player.id;
+          room.liveAuction.highestBidderName = player.name;
+          room.liveAuction.highestBidderAvatar = player.avatar;
 
-          // Notify room of progress (Anti-Cheat preserves secrecy)
+          // Sniper extension: if under 5 seconds, add time
+          if (room.liveAuction.timerSec < 5) {
+            room.liveAuction.timerSec = 5;
+          }
+
           broadcastRoom(room, {
-            type: 'PLAYER_DECIDED',
-            playerId: player.id
+            type: 'BID_PLACED',
+            highestBid: amount,
+            highestBidderId: player.id,
+            highestBidderName: player.name,
+            highestBidderAvatar: player.avatar,
+            timer: room.liveAuction.timerSec,
+            message: `🔨 رفع ${player.avatar} ${player.name} السومة إلى ${amount} ر.س!`
+          });
+          break;
+        }
+
+        // 7. PASS / FOLD CURRENT ITEM
+        case 'PASS_BID': {
+          const room = rooms.get(playerSession.roomCode);
+          if (!room || room.state !== 'playing' || !room.liveAuction) return;
+          const player = room.players.find(p => p.id === playerSession.id);
+          if (!player || !player.isAlive) return;
+
+          player.hasPassed = true;
+
+          broadcastRoom(room, {
+            type: 'PLAYER_PASSED',
+            playerId: player.id,
+            playerName: player.name
           });
 
-          checkAllPlayersDecided(room);
+          checkAuctionAllPassed(room);
           break;
         }
 
