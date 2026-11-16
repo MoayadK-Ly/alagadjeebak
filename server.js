@@ -214,6 +214,48 @@ function isValidEmoji(str) {
   return emojiRegex.test(str);
 }
 
+// ==========================================
+// OFFENSIVE & INAPPROPRIATE NAMES FILTER
+// ==========================================
+const OFFENSIVE_ROOTS = [
+  // Arabic profanity, insults & vulgar roots
+  'شرموط', 'قحب', 'منيوك', 'ديوث', 'عرص', 'خنيث', 'طيز', 'كس', 'زب', 'سكس', 'نيك', 'قواد', 
+  'سافل', 'حقير', 'واطي', 'نجس', 'كلب', 'حمار', 'جحش', 'ابنحرام', 'ولدحرام', 'تفوه',
+  'لوطي', 'شاذ', 'عاهر', 'بظر', 'مني', 'مؤخرة', 'صدرك', 'محنه', 'ممحون', 'شهوه', 'ارهاب', 'داعش',
+  'حرامي', 'شحات', 'حقود', 'خسيس', 'نذل',
+  // English profanity & vulgar roots
+  'fuck', 'shit', 'bitch', 'whore', 'slut', 'dick', 'pussy', 'asshole', 'cunt', 'porn', 
+  'sex', 'nigger', 'nigga', 'fag', 'cock', 'penis', 'vagina', 'boobs'
+];
+
+function isOffensiveName(rawName) {
+  if (!rawName) return false;
+  const raw = String(rawName).toLowerCase();
+  const norm = raw
+    .replace(/[\u064B-\u065F\u0670\u0640]/g, '') // remove tashkeel & tatweel
+    .replace(/[أإآء]/g, 'ا')
+    .replace(/ة/g, 'ه')
+    .replace(/ى/g, 'ي')
+    .replace(/0/g, 'o')
+    .replace(/1/g, 'i')
+    .replace(/3/g, 'e')
+    .replace(/4/g, 'a')
+    .replace(/5/g, 's')
+    .replace(/7/g, 't')
+    .replace(/@/g, 'a')
+    .replace(/\$/g, 's')
+    .replace(/[\s\.\-_,،\/\\+=*!#%^&()\[\]{}|:;\'\"<>?~`]/g, '');
+
+  const collapsed = norm.replace(/(.)\1+/g, '$1');
+
+  for (const root of OFFENSIVE_ROOTS) {
+    if (norm.includes(root)) return true;
+    const colRoot = root.replace(/(.)\1+/g, '$1');
+    if (collapsed.includes(colRoot)) return true;
+  }
+  return false;
+}
+
 function createRoom(hostPlayer, options = {}) {
   let code = generateCode();
   while (rooms.has(code)) code = generateCode();
@@ -636,6 +678,9 @@ wss.on('connection', (ws) => {
           if (!name || !name.trim()) {
             return ws.send(JSON.stringify({ type: 'ERROR', message: 'الاسم إلزامي لإنشاء الغرفة!' }));
           }
+          if (isOffensiveName(name)) {
+            return ws.send(JSON.stringify({ type: 'ERROR', message: '⚠️ عذراً، هذا الاسم غير لائق أو خادش! يرجى اختيار اسم محترم يليق باللعبة.' }));
+          }
           if (avatar && !isValidEmoji(avatar)) {
             return ws.send(JSON.stringify({ type: 'ERROR', message: 'الأيقونة يجب أن تكون إيموجي فقط من الكيبورد!' }));
           }
@@ -670,6 +715,9 @@ wss.on('connection', (ws) => {
           const { code, name, avatar } = data;
           if (!name || !name.trim()) {
             return ws.send(JSON.stringify({ type: 'ERROR', message: 'الاسم إلزامي للانضمام!' }));
+          }
+          if (isOffensiveName(name)) {
+            return ws.send(JSON.stringify({ type: 'ERROR', message: '⚠️ عذراً، هذا الاسم غير لائق أو خادش! يرجى اختيار اسم محترم يليق باللعبة.' }));
           }
           if (avatar && !isValidEmoji(avatar)) {
             return ws.send(JSON.stringify({ type: 'ERROR', message: 'الأيقونة يجب أن تكون إيموجي فقط من الكيبورد!' }));

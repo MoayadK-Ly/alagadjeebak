@@ -164,10 +164,11 @@
       <!-- Identity Gatekeeper Card -->
       <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 md:p-6 shadow-2xl space-y-4">
         
-        <!-- Name Input (MANDATORY) -->
+        <!-- Name Input (MANDATORY + OFFENSIVE FILTER) -->
         <div>
           <label class="block text-xs font-bold text-slate-300 mb-1">اسمك باللعبة <span class="text-rose-400">*</span></label>
           <input type="text" id="entryName" placeholder="اكتب اسمك الصريح..." maxlength="18"
+                 oninput="validateNameInput(this)"
                  class="w-full bg-slate-950 border border-slate-700 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 outline-none transition font-bold">
           <p id="entryNameErr" class="text-[10px] text-rose-400 font-bold mt-1 min-h-[14px]"></p>
         </div>
@@ -812,10 +813,72 @@
       if (avPrev) avPrev.innerText = myProfile.avatar;
     }
 
+    // ==========================================
+    // OFFENSIVE & INAPPROPRIATE NAMES FILTER
+    // ==========================================
+    const OFFENSIVE_ROOTS = [
+      // Arabic profanity, insults & vulgar roots
+      'شرموط', 'قحب', 'منيوك', 'ديوث', 'عرص', 'خنيث', 'طيز', 'كس', 'زب', 'سكس', 'نيك', 'قواد', 
+      'سافل', 'حقير', 'واطي', 'نجس', 'كلب', 'حمار', 'جحش', 'ابنحرام', 'ولدحرام', 'تفوه',
+      'لوطي', 'شاذ', 'عاهر', 'بظر', 'مني', 'مؤخرة', 'صدرك', 'محنه', 'ممحون', 'شهوه', 'ارهاب', 'داعش',
+      'حرامي', 'شحات', 'حقود', 'خسيس', 'نذل',
+      // English profanity & vulgar roots
+      'fuck', 'shit', 'bitch', 'whore', 'slut', 'dick', 'pussy', 'asshole', 'cunt', 'porn', 
+      'sex', 'nigger', 'nigga', 'fag', 'cock', 'penis', 'vagina', 'boobs'
+    ];
+
+    function isOffensiveName(rawName) {
+      if (!rawName) return false;
+      const raw = String(rawName).toLowerCase();
+      const norm = raw
+        .replace(/[\u064B-\u065F\u0670\u0640]/g, '') // remove tashkeel & tatweel
+        .replace(/[أإآء]/g, 'ا')
+        .replace(/ة/g, 'ه')
+        .replace(/ى/g, 'ي')
+        .replace(/0/g, 'o')
+        .replace(/1/g, 'i')
+        .replace(/3/g, 'e')
+        .replace(/4/g, 'a')
+        .replace(/5/g, 's')
+        .replace(/7/g, 't')
+        .replace(/@/g, 'a')
+        .replace(/\$/g, 's')
+        .replace(/[\s\.\-_,،\/\\+=*!#%^&()\[\]{}|:;\'\"<>?~`]/g, '');
+
+      const collapsed = norm.replace(/(.)\1+/g, '$1');
+
+      for (const root of OFFENSIVE_ROOTS) {
+        if (norm.includes(root)) return true;
+        const colRoot = root.replace(/(.)\1+/g, '$1');
+        if (collapsed.includes(colRoot)) return true;
+      }
+      return false;
+    }
+
+    function validateNameInput(input) {
+      const val = (input.value || '').trim();
+      const err = document.getElementById('entryNameErr');
+      if (!err) return true;
+      err.innerText = '';
+      if (isOffensiveName(val)) {
+        err.innerText = '⚠️ عذراً، هذا الاسم غير لائق أو خادش! يرجى اختيار اسم محترم.';
+        input.classList.add('border-rose-500');
+        return false;
+      } else {
+        input.classList.remove('border-rose-500');
+        return true;
+      }
+    }
+
     function openProfileModal() {
       const newName = prompt('تعديل اسمك في اللعبة:', myProfile.name);
       if (newName && newName.trim()) {
-        myProfile.name = newName.trim().slice(0, 18);
+        const trimmed = newName.trim().slice(0, 18);
+        if (isOffensiveName(trimmed)) {
+          alert('⚠️ عذراً، هذا الاسم غير لائق أو خادش! يرجى اختيار اسم محترم يليق باللعبة.');
+          return;
+        }
+        myProfile.name = trimmed;
         saveProfile();
       }
     }
@@ -1176,6 +1239,12 @@
         return;
       }
 
+      if (isOffensiveName(name)) {
+        nameErr.innerText = '⚠️ عذراً، هذا الاسم غير لائق أو خادش! يرجى اختيار اسم محترم يليق باللعبة.';
+        nameInput.focus();
+        return;
+      }
+
       const avInput = document.getElementById('entryAvatarInput');
       if (!validateAvatarInput(avInput)) return;
 
@@ -1209,6 +1278,12 @@
 
       if (!name) {
         nameErr.innerText = '⚠️ أدخل اسمك أولاً للانضمام!';
+        nameInput.focus();
+        return;
+      }
+
+      if (isOffensiveName(name)) {
+        nameErr.innerText = '⚠️ عذراً، هذا الاسم غير لائق أو خادش! يرجى اختيار اسم محترم يليق باللعبة.';
         nameInput.focus();
         return;
       }
@@ -1413,19 +1488,8 @@
     // 8. ACTIVE GAMEPLAY: TIMERS, OFFERS & DECISIONS
     // ==========================================
     function renderPlayRound() {
-      const themeData = THEMES[gameState.theme] || THEMES.car;
-      document.getElementById('playThemeTitle').innerText = themeData.title;
-      document.getElementById('currentRoundNum').innerText = gameState.round;
-      document.getElementById('totalRoundsNum').innerText = gameState.totalRounds;
-
-      // Update Offer
-      const off = gameState.currentOffer;
-      if (off) {
-        document.getElementById('offerName').innerText = off.name;
-        document.getElementById('offerPrice').innerText = `السعر: ${off.price} ر.س`;
-        document.getElementById('offerDesc').innerText = off.desc;
-        document.getElementById('offerScoreBonus').innerText = `+${off.score} نقطة تميز`;
-      }
+      renderAuctionRound();
+    }
 
     let currentProposedBid = 1;
     let myHasPassed = false;
