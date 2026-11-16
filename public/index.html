@@ -605,7 +605,7 @@
     </div>
 
     <!-- ================= SCREEN 5: GRAND REVEAL & PODIUM ================= -->
-    <div id="screenResults" class="hidden space-y-6 max-w-3xl mx-auto w-full text-center">
+    <div id="screenResults" class="hidden space-y-6 max-w-4xl mx-auto w-full text-center">
       
       <!-- Big Reveal Banner -->
       <div class="space-y-1">
@@ -616,26 +616,31 @@
         <p class="text-xs text-slate-400">انكشفت جميع المشاريع وحسم الذكاء الاصطناعي صاحب أفضل ميزانية وتصميم</p>
       </div>
 
-      <!-- 3-Tier Podium (🥇 🥈 🥉) -->
-      <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-2xl">
-        <div class="flex justify-center items-end gap-2 md:gap-4 pt-6 pb-2" id="podiumContainer">
-          <!-- Injected via JS -->
+      <!-- 3-Tier Podium with Assembled Projects (🥇 🥈 🥉) -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-4 md:p-6 shadow-2xl">
+        <div class="flex justify-center items-end gap-2 md:gap-4 pt-4 pb-2" id="podiumContainer">
+          <!-- Injected via JS with Dynamic Finished SVGs -->
         </div>
 
-        <!-- AI Judge Commentary Card -->
-        <div class="mt-6 bg-slate-950/80 border border-indigo-500/30 rounded-2xl p-4 text-right space-y-2">
-          <div class="flex items-center gap-2">
-            <span class="text-lg">🤖</span>
-            <span class="text-xs font-black text-indigo-400">تقرير وتحليل حكم الذكاء الاصطناعي:</span>
+        <!-- AI Judge Commentary Card (Clean, Simple & Elegant) -->
+        <div class="mt-6 bg-slate-950/90 border border-indigo-500/30 rounded-2xl p-4 md:p-5 text-right space-y-2.5 shadow-lg">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-800/80">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">🤖</span>
+              <span class="text-xs font-black text-indigo-400">حُكم وتقييم الذكاء الاصطناعي النهائي:</span>
+            </div>
+            <span class="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full font-bold">حسم اللقب</span>
           </div>
-          <p id="aiCommentaryText" class="text-xs md:text-sm text-slate-200 leading-relaxed font-bold"></p>
+          <div id="aiCommentaryContainer" class="pt-0.5">
+            <p id="aiCommentaryText" class="text-xs md:text-sm text-slate-200 leading-relaxed font-bold"></p>
+          </div>
         </div>
       </div>
 
       <!-- Full Rankings Table -->
       <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 text-right space-y-3">
-        <h4 class="text-xs font-black text-slate-300">جدول الترتيب والنسب المئوية الدقيقة (مجموع 100%):</h4>
-        <div class="space-y-2" id="fullRankingsList">
+        <h4 class="text-xs font-black text-slate-300">جدول الترتيب والمشاريع المكتملة (مجموع 100%):</h4>
+        <div class="space-y-2.5" id="fullRankingsList">
           <!-- Injected via JS -->
         </div>
       </div>
@@ -2225,63 +2230,124 @@
 
       const themeData = THEMES[gameState.theme] || THEMES.car;
 
-      // Podium HTML
+      // Project SVG Preview Helper for Podium & Rankings
+      const renderProjectPreview = (upgrades, isFirst = false) => {
+        const svgContent = themeData.svgRender(upgrades || []);
+        return `
+          <div class="${isFirst ? 'w-40 sm:w-52 md:w-60 h-28 sm:h-36 border-2 border-amber-400/80 shadow-2xl shadow-amber-500/20' : 'w-28 sm:w-36 md:w-44 h-20 sm:h-26 border border-slate-700 shadow-lg'} bg-slate-950/85 rounded-2xl p-2 flex items-center justify-center overflow-hidden mb-2 transition transform hover:scale-105">
+            ${svgContent}
+          </div>
+        `;
+      };
+
+      // Podium HTML with Real Assembled Projects
       document.getElementById('podiumContainer').innerHTML = `
-        <!-- Runner Up (2nd) -->
+        <!-- Runner Up (2nd Place) -->
         ${p2 ? `
-          <div class="flex flex-col items-center">
-            <span class="text-2xl">${p2.avatar}</span>
-            <span class="text-xs font-bold text-slate-300 mt-1">${p2.name}</span>
-            <span class="text-xs font-mono font-black text-rose-400">${p2.pct}%</span>
-            <div class="w-20 md:w-24 h-24 bg-gradient-to-t from-slate-900 to-slate-800 border-t-4 border-slate-400 rounded-t-2xl flex flex-col items-center justify-center shadow-lg">
-              <span class="text-lg">🥈</span>
-              <span class="text-[10px] font-bold text-slate-300">المركز الثاني</span>
+          <div class="flex flex-col items-center flex-1 max-w-[180px]">
+            ${renderProjectPreview(p2.upgrades, false)}
+            <div class="flex items-center gap-1">
+              <span class="text-xl">${p2.avatar}</span>
+              <span class="text-xs md:text-sm font-black text-slate-200 truncate">${p2.name}</span>
+            </div>
+            <span class="text-xs font-mono font-black text-rose-400 my-0.5">${p2.pct}%</span>
+            <div class="w-full h-24 bg-gradient-to-t from-slate-900 to-slate-800 border-t-4 border-slate-400 rounded-t-2xl flex flex-col items-center justify-center shadow-lg">
+              <span class="text-xl">🥈</span>
+              <span class="text-[11px] font-bold text-slate-300">المركز الثاني</span>
             </div>
           </div>
         ` : ''}
 
-        <!-- Champion (1st) -->
+        <!-- Champion (1st Place) -->
         ${p1 ? `
-          <div class="flex flex-col items-center z-10 scale-105">
-            <span class="text-4xl animate-bounce">👑</span>
-            <span class="text-3xl">${p1.avatar}</span>
-            <span class="text-sm font-black text-amber-300 mt-1">${p1.name}</span>
-            <span class="text-base font-mono font-black text-emerald-400">${p1.pct}%</span>
-            <div class="w-24 md:w-32 h-36 bg-gradient-to-t from-amber-600 to-amber-500 text-slate-950 rounded-t-2xl flex flex-col items-center justify-center shadow-2xl border-t-4 border-amber-300">
-              <span class="text-2xl">🥇</span>
-              <span class="text-xs font-black">البطل الأول</span>
+          <div class="flex flex-col items-center z-10 scale-105 flex-1 max-w-[220px]">
+            <span class="text-3xl md:text-4xl animate-bounce mb-1">👑</span>
+            ${renderProjectPreview(p1.upgrades, true)}
+            <div class="flex items-center gap-1.5">
+              <span class="text-2xl">${p1.avatar}</span>
+              <span class="text-sm md:text-base font-black text-amber-300 truncate">${p1.name}</span>
+            </div>
+            <span class="text-base font-mono font-black text-emerald-400 my-0.5">${p1.pct}%</span>
+            <div class="w-full h-36 bg-gradient-to-t from-amber-600 via-amber-500 to-amber-400 text-slate-950 rounded-t-2xl flex flex-col items-center justify-center shadow-2xl border-t-4 border-amber-200">
+              <span class="text-3xl">🥇</span>
+              <span class="text-xs md:text-sm font-black tracking-wide">البطل الأول</span>
             </div>
           </div>
         ` : ''}
 
         <!-- 3rd Place -->
         ${p3 ? `
-          <div class="flex flex-col items-center">
-            <span class="text-2xl">${p3.avatar}</span>
-            <span class="text-xs font-bold text-slate-300 mt-1">${p3.name}</span>
-            <span class="text-xs font-mono font-black text-indigo-400">${p3.pct}%</span>
-            <div class="w-20 md:w-24 h-20 bg-gradient-to-t from-slate-900 to-slate-800 border-t-4 border-amber-700 rounded-t-2xl flex flex-col items-center justify-center shadow-lg">
-              <span class="text-lg">🥉</span>
-              <span class="text-[10px] font-bold text-amber-600">المركز الثالث</span>
+          <div class="flex flex-col items-center flex-1 max-w-[180px]">
+            ${renderProjectPreview(p3.upgrades, false)}
+            <div class="flex items-center gap-1">
+              <span class="text-xl">${p3.avatar}</span>
+              <span class="text-xs md:text-sm font-black text-slate-200 truncate">${p3.name}</span>
+            </div>
+            <span class="text-xs font-mono font-black text-indigo-400 my-0.5">${p3.pct}%</span>
+            <div class="w-full h-20 bg-gradient-to-t from-slate-900 to-slate-800 border-t-4 border-amber-700 rounded-t-2xl flex flex-col items-center justify-center shadow-lg">
+              <span class="text-xl">🥉</span>
+              <span class="text-[11px] font-bold text-amber-600">المركز الثالث</span>
             </div>
           </div>
         ` : ''}
       `;
 
-      // AI Commentary
-      document.getElementById('aiCommentaryText').innerText = data.commentary || 'تم تقييم المشاريع وفق معايير هندسية ومالية صارمة.';
+      // AI Commentary - Clean, simple, and elegant without raw asterisks
+      const commContainer = document.getElementById('aiCommentaryContainer');
+      if (commContainer) {
+        if (typeof data.commentary === 'object' && data.commentary.headline) {
+          commContainer.innerHTML = `
+            <div class="space-y-2">
+              <div class="text-sm md:text-base font-black text-amber-300 flex items-center gap-2">
+                <span>🏆</span>
+                <span>${data.commentary.headline}</span>
+              </div>
+              <div class="text-xs md:text-sm text-slate-200 font-bold flex items-center gap-2 bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">
+                <span class="text-base">💡</span>
+                <span>${data.commentary.verdict}</span>
+              </div>
+              ${data.commentary.runnerUpNote ? `
+                <div class="text-[11px] text-slate-400 font-semibold pt-1 border-t border-slate-800/80">
+                  🥈 ${data.commentary.runnerUpNote}
+                </div>
+              ` : ''}
+            </div>
+          `;
+        } else {
+          // Clean string fallback (remove markdown ** or raw tags)
+          const cleanStr = String(data.commentary || '')
+            .replace(/\*\*/g, '')
+            .replace(/🏆\s*حكم الـ AI:\s*/g, '');
+          commContainer.innerHTML = `
+            <div class="flex items-start gap-2 text-xs md:text-sm text-slate-200 font-bold leading-relaxed">
+              <span class="text-amber-400 text-base">🏆</span>
+              <p>${cleanStr}</p>
+            </div>
+          `;
+        }
+      }
 
-      // Full Rankings List
+      // Full Rankings List with finished project thumbnails
       document.getElementById('fullRankingsList').innerHTML = data.rankings.map(r => `
-        <div class="bg-slate-950 border border-slate-800 p-3 rounded-2xl flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <span class="w-6 h-6 rounded-full bg-slate-800 text-xs font-bold flex items-center justify-center text-slate-300">#${r.rank}</span>
-            <span class="text-xl">${r.avatar}</span>
-            <span class="text-xs font-black text-white">${r.name}</span>
+        <div class="bg-slate-950 border border-slate-800 p-3 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 transition hover:border-slate-700 shadow-sm">
+          <div class="flex items-center gap-3 w-full sm:w-auto">
+            <span class="w-7 h-7 rounded-full bg-slate-800 text-xs font-black flex items-center justify-center text-amber-400 border border-slate-700">#${r.rank}</span>
+            <div class="w-16 h-11 bg-slate-900 rounded-xl p-1 border border-slate-800 flex items-center justify-center overflow-hidden">
+              ${themeData.svgRender(r.upgrades || [])}
+            </div>
+            <div class="text-right">
+              <div class="flex items-center gap-1.5">
+                <span class="text-lg">${r.avatar}</span>
+                <span class="text-xs font-black text-white">${r.name}</span>
+              </div>
+              <span class="text-[10px] text-slate-400 block">${r.upgrades ? r.upgrades.length : 0} قطع تم تركيبها</span>
+            </div>
           </div>
-          <div class="flex items-center gap-3">
-            <span class="text-[10px] text-slate-400 font-mono">رصيد: ${r.budget} ر.س | قطع: ${r.upgrades ? r.upgrades.length : 0}</span>
-            <span class="text-sm font-mono font-black text-emerald-400">${r.percentage}%</span>
+          <div class="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-900">
+            <span class="text-xs font-mono text-slate-300 bg-slate-900 px-2.5 py-1 rounded-xl border border-slate-800">
+              رصيد متبقٍ: <strong class="text-amber-300">${r.budget} ر.س</strong>
+            </span>
+            <span class="text-base font-mono font-black text-emerald-400">${r.percentage}%</span>
           </div>
         </div>
       `).join('');
@@ -2971,13 +3037,25 @@
       const p2 = gameState.players[1];
       const p3 = gameState.players[2] || null;
 
-      const commentary = `🏆 يتوّج الذكاء الاصطناعي اللاعب "${p1.name}" بالمركز الأول بنسبة ${p1.percentage}%! تميز في هندسة وتطوير (${themeData.title}) واحتفظ بـ (${p1.budget} ر.س) كرصيد استراتيجي منعته من الطفرة!`;
+      const verdictReason = p1.budget >= 5
+        ? `أدار ميزانيته بذكاء واحتفظ بـ (${p1.budget} ر.س) منعته من الطفرة مع بناء متقن لـ (${themeData.title})!`
+        : `جازف بكل ما في جيبه وصنع أفخم تصميم يستحق الصدارة!`;
+
+      const runnerUpText = p2
+        ? `الوصيف ${p2.name} حقق ${p2.percentage}%، لكن إدارة الرصيد حسمت اللقب.`
+        : '';
+
+      const commentary = {
+        headline: `يتوّج الذكاء الاصطناعي اللاعب «${p1.name}» بطلاً للجلسة بنسبة ${p1.percentage}%!`,
+        verdict: verdictReason,
+        runnerUpNote: runnerUpText
+      };
 
       renderGrandReveal({
         podium: {
-          first: { name: p1.name, avatar: p1.avatar, pct: p1.percentage },
-          second: p2 ? { name: p2.name, avatar: p2.avatar, pct: p2.percentage } : null,
-          third: p3 ? { name: p3.name, avatar: p3.avatar, pct: p3.percentage } : null
+          first: { name: p1.name, avatar: p1.avatar, pct: p1.percentage, upgrades: p1.upgrades },
+          second: p2 ? { name: p2.name, avatar: p2.avatar, pct: p2.percentage, upgrades: p2.upgrades } : null,
+          third: p3 ? { name: p3.name, avatar: p3.avatar, pct: p3.percentage, upgrades: p3.upgrades } : null
         },
         rankings: gameState.players.map((p, i) => ({
           rank: i + 1,

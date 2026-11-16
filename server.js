@@ -850,17 +850,23 @@ function endGame(room) {
   const runnerUp = room.players[1] || null;
   const third = room.players[2] || null;
 
-  // Generate witty, analytical AI commentary
-  let aiCommentary = `🏆 **حكم الـ AI:** يتوّج اللاعب **${champion.name}** بطلاً للجلسة بنسبة **${champion.percentage}%**! `;
-  if (champion.budget >= 5) {
-    aiCommentary += `أظهر ذكاءً استثمارياً نادراً باقتناء قطع ذات وزن نوعي لـ (${themeData.title}) واحتفظ بـ (${champion.budget} ر.س) كرصيد طوارئ منعه من الطفرة. `;
-  } else {
-    aiCommentary += `جازف بكل ما في جيبه حتى آخر قرش وصنع أفخم تحفة فنية تستحق الصدارة المطلقة! `;
-  }
+  // Generate concise, clean and punchy AI commentary object
+  const verdictReason = champion.budget >= 5
+    ? `أدار ميزانيته بذكاء استثماري، وركّب قطعاً نوعية لـ (${themeData.title})، واحتفظ بـ (${champion.budget} ر.س) منعته من الطفرة!`
+    : `جازف بكل ما في جيبه حتى آخر قرش وصنع أفخم تحفة فنية تستحق الصدارة المطلقة!`;
 
-  if (runnerUp) {
-    aiCommentary += `بينما نال **${runnerUp.name}** المركز الثاني بنسبة **${runnerUp.percentage}%** بفضل بناء قوي لكن فارق إدارة الرصيد حسم المعركة.`;
-  }
+  const runnerUpText = runnerUp
+    ? `الوصيف ${runnerUp.name} حقق ${runnerUp.percentage}% وبنى مشروعاً رائعاً، لكن إدارة الرصيد حسمت اللقب.`
+    : '';
+
+  const aiCommentary = {
+    championName: champion.name,
+    championAvatar: champion.avatar,
+    percentage: champion.percentage,
+    headline: `يتوّج الذكاء الاصطناعي اللاعب «${champion.name}» بطلاً للجلسة بنسبة ${champion.percentage}%!`,
+    verdict: verdictReason,
+    runnerUpNote: runnerUpText
+  };
 
   // Lift curtain and reveal all projects
   broadcastRoom(room, {
