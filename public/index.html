@@ -1998,8 +1998,12 @@
       const uNames = upgrades.map(u => u.name || '');
       const hasPool = uNames.some(n => n.includes('مسبح'));
       const hasGarden = uNames.some(n => n.includes('حديقة'));
-      const hasRoof = uNames.some(n => n.includes('روف'));
+      const hasRoof = uNames.some(n => n.includes('روف') || n.includes('سينما'));
       const hasHeli = uNames.some(n => n.includes('هليكوبتر'));
+      const hasFountain = uNames.some(n => n.includes('نافورة'));
+      const hasSolar = uNames.some(n => n.includes('طاقة'));
+      const hasMajlis = uNames.some(n => n.includes('مشب') || n.includes('مجالس'));
+      const hasElevator = uNames.some(n => n.includes('مصعد'));
 
       return `
         <svg viewBox="0 0 340 180" class="w-full max-h-56 select-none" xmlns="http://www.w3.org/2000/svg">
@@ -2008,33 +2012,49 @@
 
           <!-- Villa Base Ground -->
           <rect x="0" y="145" width="340" height="35" fill="#0f172a" />
-          ${hasGarden ? `<rect x="0" y="142" width="120" height="6" fill="#15803d" /><text x="30" y="138" font-size="20">🌴</text>` : ''}
+          ${hasGarden ? `<rect x="0" y="142" width="130" height="6" fill="#15803d" /><text x="25" y="138" font-size="20">🌴</text><text x="65" y="140" font-size="16">🌺</text>` : ''}
+          ${hasMajlis ? `<text x="95" y="142" font-size="16">⛺</text>` : ''}
+          ${hasFountain ? `<text x="145" y="146" font-size="18" class="animate-pulse">⛲</text>` : ''}
 
           <!-- Villa Main House Structure -->
-          <rect x="90" y="70" width="170" height="75" fill="#1e293b" stroke="#38bdf8" stroke-width="2" rx="4" />
-          <rect x="140" y="40" width="100" height="30" fill="#0f172a" stroke="#38bdf8" stroke-width="1.5" />
+          <rect x="85" y="65" width="175" height="80" fill="#1e293b" stroke="#38bdf8" stroke-width="2" rx="4" />
+          <rect x="135" y="35" width="105" height="30" fill="#0f172a" stroke="#38bdf8" stroke-width="1.5" />
 
-          <!-- Windows -->
-          <rect x="105" y="85" width="35" height="25" fill="#38bdf8" opacity="0.6" rx="2" />
-          <rect x="160" y="85" width="45" height="40" fill="#38bdf8" opacity="0.8" rx="2" />
-          <rect x="225" y="85" width="25" height="25" fill="#38bdf8" opacity="0.6" rx="2" />
+          <!-- Solar Panels on roof -->
+          ${hasSolar ? `
+            <rect x="140" y="27" width="45" height="7" fill="#0284c7" stroke="#38bdf8" stroke-width="1" />
+            <line x1="155" y1="27" x2="155" y2="34" stroke="#e0f2fe" stroke-width="1" />
+            <line x1="170" y1="27" x2="170" y2="34" stroke="#e0f2fe" stroke-width="1" />
+          ` : ''}
+
+          <!-- Panoramic Windows -->
+          <rect x="95" y="80" width="35" height="25" fill="#38bdf8" opacity="0.6" rx="2" />
+          <rect x="150" y="80" width="50" height="45" fill="#38bdf8" opacity="0.8" rx="2" />
+          <rect x="215" y="80" width="35" height="25" fill="#38bdf8" opacity="0.6" rx="2" />
+
+          <!-- Glass Hydraulic Elevator on side -->
+          ${hasElevator ? `
+            <rect x="68" y="55" width="14" height="90" fill="#0284c7" opacity="0.4" stroke="#38bdf8" stroke-width="1" />
+            <rect x="70" y="85" width="10" height="15" fill="#38bdf8" rx="2" class="animate-bounce" />
+          ` : ''}
 
           <!-- Infinity Pool -->
           ${hasPool ? `
-            <rect x="200" y="140" width="120" height="20" fill="#0284c7" stroke="#38bdf8" stroke-width="2" rx="4" />
-            <text x="240" y="155" font-size="12" fill="#fff" font-weight="bold">مسبح 🌊</text>
+            <rect x="210" y="140" width="120" height="22" fill="#0284c7" stroke="#38bdf8" stroke-width="2" rx="4" />
+            <text x="245" y="156" font-size="12" fill="#fff" font-weight="black">مسبح 🌊</text>
           ` : ''}
 
           <!-- Rooftop Lounge & Cinema -->
           ${hasRoof ? `
-            <rect x="150" y="32" width="80" height="8" fill="#e11d48" rx="2" />
-            <text x="180" y="30" font-size="12">🍸</text>
+            <rect x="150" y="26" width="85" height="9" fill="#e11d48" rx="2" />
+            <text x="185" y="24" font-size="13">🍸🎬</text>
           ` : ''}
 
           <!-- Helipad on top -->
           ${hasHeli ? `
-            <circle cx="115" cy="50" r="14" fill="#020617" stroke="#eab308" stroke-width="2" />
-            <text x="111" y="55" font-size="14" font-weight="black" fill="#eab308">H</text>
+            <circle cx="110" cy="45" r="14" fill="#020617" stroke="#eab308" stroke-width="2" />
+            <text x="106" y="50" font-size="13" font-weight="black" fill="#eab308">H</text>
+            <text x="110" y="30" font-size="12" class="animate-bounce">🚁</text>
           ` : ''}
         </svg>
       `;
@@ -2045,6 +2065,9 @@
       const hasEspresso = uNames.some(n => n.includes('ماكينة'));
       const hasNeon = uNames.some(n => n.includes('نيون'));
       const hasTerrace = uNames.some(n => n.includes('جلسات'));
+      const hasRoaster = uNames.some(n => n.includes('محمصة'));
+      const hasRobot = uNames.some(n => n.includes('روبوت'));
+      const hasDriveThru = uNames.some(n => n.includes('درايف'));
 
       return `
         <svg viewBox="0 0 340 180" class="w-full max-h-56 select-none" xmlns="http://www.w3.org/2000/svg">
@@ -2053,45 +2076,112 @@
 
           <!-- Neon Sign -->
           ${hasNeon ? `
-            <rect x="90" y="25" width="160" height="25" fill="#030712" stroke="#ec4899" stroke-width="2" rx="10" />
-            <text x="170" y="42" font-size="13" font-weight="black" fill="#ec4899" text-anchor="middle" class="animate-pulse">☕ SPECIALTY COFFEE ☕</text>
+            <rect x="70" y="22" width="200" height="26" fill="#030712" stroke="#ec4899" stroke-width="2" rx="10" />
+            <text x="170" y="39" font-size="12" font-weight="black" fill="#ec4899" text-anchor="middle" class="animate-pulse">☕ SPECIALTY ROASTERY ☕</text>
           ` : `
-            <rect x="120" y="30" width="100" height="20" fill="#292524" rx="4" />
-            <text x="170" y="44" font-size="10" fill="#a8a29e" text-anchor="middle">كافيه المدينة</text>
+            <rect x="120" y="28" width="100" height="20" fill="#292524" rx="4" />
+            <text x="170" y="42" font-size="10" fill="#a8a29e" text-anchor="middle">كافيه المدينة</text>
           `}
 
           <!-- Glass Storefront & Bar -->
           <rect x="70" y="65" width="90" height="70" fill="#0c4a6e" opacity="0.7" rx="3" />
           <rect x="180" y="65" width="90" height="70" fill="#0c4a6e" opacity="0.7" rx="3" />
 
+          <!-- Roastery with Smoke -->
+          ${hasRoaster ? `
+            <rect x="73" y="70" width="25" height="35" fill="#451a03" stroke="#ca8a04" stroke-width="1.5" rx="3" />
+            <text x="76" y="92" font-size="11">🔥</text>
+          ` : ''}
+
           <!-- Espresso Machine with Steam -->
           ${hasEspresso ? `
-            <rect x="90" y="100" width="40" height="25" fill="#ca8a04" stroke="#eab308" stroke-width="1.5" rx="3" />
-            <text x="98" y="95" font-size="14" class="animate-bounce">♨️</text>
+            <rect x="110" y="98" width="40" height="25" fill="#ca8a04" stroke="#eab308" stroke-width="1.5" rx="3" />
+            <text x="118" y="93" font-size="14" class="animate-bounce">♨️</text>
           ` : ''}
 
           <!-- Outdoor Terrace -->
           ${hasTerrace ? `
             <circle cx="230" cy="115" r="12" fill="#ca8a04" opacity="0.8" />
             <text x="220" y="120" font-size="14">🪑</text>
+            <text x="245" y="120" font-size="14">🌴</text>
+          ` : ''}
+
+          <!-- Robot Server -->
+          ${hasRobot ? `
+            <text x="160" y="128" font-size="15" class="animate-pulse">🤖</text>
+          ` : ''}
+
+          <!-- Drive Thru -->
+          ${hasDriveThru ? `
+            <rect x="10" y="120" width="35" height="25" fill="#0284c7" rx="4" />
+            <text x="14" y="137" font-size="12">🚗💨</text>
           ` : ''}
         </svg>
       `;
     }
 
     function renderRestaurantSVG(upgrades = []) {
+      const uNames = upgrades.map(u => u.name || '');
+      const hasGrill = uNames.some(n => n.includes('مطبخ') || n.includes('شواية'));
+      const hasPiano = uNames.some(n => n.includes('بيانو'));
+      const hasChandelier = uNames.some(n => n.includes('ثريات'));
+      const hasMichelin = uNames.some(n => n.includes('ميشلان') || n.includes('شيف'));
+      const hasWagyu = uNames.some(n => n.includes('واغيو') || n.includes('لحوم'));
+      const hasTerrace = uNames.some(n => n.includes('تراس'));
+
       return `
         <svg viewBox="0 0 340 180" class="w-full max-h-56 select-none" xmlns="http://www.w3.org/2000/svg">
           <rect x="0" y="0" width="340" height="180" fill="#111827" rx="16" />
-          <rect x="40" y="40" width="260" height="110" fill="#1f2937" stroke="#e11d48" stroke-width="2" rx="6" />
-          <text x="170" y="30" font-size="14" font-weight="black" fill="#f43f5e" text-anchor="middle">👑 مطعم فاخر وسحابي 5★</text>
-          <!-- Tables & Chandeliers -->
-          <circle cx="170" cy="55" r="8" fill="#eab308" opacity="0.9" />
-          <line x1="170" y1="40" x2="170" y2="55" stroke="#ca8a04" stroke-width="2" />
-          <rect x="80" y="95" width="50" height="25" fill="#e2e8f0" stroke="#cbd5e1" rx="4" />
-          <rect x="210" y="95" width="50" height="25" fill="#e2e8f0" stroke="#cbd5e1" rx="4" />
-          <text x="95" y="112" font-size="14">🍷</text>
-          <text x="225" y="112" font-size="14">🥩</text>
+          <rect x="30" y="38" width="280" height="118" fill="#1f2937" stroke="#e11d48" stroke-width="2" rx="8" />
+
+          <!-- Title / Michelin Header -->
+          ${hasMichelin ? `
+            <text x="170" y="28" font-size="13" font-weight="black" fill="#fbbf24" text-anchor="middle" class="animate-pulse">⭐ 3-STAR MICHELIN GOURMET ⭐</text>
+          ` : `
+            <text x="170" y="28" font-size="13" font-weight="black" fill="#f43f5e" text-anchor="middle">👑 مطعم فاخر وسحابي 5★</text>
+          `}
+
+          <!-- Bohemian Chandeliers -->
+          ${hasChandelier ? `
+            <circle cx="110" cy="55" r="9" fill="#fef08a" opacity="0.9" class="animate-pulse" />
+            <line x1="110" y1="38" x2="110" y2="55" stroke="#ca8a04" stroke-width="2" />
+            <circle cx="230" cy="55" r="9" fill="#fef08a" opacity="0.9" class="animate-pulse" />
+            <line x1="230" y1="38" x2="230" y2="55" stroke="#ca8a04" stroke-width="2" />
+          ` : `
+            <circle cx="170" cy="55" r="7" fill="#eab308" opacity="0.7" />
+            <line x1="170" y1="38" x2="170" y2="55" stroke="#ca8a04" stroke-width="1.5" />
+          `}
+
+          <!-- Open Fire Grill / Chef Area -->
+          ${hasGrill ? `
+            <rect x="45" y="85" width="55" height="35" fill="#450a0a" stroke="#ef4444" stroke-width="1.5" rx="4" />
+            <text x="50" y="107" font-size="15" class="animate-bounce">🔥</text>
+            <text x="70" y="108" font-size="14">👨‍🍳</text>
+          ` : ''}
+
+          <!-- Grand Piano Stage -->
+          ${hasPiano ? `
+            <rect x="235" y="85" width="60" height="35" fill="#030712" stroke="#e2e8f0" stroke-width="1.5" rx="4" />
+            <text x="248" y="108" font-size="18">🎹</text>
+            <text x="275" y="100" font-size="10" fill="#f43f5e" class="animate-pulse">🎶</text>
+          ` : ''}
+
+          <!-- Wagyu Fridge -->
+          ${hasWagyu ? `
+            <rect x="180" y="85" width="28" height="40" fill="#0c4a6e" stroke="#38bdf8" stroke-width="1.5" rx="3" />
+            <text x="184" y="110" font-size="14">🥩</text>
+          ` : ''}
+
+          <!-- VIP Dining Table -->
+          <rect x="115" y="95" width="55" height="28" fill="#e2e8f0" stroke="#cbd5e1" rx="4" />
+          <text x="122" y="114" font-size="13">🍷</text>
+          <text x="145" y="114" font-size="13">🍽️</text>
+
+          <!-- Upper Terrace -->
+          ${hasTerrace ? `
+            <rect x="100" y="32" width="140" height="6" fill="#ca8a04" rx="2" />
+            <text x="160" y="24" font-size="11">🌆</text>
+          ` : ''}
         </svg>
       `;
     }
@@ -2100,25 +2190,58 @@
       const uNames = upgrades.map(u => u.name || '');
       const hasRevolving = uNames.some(n => n.includes('دوار'));
       const hasEvtol = uNames.some(n => n.includes('EVTOL') || n.includes('تاكسي'));
+      const hasLaser = uNames.some(n => n.includes('شاشات') || n.includes('ليزر'));
+      const hasElevator = uNames.some(n => n.includes('كبسولة') || n.includes('مصاعد'));
+      const hasSpire = uNames.some(n => n.includes('هوائي') || n.includes('ليزر تضيء'));
+      const hasPool = uNames.some(n => n.includes('معلق') || n.includes('مسبح'));
 
       return `
         <svg viewBox="0 0 340 180" class="w-full max-h-56 select-none" xmlns="http://www.w3.org/2000/svg">
           <rect x="0" y="0" width="340" height="180" fill="#020617" rx="16" />
+
+          <!-- Antenna / Spire Laser to Sky -->
+          ${hasSpire ? `
+            <line x1="170" y1="28" x2="170" y2="4" stroke="#a855f7" stroke-width="2.5" class="animate-pulse" />
+            <circle cx="170" cy="4" r="4" fill="#ec4899" class="animate-ping" />
+            <text x="178" y="14" font-size="10" fill="#c084fc">⚡ 6G</text>
+          ` : `
+            <line x1="170" y1="28" x2="170" y2="15" stroke="#64748b" stroke-width="2" />
+          `}
+
           <!-- Tower Main Glass Shaft -->
-          <polygon points="140,165 155,25 185,25 200,165" fill="#0f172a" stroke="#38bdf8" stroke-width="2" />
+          <polygon points="135,170 152,28 188,28 205,170" fill="#0f172a" stroke="#38bdf8" stroke-width="2" />
+
+          <!-- LED Facade / Laser show -->
+          ${hasLaser ? `
+            <rect x="154" y="65" width="32" height="70" fill="#3b82f6" opacity="0.3" class="animate-pulse" />
+            <text x="170" y="105" font-size="10" font-weight="black" fill="#38bdf8" text-anchor="middle" transform="rotate(-90 170 105)">NEOM 2030</text>
+          ` : ''}
+
           <!-- Glass Floor Lines -->
-          ${[40, 60, 80, 100, 120, 140].map(y => `<line x1="145" y1="${y}" x2="195" y2="${y}" stroke="#0284c7" stroke-width="1.5" opacity="0.6" />`).join('')}
+          ${[48, 70, 92, 114, 136, 155].map(y => `<line x1="142" y1="${y}" x2="198" y2="${y}" stroke="#0284c7" stroke-width="1.5" opacity="0.6" />`).join('')}
+
+          <!-- Rocket Glass Elevator -->
+          ${hasElevator ? `
+            <line x1="133" y1="40" x2="133" y2="165" stroke="#f59e0b" stroke-width="2" />
+            <circle cx="133" cy="80" r="4" fill="#fbbf24" class="animate-bounce" />
+          ` : ''}
+
+          <!-- Cantilever Sky Pool -->
+          ${hasPool ? `
+            <rect x="195" y="100" width="35" height="10" fill="#0284c7" stroke="#38bdf8" stroke-width="1.5" rx="3" />
+            <text x="200" y="98" font-size="9" fill="#38bdf8">🏊 مسبح</text>
+          ` : ''}
 
           <!-- Revolving Restaurant at Top -->
           ${hasRevolving ? `
-            <ellipse cx="170" cy="35" rx="30" ry="10" fill="#ca8a04" stroke="#fef08a" stroke-width="2" class="animate-pulse" />
-            <text x="170" y="39" font-size="9" fill="#020617" font-weight="black" text-anchor="middle">360°</text>
+            <ellipse cx="170" cy="38" rx="34" ry="11" fill="#ca8a04" stroke="#fef08a" stroke-width="2" class="animate-pulse" />
+            <text x="170" y="42" font-size="10" fill="#020617" font-weight="black" text-anchor="middle">360° DOME</text>
           ` : ''}
 
           <!-- EVTOL Flying Taxi Pad -->
           ${hasEvtol ? `
-            <rect x="195" y="60" width="25" height="4" fill="#10b981" />
-            <text x="215" y="60" font-size="14" class="animate-bounce">🛸</text>
+            <rect x="200" y="62" width="28" height="5" fill="#10b981" />
+            <text x="216" y="62" font-size="15" class="animate-bounce">🛸</text>
           ` : ''}
         </svg>
       `;
@@ -2126,34 +2249,65 @@
 
     function renderJetSVG(upgrades = []) {
       const uNames = upgrades.map(u => u.name || '');
-      const hasGoldWings = uNames.some(n => n.includes('ذهبية'));
+      const hasGoldWings = uNames.some(n => n.includes('ذهبية') || n.includes('ذهب'));
       const hasEngines = uNames.some(n => n.includes('محركات'));
+      const hasJacuzzi = uNames.some(n => n.includes('جاكوزي'));
+      const hasStarlight = uNames.some(n => n.includes('سقف') || n.includes('نجوم'));
+      const hasVIPSuite = uNames.some(n => n.includes('ماستر') || n.includes('نوم'));
 
       const wingColor = hasGoldWings ? '#eab308' : '#64748b';
+      const wingBorder = hasGoldWings ? '#fef08a' : '#334155';
 
       return `
         <svg viewBox="0 0 340 180" class="w-full max-h-56 select-none" xmlns="http://www.w3.org/2000/svg">
           <rect x="0" y="0" width="340" height="180" fill="#030712" rx="16" />
-          <!-- Clouds -->
-          <ellipse cx="70" cy="140" rx="40" ry="12" fill="#1e293b" opacity="0.6" />
-          <ellipse cx="270" cy="130" rx="50" ry="15" fill="#1e293b" opacity="0.6" />
+
+          <!-- Clouds & Sky Atmosphere -->
+          <ellipse cx="60" cy="145" rx="45" ry="14" fill="#1e293b" opacity="0.6" />
+          <ellipse cx="280" cy="135" rx="55" ry="16" fill="#1e293b" opacity="0.6" />
+
+          <!-- Starlight Atmosphere Stars -->
+          ${hasStarlight ? `
+            <circle cx="40" cy="30" r="1.5" fill="#fef08a" class="animate-ping" />
+            <circle cx="100" cy="20" r="1" fill="#fff" />
+            <circle cx="240" cy="25" r="1.5" fill="#fef08a" class="animate-ping" />
+            <circle cx="300" cy="40" r="1" fill="#fff" />
+          ` : ''}
 
           <!-- Jet Fuselage -->
-          <ellipse cx="170" cy="85" rx="120" ry="22" fill="#f8fafc" stroke="#0f172a" stroke-width="2" />
+          <ellipse cx="170" cy="85" rx="125" ry="22" fill="#f8fafc" stroke="#0f172a" stroke-width="2" />
+
           <!-- Cockpit Glass -->
-          <polygon points="260,80 280,85 260,90" fill="#0284c7" />
+          <polygon points="265,80 290,85 265,90" fill="#0284c7" />
+
+          <!-- VIP Suite Windows Silhouette -->
+          ${hasVIPSuite ? `
+            <text x="140" y="89" font-size="10">👑🛏️</text>
+          ` : ''}
+
+          <!-- Sky Jacuzzi bubble -->
+          ${hasJacuzzi ? `
+            <circle cx="195" cy="85" r="9" fill="#38bdf8" opacity="0.8" />
+            <text x="190" y="89" font-size="9">🫧</text>
+          ` : ''}
 
           <!-- Wings -->
-          <polygon points="120,85 170,25 210,85" fill="${wingColor}" stroke="#334155" stroke-width="2" />
-          <polygon points="120,85 170,145 210,85" fill="${wingColor}" stroke="#334155" stroke-width="2" />
+          <polygon points="120,85 170,22 210,85" fill="${wingColor}" stroke="${wingBorder}" stroke-width="2" />
+          <polygon points="120,85 170,148 210,85" fill="${wingColor}" stroke="${wingBorder}" stroke-width="2" />
 
-          <!-- Jet Engines -->
+          <!-- Twin Supersonic Jet Engines with Animated Blazing Fire -->
           ${hasEngines ? `
-            <rect x="130" y="45" width="30" height="10" rx="4" fill="#0f172a" stroke="#f59e0b" stroke-width="2" />
-            <polygon points="130,46 115,50 130,54" fill="#f97316" class="animate-ping" />
-            <rect x="130" y="115" width="30" height="10" rx="4" fill="#0f172a" stroke="#f59e0b" stroke-width="2" />
-            <polygon points="130,116 115,120 130,124" fill="#f97316" class="animate-ping" />
-          ` : ''}
+            <rect x="125" y="42" width="32" height="12" rx="4" fill="#0f172a" stroke="#f59e0b" stroke-width="2" />
+            <polygon points="125,44 100,48 125,52" fill="#ef4444" class="animate-ping" />
+            <polygon points="125,45 110,48 125,51" fill="#f59e0b" />
+
+            <rect x="125" y="116" width="32" height="12" rx="4" fill="#0f172a" stroke="#f59e0b" stroke-width="2" />
+            <polygon points="125,118 100,122 125,126" fill="#ef4444" class="animate-ping" />
+            <polygon points="125,119 110,122 125,125" fill="#f59e0b" />
+          ` : `
+            <rect x="130" y="46" width="24" height="8" rx="2" fill="#334155" />
+            <rect x="130" y="118" width="24" height="8" rx="2" fill="#334155" />
+          `}
         </svg>
       `;
     }
