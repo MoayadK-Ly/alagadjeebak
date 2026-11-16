@@ -313,6 +313,54 @@
 
         <!-- LEFT COLUMN: Pre-Game Settings & Host Actions (lg:col-span-7) -->
         <div class="lg:col-span-7 space-y-4">
+
+          <!-- Guest Room Info Card (Clean, Read-Only summary for joiners) -->
+          <div id="guestRoomInfoCard" class="hidden bg-slate-900/90 border border-indigo-500/30 rounded-3xl p-5 sm:p-6 space-y-4 shadow-xl">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div class="flex items-center gap-2">
+                <span class="text-xl">📋</span>
+                <h3 class="text-sm font-black text-white">تفاصيل الغرفة وشروط اللعبة</h3>
+              </div>
+              <span class="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2.5 py-0.5 rounded-full font-bold">
+                أنت لاعب منضم 🎮
+              </span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <!-- Host -->
+              <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 flex items-center justify-between">
+                <span class="text-slate-400 font-bold">صانع ومضيف الغرفة:</span>
+                <span id="guestInfoHost" class="font-black text-amber-300">👑 جاري التحميل...</span>
+              </div>
+              <!-- Theme -->
+              <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 flex items-center justify-between">
+                <span class="text-slate-400 font-bold">موضوع التحدي:</span>
+                <span id="guestInfoTheme" class="font-black text-white">🏎️ جاري التحديد...</span>
+              </div>
+              <!-- Budget & Rounds -->
+              <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 flex items-center justify-between">
+                <span class="text-slate-400 font-bold">الميزانية والجولات:</span>
+                <span id="guestInfoBudget" class="font-black text-emerald-400">25 ر.س (6 جولات)</span>
+              </div>
+              <!-- Game Mode -->
+              <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 flex items-center justify-between">
+                <span class="text-slate-400 font-bold">طور اللعب:</span>
+                <span id="guestInfoMode" class="font-black text-indigo-300">فردي تنافسي</span>
+              </div>
+            </div>
+
+            <!-- Status Banner for Guest -->
+            <div class="bg-gradient-to-r from-amber-500/10 via-amber-500/15 to-amber-500/10 border border-amber-500/30 rounded-2xl p-3.5 text-center space-y-1">
+              <div class="flex items-center justify-center gap-1.5 text-amber-300 font-black text-xs sm:text-sm">
+                <span class="animate-pulse">⏳</span>
+                <span>بانتظار إشارة المضيف لبدء التحدي!</span>
+              </div>
+              <p class="text-[11px] text-slate-400 font-medium">
+                تأكد من ضغط زر <strong class="text-emerald-400 font-bold">"أنا جاهز للعب"</strong> لتفعيل إشارة البدء عند المضيف
+              </p>
+            </div>
+          </div>
+
           <!-- Pre-Game Settings (Host Only) -->
           <div id="hostControlsCard" class="bg-slate-900/90 border border-indigo-500/30 rounded-3xl p-5 space-y-4 shadow-xl">
             <div class="flex items-center justify-between pb-2 border-b border-slate-800">
@@ -1773,32 +1821,45 @@
       gameState.isHost = isActualHost;
 
       const hostControls = document.getElementById('hostControlsCard');
-      const startBtn = document.getElementById('startGameBtn');
-      const addBotBtn = document.getElementById('addAiBotBtn');
+      const guestCard = document.getElementById('guestRoomInfoCard');
+      const startArea = document.getElementById('lobbyHostStartArea');
       const waitNotice = document.getElementById('lobbyWaitingMsg');
       const codeTimerCont = document.getElementById('lobbyCodeCountdownContainer');
+      const joinerCard = document.getElementById('joinerReadyCard');
 
-      const hostBadge = document.getElementById('hostControlsHeaderBadge');
       if (gameState.isHost) {
-        if (hostControls) hostControls.classList.remove('opacity-50', 'pointer-events-none');
-        if (startBtn) startBtn.classList.remove('hidden');
-        if (addBotBtn) addBotBtn.classList.remove('hidden');
+        // Host View: Show full host controls, hide guest card
+        if (hostControls) hostControls.classList.remove('hidden', 'opacity-50', 'pointer-events-none');
+        if (guestCard) guestCard.classList.add('hidden');
+        if (startArea) startArea.classList.remove('hidden');
         if (waitNotice) waitNotice.classList.add('hidden');
         if (codeTimerCont) codeTimerCont.classList.remove('hidden');
-        if (hostBadge) {
-          hostBadge.innerText = '👑 أنت المضيف (تتحكم بالإعدادات)';
-          hostBadge.className = 'text-[10px] bg-indigo-500/20 text-indigo-300 px-2.5 py-0.5 rounded-full font-bold border border-indigo-500/30';
-        }
+        if (joinerCard) joinerCard.classList.add('hidden');
       } else {
-        if (hostControls) hostControls.classList.add('opacity-50', 'pointer-events-none');
-        if (startBtn) startBtn.classList.add('hidden');
-        if (addBotBtn) addBotBtn.classList.add('hidden');
-        if (waitNotice) waitNotice.classList.remove('hidden');
+        // Guest View: COMPLETELY HIDE host settings & action buttons. Only show Room Info & Ready Button!
+        if (hostControls) hostControls.classList.add('hidden');
+        if (guestCard) guestCard.classList.remove('hidden');
+        if (startArea) startArea.classList.add('hidden');
+        if (waitNotice) waitNotice.classList.add('hidden');
         if (codeTimerCont) codeTimerCont.classList.add('hidden');
-        if (hostBadge) {
-          hostBadge.innerText = '🔒 للعرض فقط (المضيف يحدد الإعدادات)';
-          hostBadge.className = 'text-[10px] bg-slate-800 text-slate-400 px-2.5 py-0.5 rounded-full font-bold border border-slate-700';
-        }
+        if (joinerCard) joinerCard.classList.remove('hidden');
+
+        // Populate Guest Room Info
+        const themeData = THEMES[gameState.theme] || THEMES.car;
+        const hostPlayer = gameState.players.find(p => p.isHost) || { name: 'المضيف', avatar: '👑' };
+        const gHost = document.getElementById('guestInfoHost');
+        const gTheme = document.getElementById('guestInfoTheme');
+        const gBudget = document.getElementById('guestInfoBudget');
+        const gMode = document.getElementById('guestInfoMode');
+        
+        const budgetRoundsMap = { 25: 6, 50: 8, 100: 10, 200: 14 };
+        const totalRounds = budgetRoundsMap[gameState.budget] || 6;
+        const modeLabels = { ffa: 'فردي تنافسي', coop: 'ثنائيات', survival: 'طور الطفرة' };
+
+        if (gHost) gHost.innerText = `${hostPlayer.avatar} ${hostPlayer.name}`;
+        if (gTheme) gTheme.innerText = themeData.title;
+        if (gBudget) gBudget.innerText = `${gameState.budget} ر.س (${totalRounds} جولات)`;
+        if (gMode) gMode.innerText = modeLabels[gameState.mode] || 'فردي تنافسي';
       }
 
       // Sync form controls if needed
@@ -2130,16 +2191,16 @@
           const me = gameState.players.find(p => p.id === gameState.myPlayerId);
           const myReady = me ? me.isReady : false;
           if (myReady) {
-            toggleBtn.className = 'w-full py-2.5 px-3 rounded-2xl border font-black text-xs flex items-center justify-center gap-2 transition active:scale-95 shadow-md bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border-emerald-500/50';
+            toggleBtn.className = 'w-full py-3.5 px-4 rounded-2xl border-2 font-black text-sm flex items-center justify-center gap-2 transition active:scale-95 shadow-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white border-emerald-400';
             toggleBtn.innerHTML = `
-              <span class="text-base">✅</span>
+              <span class="text-lg">✅</span>
               <span>أنت جاهز للعب! (اضغط للإلغاء)</span>
             `;
           } else {
-            toggleBtn.className = 'w-full py-2.5 px-3 rounded-2xl border font-black text-xs flex items-center justify-center gap-2 transition active:scale-95 shadow-md bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border-amber-500/50 animate-pulse';
+            toggleBtn.className = 'w-full py-3.5 px-4 rounded-2xl border-2 font-black text-sm flex items-center justify-center gap-2 transition active:scale-95 shadow-xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-400 text-slate-950 border-amber-300 animate-pulse';
             toggleBtn.innerHTML = `
-              <span class="text-base">⏳</span>
-              <span>اضغط هنا لتأكيد أنك جاهز للعب</span>
+              <span class="text-lg animate-bounce">⏳</span>
+              <span>اضغط هنا لتأكيد أنك جاهز للعب!</span>
             `;
           }
         } else {
