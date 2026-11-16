@@ -795,6 +795,8 @@ function createRoom(hostPlayer, options = {}) {
     codeTimerInterval: null,
     auctionData: null,
     usedOfferIds: [],
+    bannedNames: new Set(),
+    bannedIds: new Set(),
     history: []
   };
 
@@ -1296,6 +1298,9 @@ wss.on('connection', (ws) => {
           if (room.players.length >= 8) {
             return ws.send(JSON.stringify({ type: 'ERROR', message: 'الغرفة ممتلئة (الحد الأقصى 8 لاعبين)!' }));
           }
+          if (room.bannedNames && (room.bannedNames.has(name.trim().toLowerCase()) || room.bannedIds.has(playerSession.id))) {
+            return ws.send(JSON.stringify({ type: 'ERROR', message: '🚫 لقد تم استبعادك من هذه الغرفة، ولا يمكنك الدخول إليها مجدداً!' }));
+          }
 
           const player = {
             id: playerSession.id,
@@ -1445,12 +1450,17 @@ wss.on('connection', (ws) => {
           const room = rooms.get(roomCode);
           if (!room || room.hostId !== playerSession.id || room.state !== 'lobby') return;
           const targetId = data.playerId || data.botId;
-          const targetIdx = room.players.findIndex(p => p.id === targetId);
-          if (targetIdx === -1) return;
-          const targetPlayer = room.players[targetIdx];
+          const targetPlayer = room.players.find(p => p.id === targetId);
+          if (!targetPlayer) return;
           if (targetPlayer.id === room.hostId || targetPlayer.id === playerSession.id) return; // Cannot kick host or self
 
-          // Notify kicked player if connected via WebSocket
+          // Add to permanent ban list for this room
+          if (!room.bannedNames) room.bannedNames = new Set();
+          if (!room.bannedIds) room.bannedIds = new Set();
+          room.bannedNames.add(targetPlayer.name.trim().toLowerCase());
+          room.bannedIds.add(targetPlayer.id);
+
+          // Clear kicked player's room association and notify them immediately
           if (targetPlayer.ws && targetPlayer.ws.readyState === WebSocket.OPEN) {
             targetPlayer.ws.send(JSON.stringify({
               type: 'KICKED_FROM_ROOM',
@@ -1458,7 +1468,9 @@ wss.on('connection', (ws) => {
             }));
           }
 
-          room.players.splice(targetIdx, 1);
+          // Filter out the player from room
+          room.players = room.players.filter(p => p.id !== targetId);
+
           broadcastRoom(room, {
             type: 'PLAYER_KICKED',
             kickedName: targetPlayer.name,

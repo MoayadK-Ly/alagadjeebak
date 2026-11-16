@@ -1625,10 +1625,11 @@
           break;
 
         case 'KICKED_FROM_ROOM':
-          alert(msg.message || '🚪 تم استبعادك من الغرفة بواسطة صانع الغرفة.');
           gameState.roomCode = null;
           gameState.players = [];
+          gameState.isHost = false;
           switchScreen('screenEntry');
+          showFloatingNotification(msg.message || '🚪 تم استبعادك من الغرفة بواسطة صانع الغرفة.');
           break;
 
         case 'PLAYER_READY_CHANGED':
@@ -2247,21 +2248,22 @@
         return;
       }
       if (!confirm(`هل أنت متأكد من طرد اللاعب (${playerName}) من الغرفة؟`)) return;
+
+      // Optimistic instant removal from UI
+      gameState.players = gameState.players.filter(p => p.id !== playerId);
+      renderLobbyPlayers();
+      const pCount = document.getElementById('lobbyPlayerCount');
+      if (pCount) pCount.innerText = gameState.players.length;
+
       playSoundEffect('skip');
+      showFloatingNotification(`🚪 تم طرد (${playerName})`);
+
       if (isConnected && ws && ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({ 
           type: 'KICK_PLAYER',
           playerId: playerId,
           code: gameState.roomCode 
         }));
-      } else if (isOfflineDemo) {
-        const idx = gameState.players.findIndex(p => p.id === playerId);
-        if (idx !== -1) {
-          const removed = gameState.players.splice(idx, 1)[0];
-          renderLobbyPlayers();
-          document.getElementById('lobbyPlayerCount').innerText = gameState.players.length;
-          showFloatingNotification(`🚪 تم استبعاد (${removed.name})`);
-        }
       }
     }
 
