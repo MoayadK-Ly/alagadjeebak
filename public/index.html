@@ -2466,10 +2466,10 @@
     function handleStartGameClick() {
       if (!gameState.isHost) return;
 
-      const unreadyPlayers = gameState.players.filter(p => !p.isReady);
-      if (unreadyPlayers.length > 0) {
+      const unreadyGuests = gameState.players.filter(p => !p.isHost && !p.isBot && !p.isReady);
+      if (unreadyGuests.length > 0) {
         playSoundEffect('buzz');
-        const names = unreadyPlayers.map(p => p.name).join('، ');
+        const names = unreadyGuests.map(p => p.name).join('، ');
         showFloatingNotification(`⚠️ لا يمكنك بدء اللعبة! بانتظار جاهزية: ${names}`);
         alert(`⚠️ لا يمكنك بدء اللعبة حتى يضغط جميع اللاعبين على زر "جاهز"!
 
