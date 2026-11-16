@@ -164,10 +164,16 @@
       <!-- Identity Gatekeeper Card -->
       <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 md:p-6 shadow-2xl space-y-4">
         
-        <!-- Name Input (MANDATORY + OFFENSIVE FILTER) -->
+        <!-- Name Input (MANDATORY + OFFENSIVE FILTER + RANDOM NAME BUTTON) -->
         <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1">اسمك باللعبة <span class="text-rose-400">*</span></label>
-          <input type="text" id="entryName" placeholder="اكتب اسمك الصريح..." maxlength="18"
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="text-xs font-bold text-slate-300">اسمك باللعبة <span class="text-rose-400">*</span></label>
+            <button type="button" onclick="generateRandomCleanName()" class="text-[11px] font-bold text-amber-300 hover:text-amber-200 bg-amber-500/10 hover:bg-amber-500/20 px-2.5 py-1 rounded-xl border border-amber-500/30 flex items-center gap-1 transition active:scale-95 shadow-sm">
+              <span>🎲</span>
+              <span>اسم عشوائي</span>
+            </button>
+          </div>
+          <input type="text" id="entryName" placeholder="اكتب اسمك الصريح أو اختر اسماً عشوائياً..." maxlength="18"
                  oninput="validateNameInput(this)"
                  class="w-full bg-slate-950 border border-slate-700 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 outline-none transition font-bold">
           <p id="entryNameErr" class="text-[10px] text-rose-400 font-bold mt-1 min-h-[14px]"></p>
@@ -794,14 +800,17 @@
         const raw = localStorage.getItem(PROFILE_KEY);
         if (raw) {
           const parsed = JSON.parse(raw);
-          if (parsed && parsed.name) myProfile = parsed;
+          if (parsed && typeof parsed === 'object') {
+            myProfile = { ...myProfile, ...parsed };
+            // Clear out legacy default auto-generated 'كابتن XX' names from storage
+            if (myProfile.name && /^كابتن\s*\d*$/i.test(myProfile.name.trim())) {
+              myProfile.name = '';
+              saveProfile();
+            }
+          }
         }
       } catch (e) {}
 
-      if (!myProfile.name) {
-        myProfile.name = 'كابتن ' + Math.floor(10 + Math.random() * 90);
-        saveProfile();
-      }
       syncProfileHeader();
     }
 
@@ -812,22 +821,46 @@
       syncProfileHeader();
     }
 
+    // Pure Arabic Real Names (No emojis, no prefixes, no numbers)
+    const CLEAN_ARABIC_NAMES = [
+      'محمد', 'عبدالله', 'سلطان', 'فيصل', 'سعود', 'خالد', 'فهد', 'مشعل', 'بدر', 'تركي',
+      'سارة', 'نورة', 'ريم', 'شهد', 'لمى', 'رغد', 'دانة', 'هيفاء', 'دلال', 'العنود',
+      'عبدالعزيز', 'عبدالرحمن', 'ريان', 'طلال', 'نايف', 'ماجد', 'بندر', 'عمر', 'علي', 'حمزة',
+      'يوسف', 'سلمان', 'زياد', 'طارق', 'وليد', 'إبراهيم', 'أحمد', 'منصور', 'مساعد', 'ناصر',
+      'جود', 'ليان', 'أسرار', 'روان', 'مها', 'عبير', 'غادة', 'خلود', 'أروى', 'حصة',
+      'سامي', 'حاتم', 'صالح', 'مبارك', 'حمد', 'نواف', 'سعد', 'يزيد', 'هيثم', 'وسام'
+    ];
+
+    function generateRandomCleanName() {
+      const randomName = CLEAN_ARABIC_NAMES[Math.floor(Math.random() * CLEAN_ARABIC_NAMES.length)];
+      const entryName = document.getElementById('entryName');
+      if (entryName) {
+        entryName.value = randomName;
+        validateNameInput(entryName);
+      }
+      myProfile.name = randomName;
+      saveProfile();
+      if (typeof playSoundEffect === 'function') {
+        playSoundEffect('pop');
+      }
+    }
+
     function syncProfileHeader() {
       const hName = document.getElementById('hName');
       const hAvatar = document.getElementById('hAvatar');
       const hTag = document.getElementById('hTag');
       const hWins = document.getElementById('hWins');
-      if (hName) hName.innerText = myProfile.name;
-      if (hAvatar) hAvatar.innerText = myProfile.avatar;
-      if (hTag) hTag.innerText = myProfile.tag;
+      if (hName) hName.innerText = myProfile.name || 'متسابق جديد';
+      if (hAvatar) hAvatar.innerText = myProfile.avatar || '🏎️';
+      if (hTag) hTag.innerText = myProfile.tag || '#KSA-101';
       if (hWins) hWins.innerText = myProfile.wins || 0;
 
       const entryName = document.getElementById('entryName');
       const entryAvInput = document.getElementById('entryAvatarInput');
       const avPrev = document.getElementById('avatarPreview');
-      if (entryName && !entryName.value) entryName.value = myProfile.name;
-      if (entryAvInput) entryAvInput.value = myProfile.avatar;
-      if (avPrev) avPrev.innerText = myProfile.avatar;
+      if (entryName) entryName.value = myProfile.name || '';
+      if (entryAvInput) entryAvInput.value = myProfile.avatar || '🏎️';
+      if (avPrev) avPrev.innerText = myProfile.avatar || '🏎️';
     }
 
     // ==========================================
