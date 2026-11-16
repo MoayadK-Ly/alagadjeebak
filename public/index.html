@@ -130,9 +130,11 @@
           <div class="flex items-center gap-1.5">
             <span id="hName" class="font-black text-xs text-white">اللاعب</span>
             <span id="hTag" class="text-[9px] font-mono text-amber-400 bg-amber-500/10 px-1 rounded">#KSA-000</span>
+            <span id="hRankBadge" class="text-[9px] font-bold px-1.5 py-0.5 rounded border text-slate-300 bg-slate-800 border-slate-700">مبتدئ 👶</span>
           </div>
-          <div class="text-[9px] text-emerald-400 font-bold flex items-center gap-1">
-            🏆 <span id="hWins">0</span> فوز
+          <div class="flex items-center justify-between text-[9px] text-emerald-400 font-bold gap-2">
+            <span>🏆 <span id="hWins">0</span> فوز</span>
+            <span id="hXpBadge" class="text-purple-300 font-mono">⚡ 0 XP</span>
           </div>
         </div>
         <span class="text-slate-500 text-xs">✏️</span>
@@ -550,6 +552,24 @@
           <!-- Dynamic SVG Drawing Area (Centered, No Ugly Blank Void) -->
           <div class="flex items-center justify-center py-2 px-1 relative bg-gradient-to-b from-slate-950/70 to-slate-900/90 rounded-2xl border border-slate-800/80 shadow-inner" id="svgViewport">
             <!-- Injected dynamic SVG for theme -->
+          </div>
+
+          <!-- Secret Contract Card (عقدك السري الخاص) -->
+          <div id="secretContractCard" class="bg-gradient-to-r from-purple-950/80 via-slate-900 to-indigo-950/80 border border-purple-500/50 rounded-2xl p-3 shadow-lg space-y-2">
+            <div class="flex items-center justify-between pb-1.5 border-b border-purple-500/30">
+              <div class="flex items-center gap-1.5">
+                <span class="text-base animate-pulse">📜</span>
+                <span class="text-xs font-black text-purple-200">عقدك السري الخاص:</span>
+                <span id="secretContractTitle" class="text-xs font-black text-amber-300">جاري تعيين العقد...</span>
+              </div>
+              <span class="text-[10px] font-mono font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">
+                +35 نقطة بونص 🌟
+              </span>
+            </div>
+            <p id="secretContractDesc" class="text-[11px] text-slate-300 font-medium leading-relaxed"></p>
+            <div id="secretContractSlots" class="flex items-center gap-1.5 flex-wrap pt-0.5">
+              <!-- Populated dynamically via updateMyProjectView -->
+            </div>
           </div>
 
           <!-- Project Blueprint Checklist (6 Core Theme Features / Slots HUD) -->
@@ -1003,6 +1023,233 @@
       ]
     };
 
+        // ==========================================
+    // 1c. SECRET CONTRACTS & RARITY & XP SYSTEM
+    // ==========================================
+    const CONTRACTS = {
+    "car": [
+        {
+            "id": "c_track",
+            "title": "وحش الحلبات والسرعة 🏎️",
+            "desc": "اقتنِ ترقية في (المحرك) و(الجنوط) و(الهيكل/الجناح)",
+            "bonus": 35,
+            "slots": [
+                "engine",
+                "wheels",
+                "body"
+            ]
+        },
+        {
+            "id": "c_vip",
+            "title": "كروز وفخامة ملكية 👑",
+            "desc": "اقتنِ ترقية في (الداخلية) و(التقنية) و(الهيكل/البوية)",
+            "bonus": 35,
+            "slots": [
+                "interior",
+                "tech",
+                "body"
+            ]
+        },
+        {
+            "id": "c_show",
+            "title": "هيبة واستعراض شوارع 🔥",
+            "desc": "اقتنِ ترقية في (الصوتيات/النيون) و(الداخلية) و(المحرك)",
+            "bonus": 35,
+            "slots": [
+                "audio",
+                "interior",
+                "engine"
+            ]
+        }
+    ],
+    "villa": [
+        {
+            "id": "v_resort",
+            "title": "منتجع استجمام مائي 🏊",
+            "desc": "اقتنِ ترقية في (المسبح) و(الحديقة) و(الترفيه)",
+            "bonus": 35,
+            "slots": [
+                "pool",
+                "garden",
+                "fun"
+            ]
+        },
+        {
+            "id": "v_palace",
+            "title": "قصر ضيافة أسطوري 🏛️",
+            "desc": "اقتنِ ترقية في (المعمار) و(المجلس) و(التقنية/الأمان)",
+            "bonus": 35,
+            "slots": [
+                "facade",
+                "living",
+                "smart"
+            ]
+        },
+        {
+            "id": "v_future",
+            "title": "قصر ذكي ومستقبلي ⚡",
+            "desc": "اقتنِ ترقية في (التقنية/الأمان) و(المعمار) و(الترفيه/السينما)",
+            "bonus": 35,
+            "slots": [
+                "smart",
+                "facade",
+                "fun"
+            ]
+        }
+    ],
+    "cafe": [
+        {
+            "id": "k_specialty",
+            "title": "أيقونة القهوة المختصة ☕",
+            "desc": "اقتنِ ترقية في (محطة القهوة) و(المخبوزات) و(الهوية/التوسع)",
+            "bonus": 35,
+            "slots": [
+                "coffee",
+                "bakery",
+                "expansion"
+            ]
+        },
+        {
+            "id": "k_aesthetic",
+            "title": "كافيه ترند وتصوير 📸",
+            "desc": "اقتنِ ترقية في (الديكور والتصوير) و(الجلسات) و(المخبوزات)",
+            "bonus": 35,
+            "slots": [
+                "vibe",
+                "seating",
+                "bakery"
+            ]
+        },
+        {
+            "id": "k_empire",
+            "title": "إمبراطورية خدمة سريعة 📱",
+            "desc": "اقتنِ ترقية في (الخدمة والتقنية) و(محطة القهوة) و(الجلسات)",
+            "bonus": 35,
+            "slots": [
+                "tech",
+                "coffee",
+                "seating"
+            ]
+        }
+    ],
+    "restaurant": [
+        {
+            "id": "r_michelin",
+            "title": "مطبخ ميشلان 3 نجوم 👨‍🍳",
+            "desc": "اقتنِ ترقية في (المطبخ والشيف) و(اللحوم) و(الصالة)",
+            "bonus": 35,
+            "slots": [
+                "kitchen",
+                "food",
+                "dining"
+            ]
+        },
+        {
+            "id": "r_vip",
+            "title": "قاعة كبار الشخصيات 🚪",
+            "desc": "اقتنِ ترقية في (الضيافة والـ VIP) و(الصالة) و(الأنظمة)",
+            "bonus": 35,
+            "slots": [
+                "vip",
+                "dining",
+                "systems"
+            ]
+        },
+        {
+            "id": "r_show",
+            "title": "تجربة استعراضية فاخرة 🎻",
+            "desc": "اقتنِ ترقية في (الأجواء والترفيه) و(المطبخ) و(اللحوم)",
+            "bonus": 35,
+            "slots": [
+                "show",
+                "kitchen",
+                "food"
+            ]
+        }
+    ],
+    "tower": [
+        {
+            "id": "t_landmark",
+            "title": "أيقونة أفق المدينة 🏢",
+            "desc": "اقتنِ ترقية في (البرج والواجهة) و(القمة والمطاعم) و(الحدائق)",
+            "bonus": 35,
+            "slots": [
+                "structure",
+                "pinnacle",
+                "parks"
+            ]
+        },
+        {
+            "id": "t_future",
+            "title": "برج المستقبل الذكي 🚁",
+            "desc": "اقتنِ ترقية في (المواصلات) و(الأعمال والقمم) و(الأمان والاستدامة)",
+            "bonus": 35,
+            "slots": [
+                "transit",
+                "business",
+                "eco"
+            ]
+        },
+        {
+            "id": "t_oasis",
+            "title": "واحة السحاب الترفيهية 🌳",
+            "desc": "اقتنِ ترقية في (الحدائق والمسبح) و(القمة) و(المواصلات)",
+            "bonus": 35,
+            "slots": [
+                "parks",
+                "pinnacle",
+                "transit"
+            ]
+        }
+    ],
+    "jet": [
+        {
+            "id": "j_supersonic",
+            "title": "نفاثة خارقة السرعة 🚀",
+            "desc": "اقتنِ ترقية في (المحركات والسرعة) و(الملاحة) و(الصالون)",
+            "bonus": 35,
+            "slots": [
+                "power",
+                "avionics",
+                "salon"
+            ]
+        },
+        {
+            "id": "j_presidential",
+            "title": "طائرة رئاسية سرية 🛰️",
+            "desc": "اقتنِ ترقية في (الملاحة والأقمار) و(الجناح) و(الصالون)",
+            "bonus": 35,
+            "slots": [
+                "avionics",
+                "master",
+                "salon"
+            ]
+        },
+        {
+            "id": "j_royal",
+            "title": "قصر طائر 7 نجوم 🛁",
+            "desc": "اقتنِ ترقية في (السبا والاستجمام) و(المائدة والضيافة) و(الجناح)",
+            "bonus": 35,
+            "slots": [
+                "wellness",
+                "dining",
+                "master"
+            ]
+        }
+    ]
+};
+
+    const PLAYER_RANKS = [
+      { minXp: 0, maxXp: 149, level: 1, title: 'مبتدئ 👶', badgeClass: 'text-slate-300 bg-slate-800 border-slate-700' },
+      { minXp: 150, maxXp: 399, level: 2, title: 'شريطي معتمد 🤝', badgeClass: 'text-cyan-300 bg-cyan-950/80 border-cyan-500/50 shadow-[0_0_8px_rgba(6,182,212,0.3)]' },
+      { minXp: 400, maxXp: 799, level: 3, title: 'مستثمر محنك 💼', badgeClass: 'text-purple-300 bg-purple-950/80 border-purple-500/50 shadow-[0_0_8px_rgba(168,85,247,0.3)]' },
+      { minXp: 800, maxXp: Infinity, level: 4, title: 'هامور الجلسة 👑', badgeClass: 'text-amber-300 bg-amber-950/80 border-amber-500/60 shadow-[0_0_12px_rgba(245,158,11,0.5)] animate-pulse' }
+    ];
+
+    function getPlayerRank(xp = 0) {
+      return PLAYER_RANKS.find(r => xp >= r.minXp && xp <= r.maxXp) || PLAYER_RANKS[0];
+    }
+
     const QUICK_EMOJIS = ['🏎️', '👑', '🕶️', '🚀', '⚡', '💎', '🦁', '🌟', '🦅', '🔥', '🥷', '🎯'];
 
     // Realistic Saudi AI Personas with human-like playstyles
@@ -1024,7 +1271,8 @@
       name: '',
       tag: '#KSA-' + Math.floor(100 + Math.random() * 900),
       avatar: '🏎️',
-      wins: 0
+      wins: 0,
+      xp: 0
     };
 
     function loadProfile() {
@@ -1086,6 +1334,16 @@
       if (hAvatar) hAvatar.innerText = myProfile.avatar || '🏎️';
       if (hTag) hTag.innerText = myProfile.tag || '#KSA-101';
       if (hWins) hWins.innerText = myProfile.wins || 0;
+      const rank = getPlayerRank(myProfile.xp || 0);
+      const hRankBadge = document.getElementById('hRankBadge');
+      const hXpBadge = document.getElementById('hXpBadge');
+      if (hRankBadge) {
+        hRankBadge.innerText = `${rank.title} (Lv.${rank.level})`;
+        hRankBadge.className = `text-[9px] font-bold px-1.5 py-0.5 rounded border ${rank.badgeClass}`;
+      }
+      if (hXpBadge) {
+        hXpBadge.innerText = `⚡ ${myProfile.xp || 0} XP`;
+      }
 
       const entryName = document.getElementById('entryName');
       const entryAvInput = document.getElementById('entryAvatarInput');
@@ -1942,6 +2200,32 @@
       }
     }
 
+    
+    function handleResellItem(itemId, itemName, price) {
+      const refund = Math.max(1, Math.round((price || 5) * 0.6));
+      if (!confirm(`هل أنت متأكد من بيع (${itemName}) للبنك واسترداد ${refund} ر.س كاش؟`)) return;
+
+      if (isOfflineDemo) {
+        const me = gameState.players.find(p => p.id === gameState.myPlayerId);
+        if (me && me.upgrades) {
+          const idx = me.upgrades.findIndex(u => u.id === itemId);
+          if (idx !== -1) {
+            const item = me.upgrades.splice(idx, 1)[0];
+            me.budget += refund;
+            me.score = Math.max(10, me.score - (item.score || 10));
+            updateMyProjectView();
+            showFloatingNotification(`💸 تم بيع (${itemName}) واسترداد ${refund} ر.س كاش!`);
+            if (typeof playSoundEffect === 'function') playSoundEffect('pop');
+          }
+        }
+        return;
+      }
+
+      if (ws && isConnected) {
+        ws.send(JSON.stringify({ type: 'RESELL_ITEM', itemId }));
+      }
+    }
+
     function handleKickPlayer(playerId, playerName) {
       if (!gameState.isHost) return;
       if (!confirm(`هل أنت متأكد من طرد اللاعب (${playerName}) من الغرفة؟`)) return;
@@ -2341,7 +2625,16 @@
 
         const catBadge = document.getElementById('offerCategoryBadge');
         if (catBadge) {
-          catBadge.innerText = `${offerSlot.icon} ${offerSlot.name}`;
+          const rarity = off.rarity || (off.price >= 6 ? 'legendary' : off.price >= 4 ? 'rare' : 'common');
+          let rarityBadge = '';
+          if (rarity === 'legendary') {
+            rarityBadge = `<span class="bg-amber-500/20 text-amber-300 border border-amber-400/80 px-2 py-0.5 rounded-md font-mono shadow-[0_0_8px_rgba(245,158,11,0.4)]">🟡 أسطوري VIP</span>`;
+          } else if (rarity === 'rare') {
+            rarityBadge = `<span class="bg-cyan-500/20 text-cyan-300 border border-cyan-400/60 px-2 py-0.5 rounded-md font-mono shadow-[0_0_6px_rgba(6,182,212,0.3)]">🔵 نادر</span>`;
+          } else {
+            rarityBadge = `<span class="bg-slate-800 text-slate-300 border border-slate-700 px-2 py-0.5 rounded-md font-mono">⚪ شائع</span>`;
+          }
+          catBadge.innerHTML = `<span class="flex items-center gap-1.5"><span>${offerSlot.icon} ${offerSlot.name}</span>${rarityBadge}</span>`;
         }
 
         const me = gameState.players.find(p => p.id === gameState.myPlayerId) || { upgrades: gameState.myUpgrades || [] };
@@ -2563,10 +2856,17 @@
                   <span class="text-[9px] text-emerald-400 font-mono font-black">✅ جاهز</span>
                 </div>
                 <div class="mt-1 pt-1 border-t border-emerald-500/20 text-right">
-                  <span class="text-[10px] font-bold text-white block truncate" title="${matchingUpgrade.name}">
-                    ${matchingUpgrade.name}
-                  </span>
-                  <span class="text-[9px] font-mono text-amber-300">+${matchingUpgrade.score} نقطة</span>
+                  <div class="flex items-center justify-between">
+                    <span class="text-[10px] font-bold text-white truncate" title="${matchingUpgrade.name}">
+                      ${matchingUpgrade.name}
+                    </span>
+                    <span class="text-[9px] font-mono text-amber-300">+${matchingUpgrade.score}p</span>
+                  </div>
+                  <!-- Resell to Bank Action Button (استرداد الكاش 💸) -->
+                  <button type="button" onclick="handleResellItem('${matchingUpgrade.id}', '${matchingUpgrade.name}', ${matchingUpgrade.price || 5})" class="mt-1 w-full py-0.5 px-1 bg-rose-950/60 hover:bg-rose-900 border border-rose-500/30 hover:border-rose-400 rounded text-[9px] font-bold text-rose-300 flex items-center justify-center gap-1 transition active:scale-95" title="بيع للبنك واسترد كاش فوراً">
+                    <span>💸 بيع للبنك</span>
+                    <span class="text-emerald-400 font-mono">+${Math.max(1, Math.round((matchingUpgrade.price || 5) * 0.6))} ر.س</span>
+                  </button>
                 </div>
               </div>
             `;
@@ -2596,6 +2896,39 @@
       if (progressEl) {
         progressEl.innerText = `${completedSlotsCount} / 6 ملامح مكتملة`;
       }
+
+      // Update Secret Contract Card
+      const myContract = me.secretContract || (CONTRACTS[gameState.theme] ? CONTRACTS[gameState.theme][0] : null);
+      const contractCard = document.getElementById('secretContractCard');
+      if (contractCard && myContract) {
+        document.getElementById('secretContractTitle').innerText = myContract.title;
+        document.getElementById('secretContractDesc').innerText = myContract.desc;
+        
+        const contractSlotsCont = document.getElementById('secretContractSlots');
+        if (contractSlotsCont && myContract.slots) {
+          const ownedTags = (me.upgrades || []).map(u => (u.tag || '').toLowerCase() + ' ' + (u.name || '').toLowerCase());
+          let fulfilledCount = 0;
+          
+          contractSlotsCont.innerHTML = myContract.slots.map(sKey => {
+            const hasIt = ownedTags.some(ot => ot.includes(sKey));
+            if (hasIt) fulfilledCount++;
+            return `
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-lg border ${hasIt ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : 'bg-slate-900 text-slate-400 border-slate-800'}">
+                ${sKey} ${hasIt ? '✅' : '⏳'}
+              </span>
+            `;
+          }).join('');
+
+          if (fulfilledCount === myContract.slots.length) {
+            contractCard.classList.add('border-emerald-500/80', 'bg-emerald-950/30');
+            contractCard.classList.remove('border-purple-500/50');
+          } else {
+            contractCard.classList.remove('border-emerald-500/80', 'bg-emerald-950/30');
+            contractCard.classList.add('border-purple-500/50');
+          }
+        }
+      }
+
     }
 
     function renderCompetitorsGrid() {
@@ -2835,10 +3168,32 @@
       const p2 = data.podium.second;
       const p3 = data.podium.third;
 
+      // Calculate and award XP progression
+      let earnedXp = 50; // Base match participation XP
+      const myRankIndex = data.rankings.findIndex(r => r.name === myProfile.name);
+      if (myRankIndex === 0) earnedXp += 100; // Champion +100 XP
+      else if (myRankIndex === 1) earnedXp += 50; // 2nd +50 XP
+      else if (myRankIndex === 2) earnedXp += 25; // 3rd +25 XP
+
+      const myResult = data.rankings.find(r => r.name === myProfile.name);
+      if (myResult && (myResult.contractFulfilled || myResult.contractBonus > 0)) {
+        earnedXp += 40; // Secret Contract Fulfilled +40 XP
+      }
+
+      const prevRank = getPlayerRank(myProfile.xp || 0);
+      myProfile.xp = (myProfile.xp || 0) + earnedXp;
+
       // Increment win count if I am champion
       if (p1 && p1.name === myProfile.name) {
         myProfile.wins = (myProfile.wins || 0) + 1;
-        saveProfile();
+      }
+      saveProfile();
+
+      const newRank = getPlayerRank(myProfile.xp || 0);
+      if (newRank.level > prevRank.level) {
+        setTimeout(() => {
+          showFloatingNotification(`🎉 ترقية رتبة جديدة! أصبحت الآن: ${newRank.title}!`);
+        }, 1200);
       }
 
       const themeData = THEMES[gameState.theme] || THEMES.car;
@@ -2952,6 +3307,7 @@
               <div class="flex items-center gap-1.5">
                 <span class="text-lg">${r.avatar}</span>
                 <span class="text-xs font-black text-white">${r.name}</span>
+                ${(r.contractFulfilled || r.contractBonus > 0) ? '<span class="text-[9px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/40 px-1.5 py-0.5 rounded">📜 عقد منجز +35</span>' : ''}
               </div>
               <span class="text-[10px] text-slate-400 block">${r.upgrades ? r.upgrades.length : 0} قطع تم تركيبها</span>
             </div>
@@ -3458,12 +3814,13 @@
       gameState.usedOfferIds = [];
       gameState.myUpgrades = [];
 
-      // 4 simulated players
+      // 4 simulated players with secret contracts
+      const themeContracts = CONTRACTS[gameState.theme] || CONTRACTS.car;
       gameState.players = [
-        { id: 'p_me', name: myProfile.name, avatar: myProfile.avatar, isHost: true, budget: 25, score: 10, upgrades: [], sabotageCards: [{ id: 'saher', name: 'ساهر 📸', desc: 'خصم مخالفة فورية 4 ر.س' }] },
-        { id: 'p_2', name: 'عبدالله', avatar: '🕶️', isHost: false, budget: 25, score: 10, upgrades: [], sabotageCards: [] },
-        { id: 'p_3', name: 'سارة', avatar: '👑', isHost: false, budget: 25, score: 10, upgrades: [], sabotageCards: [] },
-        { id: 'p_4', name: 'فهد', avatar: '🚀', isHost: false, budget: 25, score: 10, upgrades: [], sabotageCards: [] }
+        { id: 'p_me', name: myProfile.name, avatar: myProfile.avatar, isHost: true, budget: 25, score: 10, upgrades: [], secretContract: themeContracts[0], sabotageCards: [{ id: 'saher', name: 'ساهر 📸', desc: 'خصم مخالفة فورية 4 ر.س' }] },
+        { id: 'p_2', name: 'عبدالله', avatar: '🕶️', isHost: false, budget: 25, score: 10, upgrades: [], secretContract: themeContracts[1], sabotageCards: [] },
+        { id: 'p_3', name: 'سارة', avatar: '👑', isHost: false, budget: 25, score: 10, upgrades: [], secretContract: themeContracts[2], sabotageCards: [] },
+        { id: 'p_4', name: 'فهد', avatar: '🚀', isHost: false, budget: 25, score: 10, upgrades: [], secretContract: themeContracts[0], sabotageCards: [] }
       ];
 
       switchScreen('screenLobby');
