@@ -847,7 +847,7 @@ function getSafeRoomView(room, forPlayerId) {
       avatar: p.avatar,
       isHost: p.id === room.hostId,
       isBot: p.isBot || false,
-      isReady: typeof p.isReady === 'boolean' ? p.isReady : (p.id === room.hostId || p.isBot ? true : false),
+      isReady: (p.id === room.hostId || p.isBot) ? true : Boolean(p.isReady),
       style: p.style || null,
       persona: p.persona || null,
       budget: p.budget,
@@ -1434,6 +1434,11 @@ wss.on('connection', (ws) => {
           if (!room || room.state !== 'lobby') return;
           const player = room.players.find(p => p.id === playerSession.id);
           if (!player) return;
+          // Host is always ready, cannot toggle unready
+          if (player.id === room.hostId) {
+            player.isReady = true;
+            return;
+          }
           player.isReady = !player.isReady;
           broadcastRoom(room, {
             type: 'PLAYER_READY_CHANGED',
@@ -1485,13 +1490,13 @@ wss.on('connection', (ws) => {
           const room = rooms.get(roomCode);
           if (!room || room.hostId !== playerSession.id || room.state !== 'lobby') return;
 
-          // Strictly enforce: ALL players must be ready!
-          const unready = room.players.filter(p => !p.isReady);
-          if (unready.length > 0) {
-            const names = unready.map(p => p.name).join('، ');
+          // Strictly enforce: ALL guest players must be ready! (Host & Bots are always ready)
+          const unreadyGuests = room.players.filter(p => p.id !== room.hostId && !p.isBot && !p.isReady);
+          if (unreadyGuests.length > 0) {
+            const names = unreadyGuests.map(p => p.name).join('، ');
             return ws.send(JSON.stringify({
               type: 'ERROR',
-              message: `⚠️ لا يمكن بدء التحدي! بانتظار ضغط زر "جاهز" من: ${names}`
+              message: `⚠️ لا يمكن بدء التحدي! بانتظار ضغط زر "جاهز" من اللاعبين: ${names}`
             }));
           }
 

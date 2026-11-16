@@ -362,7 +362,7 @@
           </div>
 
           <!-- Pre-Game Settings (Host Only) -->
-          <div id="hostControlsCard" class="bg-slate-900/90 border border-indigo-500/30 rounded-3xl p-5 space-y-4 shadow-xl">
+          <div id="hostControlsCard" class="hidden bg-slate-900/90 border border-indigo-500/30 rounded-3xl p-5 space-y-4 shadow-xl">
             <div class="flex items-center justify-between pb-2 border-b border-slate-800">
               <h3 class="text-sm font-black text-indigo-400 flex items-center gap-2">
                 👑 إعدادات المضيف (تُقفل تماماً عند بدء اللعب)
@@ -411,7 +411,7 @@
           </div>
 
           <!-- Host Action Area: Start & Add AI -->
-          <div id="lobbyHostStartArea" class="space-y-2.5 pt-1">
+          <div id="lobbyHostStartArea" class="hidden space-y-2.5 pt-1">
             <button id="addAiBotBtn" onclick="handleAddAiBotClick()" class="w-full py-3.5 bg-gradient-to-r from-purple-700 via-indigo-600 to-blue-600 hover:from-purple-600 hover:to-blue-500 text-white font-black text-sm rounded-2xl shadow-lg shadow-indigo-600/20 border border-indigo-400/30 flex items-center justify-center gap-2 transition active:scale-98">
               <span class="text-xl">🤖</span>
               <span>إضافة ذكاء اصطناعي</span>
@@ -1813,10 +1813,19 @@
       if (roomCodeEl) roomCodeEl.innerText = '#' + r.code;
       if (playerCountEl) playerCountEl.innerText = gameState.players.length;
 
-      // Strict Host Verification: Host is ONLY the player whose ID strictly matches r.hostId
+      // Synchronize self identity robustly
+      const me = gameState.players.find(p => 
+        (gameState.myPlayerId && p.id === gameState.myPlayerId) ||
+        (p.name && myProfile.name && p.name.trim() === myProfile.name.trim())
+      );
+      if (me && !gameState.myPlayerId) {
+        gameState.myPlayerId = me.id;
+      }
+
+      // Host Verification: ONLY true if ID strictly matches r.hostId or me.isHost === true
       const isActualHost = Boolean(
         (r.hostId && gameState.myPlayerId && r.hostId === gameState.myPlayerId) ||
-        (gameState.players.find(p => p.id === gameState.myPlayerId)?.isHost === true)
+        (me && me.isHost === true)
       );
       gameState.isHost = isActualHost;
 
@@ -2135,10 +2144,15 @@
 
       // 1. Render all player cards
       list.innerHTML = gameState.players.map(p => {
-        const isMe = (p.id === gameState.myPlayerId);
-        const isHost = p.isHost;
-        const isBot = p.isBot;
-        const isReady = p.isReady;
+        // Robust isMe matching: by ID or by Name
+        const isMe = Boolean(
+          (gameState.myPlayerId && p.id === gameState.myPlayerId) ||
+          (p.name && myProfile.name && p.name.trim() === myProfile.name.trim())
+        );
+        const isHost = Boolean(p.isHost);
+        const isBot = Boolean(p.isBot);
+        // Host and Bots are ALWAYS ready by definition!
+        const isReady = Boolean(isHost || isBot || p.isReady);
 
         // Status text & style
         let statusBadge = '';
@@ -2152,8 +2166,8 @@
           statusBadge = '<span class="text-[9px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded-full font-black flex items-center gap-1"><span>⏳</span><span>ينتظر...</span></span>';
         }
 
-        // Kick button for room creator / host: can kick any other player or bot, NEVER self
-        const canKick = gameState.isHost && !isMe;
+        // Kick button: ONLY visible to Host, NEVER on self, and NEVER on other host
+        const canKick = Boolean(gameState.isHost && !isMe && !isHost);
 
         return `
           <div class="bg-slate-950 border ${isMe ? 'border-amber-500/60 shadow-md shadow-amber-500/10' : (isBot ? 'border-purple-500/30' : 'border-slate-800')} rounded-2xl p-2.5 flex items-center justify-between gap-2 transition hover:border-slate-700">
@@ -2226,21 +2240,22 @@
         }
       }
 
-      // 4. Strictly Update Host Start Game Button based on readiness of ALL players
+      // 4. Update Host Start Game Button (ONLY checks human GUEST readiness! Host & Bots are always ready)
       const startBtn = document.getElementById('startGameBtn');
       if (startBtn && gameState.isHost) {
-        const unreadyPlayers = gameState.players.filter(p => !p.isReady);
-        const allReady = unreadyPlayers.length === 0;
-        const readyCount = gameState.players.filter(p => p.isReady).length;
+        const humanGuests = gameState.players.filter(p => !p.isHost && !p.isBot);
+        const unreadyGuests = humanGuests.filter(p => !p.isReady);
+        const allReady = (unreadyGuests.length === 0);
+        const readyGuestCount = humanGuests.filter(p => p.isReady).length;
 
         if (!allReady) {
           startBtn.disabled = true;
           startBtn.className = 'w-full py-3.5 sm:py-4 bg-slate-800/90 text-slate-400 font-black text-xs sm:text-sm rounded-2xl border border-slate-700/80 shadow-md cursor-not-allowed transition flex flex-col items-center justify-center gap-1 opacity-75';
-          const unreadyNames = unreadyPlayers.map(p => p.name).join('، ');
+          const unreadyNames = unreadyGuests.map(p => p.name).join('، ');
           startBtn.innerHTML = `
             <div class="flex items-center gap-1.5 text-amber-300 font-black">
               <span class="animate-spin">⏳</span>
-              <span>بانتظار جاهزية الجميع (${readyCount} / ${gameState.players.length} جاهز)</span>
+              <span>بانتظار جاهزية اللاعبين (${readyGuestCount} / ${humanGuests.length} جاهز)</span>
             </div>
             <span class="text-[10px] text-slate-400 font-bold truncate max-w-[90%]">
               بانتظار ضغط "جاهز": ${unreadyNames}
