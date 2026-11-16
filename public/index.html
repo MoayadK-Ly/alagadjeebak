@@ -1,0 +1,2111 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>« على قد جيبك 💸 » (Alagadjeebak) - لعبة التحديات والميزانية وحكم الـ AI 🇸🇦</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Tajawal:wght@500;700;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Cairo', 'Tajawal', sans-serif;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .curtain-pattern {
+      background: repeating-linear-gradient(45deg, #0f172a, #0f172a 12px, #1e1b4b 12px, #1e1b4b 24px);
+    }
+    @keyframes floatUp {
+      0% { opacity: 0; transform: translateY(20px) scale(0.8); }
+      20% { opacity: 1; transform: translateY(0px) scale(1.1); }
+      80% { opacity: 1; transform: translateY(-80px) scale(1); }
+      100% { opacity: 0; transform: translateY(-130px) scale(0.9); }
+    }
+    .floating-reaction {
+      animation: floatUp 2.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+    @keyframes pulseNeon {
+      0%, 100% { box-shadow: 0 0 15px rgba(244, 63, 94, 0.4), 0 0 30px rgba(16, 185, 129, 0.2); }
+      50% { box-shadow: 0 0 30px rgba(244, 63, 94, 0.8), 0 0 50px rgba(16, 185, 129, 0.4); }
+    }
+    .neon-border {
+      animation: pulseNeon 3s infinite;
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #020617; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 999px; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between overflow-x-hidden relative selection:bg-rose-500 selection:text-white">
+
+  <!-- ================= FLOATING REACTIONS CONTAINER ================= -->
+  <div id="reactionsLayer" class="fixed inset-0 pointer-events-none z-50 overflow-hidden"></div>
+
+  <!-- ================= TOP HEADER WITH PERMANENT IDENTITY ================= -->
+  <header class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 py-3 sticky top-0 z-40 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-amber-500 via-rose-500 to-emerald-500 flex items-center justify-center text-2xl shadow-lg shadow-rose-500/20 font-black">
+        💸
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-base md:text-lg font-black tracking-tight bg-gradient-to-r from-amber-400 via-rose-400 to-emerald-400 bg-clip-text text-transparent">
+            على قد جيبك 💸
+          </h1>
+          <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+            سحابي 🇸🇦
+          </span>
+        </div>
+        <p class="text-[10px] text-slate-400 hidden sm:block">لعبة الميزانية الذكية، الستارة السرية، وتحكيم الذكاء الاصطناعي</p>
+      </div>
+    </div>
+
+    <!-- Permanent Profile & Controls -->
+    <div class="flex items-center gap-2">
+      <div id="profileBadge" onclick="openProfileModal()" class="cursor-pointer bg-slate-950/80 hover:bg-slate-800 border border-slate-700/80 px-2.5 py-1.5 rounded-2xl flex items-center gap-2 transition shadow">
+        <span id="hAvatar" class="text-xl">🏎️</span>
+        <div class="text-right">
+          <div class="flex items-center gap-1.5">
+            <span id="hName" class="font-black text-xs text-white">اللاعب</span>
+            <span id="hTag" class="text-[9px] font-mono text-amber-400 bg-amber-500/10 px-1 rounded">#KSA-000</span>
+          </div>
+          <div class="text-[9px] text-emerald-400 font-bold flex items-center gap-1">
+            🏆 <span id="hWins">0</span> فوز
+          </div>
+        </div>
+        <span class="text-slate-500 text-xs">✏️</span>
+      </div>
+
+      <button id="soundBtn" onclick="toggleSound()" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs font-bold border border-slate-700 text-slate-300 transition">
+        🔊
+      </button>
+
+      <button id="leaveBtn" onclick="leaveRoom()" class="hidden px-2.5 py-1.5 bg-rose-600/80 hover:bg-rose-600 rounded-xl text-xs font-bold text-white transition">
+        🚪 خروج
+      </button>
+    </div>
+  </header>
+
+  <!-- ================= MAIN CONTAINER ================= -->
+  <main class="flex-1 max-w-5xl w-full mx-auto p-3 md:p-6 flex flex-col justify-center">
+
+    <!-- ================= SCREEN 1: ENTRY GATEKEEPER (CREATE / JOIN) ================= -->
+    <div id="screenEntry" class="space-y-6 max-w-lg mx-auto w-full">
+      <div class="text-center space-y-2">
+        <div class="inline-block px-3 py-1 bg-rose-500/10 border border-rose-500/30 rounded-full text-xs font-bold text-rose-300">
+          🎮 سعة الغرف: من 2 إلى 8 لاعبين
+        </div>
+        <h2 class="text-2xl md:text-3xl font-black text-white">ابنِ مشروعك وإياك تطفر! 💸</h2>
+        <p class="text-xs text-slate-400">اختر اسمك وإيموجي شخصيتك وابدأ اللعب أونلاين بكود سري مؤقت</p>
+      </div>
+
+      <!-- Identity Gatekeeper Card -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 md:p-6 shadow-2xl space-y-4">
+        
+        <!-- Name Input (MANDATORY) -->
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1">اسمك باللعبة <span class="text-rose-400">*</span></label>
+          <input type="text" id="entryName" placeholder="اكتب اسمك الصريح..." maxlength="18"
+                 class="w-full bg-slate-950 border border-slate-700 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 outline-none transition font-bold">
+          <p id="entryNameErr" class="text-[10px] text-rose-400 font-bold mt-1 min-h-[14px]"></p>
+        </div>
+
+        <!-- Emoji Avatar (Strict Emoji Only, No "اختياري") -->
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1">أيقونة شخصيتك (إيموجي من الكيبورد) <span class="text-rose-400">*</span></label>
+          <div class="flex items-center gap-2">
+            <div id="avatarPreview" class="w-12 h-12 bg-slate-950 border-2 border-emerald-500/50 rounded-2xl flex items-center justify-center text-2xl shadow-inner cursor-pointer" onclick="document.getElementById('entryAvatarInput').focus()">
+              🏎️
+            </div>
+            <input type="text" id="entryAvatarInput" value="🏎️" maxlength="4"
+                   placeholder="ضع إيموجي هنا"
+                   oninput="validateAvatarInput(this)"
+                   class="flex-1 bg-slate-950 border border-slate-700 focus:border-emerald-500 rounded-xl px-3 py-2 text-center text-xl text-white outline-none">
+          </div>
+          <!-- Quick Emoji Palette -->
+          <div class="flex flex-wrap gap-1.5 mt-2 justify-center" id="quickEmojiPalette">
+            <!-- Injected via JS -->
+          </div>
+          <p id="entryAvatarErr" class="text-[10px] text-rose-400 font-bold mt-1 min-h-[14px]"></p>
+        </div>
+
+        <!-- Actions: Create or Join -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+          <button onclick="handleCreateRoomClick()" class="p-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black rounded-2xl shadow-lg shadow-emerald-600/20 flex flex-col items-center justify-center gap-1 transition active:scale-95 border border-emerald-400/30">
+            <span class="text-xl">👑</span>
+            <span class="text-sm">إنشاء غرفة جديدة</span>
+            <span class="text-[9px] text-emerald-100">كود سري لمدة 10 دقائق</span>
+          </button>
+
+          <button onclick="handleOpenJoinModal()" class="p-3.5 bg-gradient-to-r from-indigo-600 to-rose-600 hover:from-indigo-500 hover:to-rose-500 text-white font-black rounded-2xl shadow-lg shadow-indigo-600/20 flex flex-col items-center justify-center gap-1 transition active:scale-95 border border-indigo-400/30">
+            <span class="text-xl">🔑</span>
+            <span class="text-sm">انضمام بكود</span>
+            <span class="text-[9px] text-indigo-100">أدخل كود أصدقائك</span>
+          </button>
+        </div>
+
+        <!-- Offline / Solo Quick Test -->
+        <div class="pt-1 text-center">
+          <button onclick="startLocalDemoMode()" class="text-xs text-slate-400 hover:text-amber-300 underline font-bold transition">
+            🕹️ تجربة سريعة مع لاعبين محليين (Offline Demo)
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ================= SCREEN 2: JOIN MODAL ================= -->
+    <div id="modalJoin" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+      <div class="bg-slate-900 border-2 border-indigo-500/60 rounded-3xl p-6 max-w-sm w-full text-center space-y-4 shadow-2xl animate-fade-in">
+        <div class="w-12 h-12 bg-indigo-500/20 border border-indigo-500/40 rounded-2xl flex items-center justify-center text-2xl mx-auto">
+          🔑
+        </div>
+        <h3 class="text-lg font-black text-white">أدخل كود الغرفة السري</h3>
+        <p class="text-xs text-slate-400">يتكون الكود من 4 أرقام يشاركها معك منشئ الغرفة</p>
+
+        <input type="text" id="joinCodeInput" maxlength="4" placeholder="8492"
+               class="w-full bg-slate-950 border-2 border-amber-500/60 rounded-2xl py-3 text-center text-3xl font-mono font-black text-amber-300 tracking-widest outline-none focus:border-amber-400">
+
+        <p id="joinCodeErr" class="text-xs text-rose-400 font-bold min-h-[16px]"></p>
+
+        <div class="flex gap-2">
+          <button onclick="submitJoinRoom()" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-xl text-sm transition">
+            انضمام للغرفة ✅
+          </button>
+          <button onclick="closeJoinModal()" class="px-4 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-sm font-bold">
+            إلغاء
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= SCREEN 3: LOBBY (UP TO 8 PLAYERS + 10-MIN CODE) ================= -->
+    <div id="screenLobby" class="hidden space-y-4 max-w-2xl mx-auto w-full">
+      
+      <!-- Top Lobby Banner: Secret Code & 10-Min Timer -->
+      <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 md:p-5 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xl">
+        <div class="text-center sm:text-right">
+          <span class="text-xs text-slate-400 font-bold block">كود الغرفة السري للمشاركة:</span>
+          <div class="flex items-center gap-2 justify-center sm:justify-start">
+            <span id="lobbyRoomCode" class="text-3xl font-black font-mono text-amber-400 tracking-wider">#8492</span>
+            <button onclick="copyRoomCode()" class="p-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs font-bold text-slate-300 transition" title="نسخ الكود">
+              📋 نسخ
+            </button>
+          </div>
+          <!-- 10-Minute Countdown Display -->
+          <div class="text-xs font-mono text-rose-400 font-bold flex items-center gap-1 justify-center sm:justify-start mt-1">
+            <span>⏳ صلاحية الكود:</span>
+            <span id="lobbyCodeCountdown" class="bg-rose-500/10 px-1.5 py-0.5 rounded border border-rose-500/20">09:59</span>
+            <button onclick="renewCodeManually()" id="renewCodeBtn" class="text-[10px] text-amber-400 hover:underline mr-1" title="تجديد الكود فوراً">
+              (🔄 تجديد)
+            </button>
+          </div>
+        </div>
+
+        <div class="text-center sm:text-left bg-slate-950/80 border border-slate-800 px-4 py-2 rounded-2xl">
+          <span class="text-xs text-slate-400 font-bold block">المتسابقون المتصلون</span>
+          <div class="text-lg font-black text-white">
+            <span id="lobbyPlayerCount" class="text-emerald-400">1</span> / 8 لاعبين
+          </div>
+        </div>
+      </div>
+
+      <!-- Pre-Game Settings (Host Only) -->
+      <div id="hostControlsCard" class="bg-slate-900/90 border border-indigo-500/30 rounded-3xl p-5 space-y-4 shadow-xl">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+          <h3 class="text-sm font-black text-indigo-400 flex items-center gap-2">
+            👑 إعدادات المضيف (تُقفل تماماً عند بدء اللعب)
+          </h3>
+          <span class="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full font-bold">المضيف يتحكم</span>
+        </div>
+
+        <!-- 6 Themes Selector -->
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1.5">موضوع التحدي (6 مشاريع حية):</label>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="themeCardsContainer">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+
+        <!-- Budget & Dynamic Rounds Selector -->
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1.5">الميزانية وعدد الجولات بالريال:</label>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="budgetCardsContainer">
+            <!-- 25, 50, 100, 200 SAR -->
+          </div>
+        </div>
+
+        <!-- Mode & Curtain Toggles -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">طور اللعب:</label>
+            <select id="lobbyGameMode" onchange="updateHostSettings()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-white outline-none">
+              <option value="ffa">فردي تنافسي (Free For All)</option>
+              <option value="coop">ثنائيات (2 ضد 2 - Co-op)</option>
+              <option value="survival">طور الطفرة القاتلة (Survival)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">الستارة السرية المشفرة:</label>
+            <div class="flex items-center gap-2 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2">
+              <input type="checkbox" id="lobbyCurtainToggle" checked onchange="updateHostSettings()" class="w-4 h-4 accent-rose-500 rounded">
+              <label for="lobbyCurtainToggle" class="text-xs font-bold text-slate-300 cursor-pointer">
+                تفعيل الستارة (حجب مشاريع الخصوم)
+              </label>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Connected Players Grid -->
+      <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 space-y-3">
+        <h4 class="text-xs font-black text-slate-300">قائمة المتسابقين في الغرفة:</h4>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="lobbyPlayersList">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+
+      <!-- Start Button (Host) -->
+      <div id="lobbyHostStartArea" class="text-center pt-2">
+        <button id="startGameBtn" onclick="handleStartGameClick()" class="w-full py-4 bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white font-black text-lg rounded-2xl shadow-xl shadow-emerald-600/30 transition transform active:scale-98">
+          🚀 ابدأ التحدي الآن!
+        </button>
+      </div>
+      <div id="lobbyWaitingMsg" class="hidden text-center text-xs text-amber-300 font-bold p-3 bg-amber-500/10 rounded-2xl border border-amber-500/20">
+        ⏳ بانتظار مضيف الغرفة لبدء اللعبة...
+      </div>
+
+    </div>
+
+    <!-- ================= SCREEN 4: ACTIVE GAMEPLAY ================= -->
+    <div id="screenPlay" class="hidden space-y-4 max-w-4xl mx-auto w-full">
+      
+      <!-- Top Gameplay Bar -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3 flex items-center justify-between">
+        <div>
+          <span class="text-[10px] text-slate-400 font-bold block" id="playThemeTitle">سيارة خارقة</span>
+          <span class="text-xs font-black text-amber-300 font-mono">
+            جولة <span id="currentRoundNum">1</span> من <span id="totalRoundsNum">6</span>
+          </span>
+        </div>
+
+        <!-- 20-Second Visual Timer -->
+        <div class="flex items-center gap-2">
+          <div class="text-right">
+            <span class="text-[9px] text-slate-400 block font-bold">الوقت المتبقي</span>
+            <span id="roundTimerNumber" class="text-xl font-black font-mono text-rose-400">20s</span>
+          </div>
+          <div class="w-20 md:w-28 h-3 bg-slate-950 rounded-full overflow-hidden border border-slate-700">
+            <div id="roundTimerBar" class="h-full bg-gradient-to-r from-emerald-500 via-amber-500 to-rose-500 transition-all duration-1000 w-full"></div>
+          </div>
+        </div>
+
+        <!-- My Budget & Score -->
+        <div class="text-left bg-slate-950 border border-slate-800 px-3 py-1 rounded-xl">
+          <span class="text-[9px] text-slate-400 block font-bold">رصيدك الحالي</span>
+          <span id="playMyBudget" class="text-sm font-black text-emerald-400 font-mono">25 ر.س</span>
+        </div>
+      </div>
+
+      <!-- Emergency Event Notification Banner (if any) -->
+      <div id="eventBanner" class="hidden bg-gradient-to-r from-amber-600/30 to-rose-600/30 border border-amber-500/40 rounded-2xl p-2.5 text-center text-xs font-bold text-amber-200 animate-bounce">
+        <span id="eventBannerText">🌪️ حدث طارئ!</span>
+      </div>
+
+      <!-- Split View: My Project (Live SVG) & Current Offer -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        
+        <!-- Live SVG Canvas (My Project) -->
+        <div class="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-3xl p-4 flex flex-col justify-between relative shadow-xl min-h-[320px]">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+            <div class="flex items-center gap-2">
+              <span id="myProjectAvatar" class="text-lg">🏎️</span>
+              <span id="myProjectName" class="text-xs font-black text-white">مشروعك المباشر</span>
+            </div>
+            <span id="myProjectScore" class="text-xs font-mono font-black text-amber-400">💎 10 نقطة فخامة</span>
+          </div>
+
+          <!-- Dynamic SVG Drawing Area -->
+          <div class="flex-1 flex items-center justify-center p-2" id="svgViewport">
+            <!-- Injected dynamic SVG for theme -->
+          </div>
+
+          <!-- Sabotage & Floating Reactions Dock -->
+          <div class="pt-2 border-t border-slate-800 flex items-center justify-between gap-2">
+            <!-- Sabotage Cards Button -->
+            <button id="sabotageBtn" onclick="openSabotageModal()" class="px-3 py-1.5 bg-rose-600/30 hover:bg-rose-600/50 border border-rose-500/40 rounded-xl text-xs font-black text-rose-300 flex items-center gap-1 transition">
+              <span>😈 مقلب</span>
+              <span id="sabotageBadge" class="bg-rose-500 text-white text-[9px] px-1 rounded-full font-mono">1</span>
+            </button>
+
+            <!-- Quick Live Reaction Buttons -->
+            <div class="flex items-center gap-1">
+              <button onclick="sendQuickReaction('💸', 'طفرنا!')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs font-bold text-slate-300">💸 طفرنا!</button>
+              <button onclick="sendQuickReaction('😱', 'يا ساتر!')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs font-bold text-slate-300">😱 يا ساتر!</button>
+              <button onclick="sendQuickReaction('🤣', 'هههههه')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs font-bold text-slate-300">🤣 ضحك</button>
+              <button onclick="sendQuickReaction('🚀', 'ولعت!')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs font-bold text-slate-300">🚀 ولعت!</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Current Offer & Competitors Curtain Bar -->
+        <div class="lg:col-span-5 flex flex-col gap-4">
+          
+          <!-- Current Round Offer Card -->
+          <div class="bg-slate-900 border-2 border-indigo-500/50 rounded-3xl p-5 space-y-3 shadow-xl">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-bold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full">عرض الجولة الحالي</span>
+              <span id="offerPrice" class="text-sm font-black font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/30">
+                السعر: 4 ر.س
+              </span>
+            </div>
+
+            <div>
+              <h3 id="offerName" class="text-base font-black text-white">جنوط سبور مقاس 20</h3>
+              <p id="offerDesc" class="text-xs text-slate-400 mt-1">ثبات خرافي على المنعطفات ويعطي شكل هجومي للسيارة</p>
+            </div>
+
+            <div class="text-[11px] text-emerald-400 font-bold flex items-center gap-1">
+              <span>⭐ الفائدة:</span>
+              <span id="offerScoreBonus">+20 نقطة تميز</span>
+            </div>
+
+            <!-- Choice Action Buttons -->
+            <div class="grid grid-cols-2 gap-2 pt-2">
+              <button id="btnBuy" onclick="handleMakeChoice('buy')" class="py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl text-xs md:text-sm shadow-lg shadow-emerald-600/30 transition active:scale-95 flex items-center justify-center gap-1.5">
+                <span>شراء ✅</span>
+              </button>
+              <button id="btnSkip" onclick="handleMakeChoice('skip')" class="py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs md:text-sm border border-slate-700 transition active:scale-95 flex items-center justify-center gap-1.5">
+                <span>تخطي ❌</span>
+              </button>
+            </div>
+
+            <p id="choiceWaitNotice" class="text-[10px] text-amber-300 text-center font-bold min-h-[14px]"></p>
+          </div>
+
+          <!-- Competitors Grid with Secret Curtain & Peek 👁️ -->
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-black text-slate-300">المنافسون (الستارة السرية 🔒)</span>
+              <span class="text-[10px] text-slate-500">اضغط 👁️ للمعاينة ثانية واحدة</span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2" id="competitorsGrid">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ================= MODAL: SABOTAGE CARDS 😈 ================= -->
+    <div id="modalSabotage" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+      <div class="bg-slate-900 border-2 border-rose-500/60 rounded-3xl p-6 max-w-md w-full space-y-4 shadow-2xl animate-fade-in">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+          <h3 class="text-base font-black text-rose-400 flex items-center gap-2">
+            😈 كروت المقالب والتخريب المتبادل
+          </h3>
+          <button onclick="closeSabotageModal()" class="text-slate-400 hover:text-white text-lg font-bold">✕</button>
+        </div>
+
+        <p class="text-xs text-slate-400">اختر كرتاً واختر المنافس المستهدف للإيقاع به وتخريب خطته!</p>
+
+        <!-- Cards List -->
+        <div class="space-y-2" id="mySabotageCardsList">
+          <!-- Injected via JS -->
+        </div>
+
+        <!-- Target Competitor Select -->
+        <div class="pt-2">
+          <label class="block text-xs font-bold text-slate-300 mb-1">الضحية المستهدفة:</label>
+          <select id="sabotageTargetSelect" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-white outline-none">
+            <!-- Injected via JS -->
+          </select>
+        </div>
+
+        <button onclick="executeSabotageCard()" class="w-full py-3 bg-rose-600 hover:bg-rose-500 text-white font-black rounded-xl text-sm transition">
+          إطلاق المقلب فوراً 🔥
+        </button>
+      </div>
+    </div>
+
+    <!-- ================= MODAL: BLIND AUCTION « حراج 🔨 » ================= -->
+    <div id="modalAuction" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+      <div class="bg-slate-900 border-2 border-amber-500 rounded-3xl p-6 max-w-md w-full text-center space-y-4 shadow-2xl animate-fade-in">
+        <div class="w-14 h-14 bg-amber-500/20 border-2 border-amber-500 rounded-2xl flex items-center justify-center text-3xl mx-auto">
+          🔨
+        </div>
+        <div>
+          <span class="text-xs font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/30">جولة المزاد السري « حراج »</span>
+          <h3 id="auctionItemName" class="text-lg font-black text-white mt-1">لوحة ملكية « ق د ك 1 »</h3>
+          <p id="auctionItemDesc" class="text-xs text-slate-400 mt-1">أندر قطعة استثمارية تمنحك +45 نقطة فخامة مطلقة!</p>
+        </div>
+
+        <div class="bg-slate-950 border border-slate-800 p-3 rounded-2xl">
+          <span class="text-xs text-slate-400 block">اكتب سراً كم تدفع من ميزانيتك:</span>
+          <div class="flex items-center justify-center gap-2 mt-1">
+            <input type="number" id="auctionBidInput" min="1" max="200" placeholder="5"
+                   class="w-24 bg-slate-900 border border-amber-500/60 rounded-xl py-2 text-center text-xl font-mono font-black text-amber-300 outline-none">
+            <span class="text-xs font-bold text-slate-300">ريال سعودي</span>
+          </div>
+          <span class="text-[10px] text-slate-500 block mt-1">أعلى مزايد يفوز بالقطعة وتُخصم من ميزانيته فوراً!</span>
+        </div>
+
+        <button onclick="submitAuctionBid()" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-xl text-sm transition">
+          تأكيد المزايدة السرية 🔨
+        </button>
+      </div>
+    </div>
+
+    <!-- ================= SCREEN 5: GRAND REVEAL & PODIUM ================= -->
+    <div id="screenResults" class="hidden space-y-6 max-w-3xl mx-auto w-full text-center">
+      
+      <!-- Big Reveal Banner -->
+      <div class="space-y-1">
+        <div class="inline-block px-3 py-1 bg-amber-500/10 border border-amber-500/30 rounded-full text-xs font-black text-amber-300">
+          ✨ الكشف الكبير وسقوط الستائر
+        </div>
+        <h2 class="text-2xl md:text-4xl font-black text-white">حفل التتويج وتقييم الـ AI 🇸🇦</h2>
+        <p class="text-xs text-slate-400">انكشفت جميع المشاريع وحسم الذكاء الاصطناعي صاحب أفضل ميزانية وتصميم</p>
+      </div>
+
+      <!-- 3-Tier Podium (🥇 🥈 🥉) -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-2xl">
+        <div class="flex justify-center items-end gap-2 md:gap-4 pt-6 pb-2" id="podiumContainer">
+          <!-- Injected via JS -->
+        </div>
+
+        <!-- AI Judge Commentary Card -->
+        <div class="mt-6 bg-slate-950/80 border border-indigo-500/30 rounded-2xl p-4 text-right space-y-2">
+          <div class="flex items-center gap-2">
+            <span class="text-lg">🤖</span>
+            <span class="text-xs font-black text-indigo-400">تقرير وتحليل حكم الذكاء الاصطناعي:</span>
+          </div>
+          <p id="aiCommentaryText" class="text-xs md:text-sm text-slate-200 leading-relaxed font-bold"></p>
+        </div>
+      </div>
+
+      <!-- Full Rankings Table -->
+      <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 text-right space-y-3">
+        <h4 class="text-xs font-black text-slate-300">جدول الترتيب والنسب المئوية الدقيقة (مجموع 100%):</h4>
+        <div class="space-y-2" id="fullRankingsList">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+
+      <!-- Play Again & Return Home -->
+      <div class="flex flex-wrap gap-3 justify-center pt-2">
+        <button id="btnPlayAgain" onclick="handlePlayAgainClick()" class="px-6 py-3.5 bg-gradient-to-r from-emerald-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white font-black rounded-2xl shadow-lg transition text-sm">
+          🔄 جولة جديدة بنفس الغرفة
+        </button>
+        <button onclick="leaveRoom()" class="px-6 py-3.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-2xl transition text-sm border border-slate-700">
+          🏠 العودة للرئيسية
+        </button>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="bg-slate-950 border-t border-slate-900 py-2.5 px-4 text-center text-[11px] text-slate-500">
+    « على قد جيبك 💸 » &copy; 2026 - نظام لعب سحابي جماعي سعودي ومحرك تحكيم بالذكاء الاصطناعي
+  </footer>
+
+  <!-- ================= JAVASCRIPT GAME ENGINE ================= -->
+  <script>
+    // ==========================================
+    // 1. DATA & THEMES DEFINITIONS
+    // ==========================================
+    const THEMES = {
+      car: {
+        id: 'car',
+        title: '🏎️ سيارة رياضية خارقة',
+        desc: 'حوّل سيارة متهالكة لوحش كربوني فخم مع نيترو وأبواب لمبو',
+        svgRender: (upgrades) => renderCarSVG(upgrades),
+        upgrades: [
+          { id: 'c1', name: 'مراتب جلد أحمر تطريز ملكي', price: 3, score: 15, desc: 'راحة فائقة ومظهر فاره' },
+          { id: 'c2', name: 'جنوط سبور مقاس 20', price: 4, score: 20, desc: 'ثبات خرافي على المنعطفات' },
+          { id: 'c3', name: 'أبواب لمبو فراشة', price: 6, score: 30, desc: 'هيبة استعراضية تلفت الأنظار' },
+          { id: 'c4', name: 'شاحن تيربو مزدوج + هيدرز', price: 5, score: 25, desc: 'قوة حصانية ونغمة طرب' },
+          { id: 'c5', name: 'جناح خلفي كربوني GT', price: 3, score: 16, desc: 'داون فورس ديناميكي هوائي' },
+          { id: 'c6', name: 'كفرات Monster ضخمة', price: 4, score: 18, desc: 'شكل هجومي يفرش الخط' },
+          { id: 'c7', name: 'أسطوانة نيترو NOS زرقاء', price: 5, score: 28, desc: 'تسارع صاروخي فوري' },
+          { id: 'c8', name: 'إضاءة نيون سفلية RGB', price: 2, score: 12, desc: 'أجواء ليلية سينمائية' },
+          { id: 'c9', name: 'طلاء ذهبي ميتاليك نانو', price: 7, score: 35, desc: 'بريق عاكس ولمعان لا يبهت' },
+          { id: 'c10', name: 'نظام صوتي 12 سماعة مع باص', price: 3, score: 14, desc: 'مسرح غنائي متنقل' },
+          { id: 'c11', name: 'مكابح كاربون سيراميك حمراء', price: 4, score: 22, desc: 'توقف فوري وأمان قصوى' },
+          { id: 'c12', name: 'فتحة سقف بانورامية ذكية', price: 4, score: 20, desc: 'رؤية سماوية وعزل حراري' },
+          { id: 'c13', name: 'نظام قيادة ذاتي بالـ AI', price: 8, score: 40, desc: 'سيارة تفهم عليك بالصوت' },
+          { id: 'c14', name: 'مفتاح كريستال وتطعيم ألماس', price: 5, score: 26, desc: 'لمسة ترف تليق بالهوامير' }
+        ]
+      },
+      villa: {
+        id: 'villa',
+        title: '🏡 فيلا وقصر الأحلام',
+        desc: 'ابنِ قصراً أسطورياً من الأرض إلى مهبط الهليكوبتر والمسبح',
+        svgRender: (upgrades) => renderVillaSVG(upgrades),
+        upgrades: [
+          { id: 'v1', name: 'واجهة زجاجية سمارت بانورامية', price: 4, score: 20, desc: 'إطلالة عصرية وإنارة طبيعية' },
+          { id: 'v2', name: 'مسبح أولمبي إنفينيتي وشلال', price: 6, score: 32, desc: 'استرخاء مائي فاخر' },
+          { id: 'v3', name: 'حديقة نخيل وثيل وشواية BBQ', price: 3, score: 15, desc: 'جلسة خارجية لأحلى جمعات' },
+          { id: 'v4', name: 'روف لاونج وسينما خارجية', price: 4, score: 22, desc: 'شاشة عملاقة تحت النجوم' },
+          { id: 'v5', name: 'مهبط هليكوبتر خاص على السطح', price: 7, score: 38, desc: 'وصول ملكي استثنائي' },
+          { id: 'v6', name: 'مصعد بانورامي زجاجي', price: 3, score: 18, desc: 'سهولة الصعود بين الأدوار' },
+          { id: 'v7', name: 'صالة سينما VIP بكراسي مساج', price: 5, score: 26, desc: 'أجواء صالات هوليوود' },
+          { id: 'v8', name: 'سور حجري وبوابة ليزر ذكية', price: 3, score: 16, desc: 'خصوصية وأمان رقمي متطور' },
+          { id: 'v9', name: 'طاقة شمسية وتكييف مركزي', price: 4, score: 20, desc: 'توفير فواتير وتبريد قوي' },
+          { id: 'v10', name: 'مطبخ إيطالي ورخام كلكتا', price: 5, score: 25, desc: 'تصميم شيف راقٍ للضيافة' },
+          { id: 'v11', name: 'نافورة راقصة بإضاءات خافتة', price: 3, score: 17, desc: 'ترحيب ملكي يليق بالزوار' },
+          { id: 'v12', name: 'نظام حماية 360 بالذكاء', price: 3, score: 16, desc: 'مراقبة وحماية بدون قلق' },
+          { id: 'v13', name: 'جناح سبا وحمام بخار تركي', price: 5, score: 28, desc: 'نقاء واستجمام ملكي' },
+          { id: 'v14', name: 'غرفة تحف ومقتنيات نادرة', price: 6, score: 30, desc: 'لمسة أرستقراطية فريدة' }
+        ]
+      },
+      cafe: {
+        id: 'cafe',
+        title: '☕ مقهى وكافيه عصري',
+        desc: 'أسس أرقى كافيه بالمدينة مع ماكينة إيطالية وجلسات خارجية',
+        svgRender: (upgrades) => renderCafeSVG(upgrades),
+        upgrades: [
+          { id: 'k1', name: 'ماكينة إسبريسو مذهبة مع بخار', price: 6, score: 32, desc: 'استخلاص قهوة مثالي' },
+          { id: 'k2', name: 'لوحة نيون مضيئة بعبارة ترند', price: 2, score: 12, desc: 'منطقة تصوير سناب وتيك توك' },
+          { id: 'k3', name: 'جلسات خارجية وترّاس مظلل برذاذ', price: 4, score: 20, desc: 'إقبال مضاعف بالأجواء الحلوة' },
+          { id: 'k4', name: 'محمصة بن احترافية داخل الكافيه', price: 5, score: 28, desc: 'رائحة التحميص تعبي الشارع' },
+          { id: 'k5', name: 'بار باريستا رخام أسود فاخر', price: 3, score: 16, desc: 'فخامة هندسية ومساحة خدمة' },
+          { id: 'k6', name: 'موسيقى جاز وساوند سيستم هادئ', price: 2, score: 12, desc: 'أجواء عمل ودراسة رايقة' },
+          { id: 'k7', name: 'ثلاجة مخبوزات وكرواسون فرنسي', price: 4, score: 22, desc: 'مبيعات مضاعفة مع كل فنجان' },
+          { id: 'k8', name: 'أكواب سيراميك وتغليف حصري', price: 3, score: 15, desc: 'هوية بصرية أنيقة' },
+          { id: 'k9', name: 'منطقة درايف ثرو سريعة للسيارات', price: 6, score: 30, desc: 'تدفق أرباح مستمر بدون انقطاع' },
+          { id: 'k10', name: 'ركن بوكسات الهدايا والبن المختص', price: 3, score: 17, desc: 'منتجات ترفع السلة الشرائية' },
+          { id: 'k11', name: 'إنترنت فايبر وأفياش مدمجة بكل طاولة', price: 2, score: 14, desc: 'مغناطيس لأصحاب العمل الحر' },
+          { id: 'k12', name: 'محطة مشروبات منعشة وماتشا باردة', price: 3, score: 18, desc: 'خلطات صيفية محبوبة' },
+          { id: 'k13', name: 'تطبيق ولاء رقمي ومكافآت بالـ AI', price: 4, score: 24, desc: 'زبائن دائمين وتكرار زيارات' },
+          { id: 'k14', name: 'فرع VIP وامتياز تجاري قابل للتوسع', price: 7, score: 38, desc: 'تحويل المقهى لعلامة كبرى' }
+        ]
+      },
+      restaurant: {
+        id: 'restaurant',
+        title: '🍔 مطعم فاخر وسحابي',
+        desc: 'مطبخ مفتوح، عازف بيانو كلاسيكي، وطاولات رخامية أرستقراطية',
+        svgRender: (upgrades) => renderRestaurantSVG(upgrades),
+        upgrades: [
+          { id: 'r1', name: 'طاولات رخام إيطالي ومقاعد مخمل كرزي', price: 4, score: 20, desc: 'جلسات ضيافة بالغة الرقي' },
+          { id: 'r2', name: 'مطبخ مفتوح وشواية حطب مباشرة', price: 6, score: 32, desc: 'شوو حي ورائحة شواء تأسر القلوب' },
+          { id: 'r3', name: 'عازف بيانو كلاسيكي على مسرح هادئ', price: 4, score: 22, desc: 'نغمات كلاسيكية راقية' },
+          { id: 'r4', name: 'ثريات كريستال بوهيمي وإضاءة دافئة', price: 3, score: 16, desc: 'فخامة بصرية تخطف الأبصار' },
+          { id: 'r5', name: 'شيف عالمي حاصل على نجمة ميشلان', price: 8, score: 45, desc: 'قائمة طعام استثنائية' },
+          { id: 'r6', name: 'غرفة VIP سرية لكبار الشخصيات', price: 5, score: 26, desc: 'خصوصية تامة وحجز مسبق' },
+          { id: 'r7', name: 'منطقة كيدز إلكترونية آمنة للأطفال', price: 3, score: 15, desc: 'راحة تامة للعائلات' },
+          { id: 'r8', name: 'خدمة صف سيارات فالي VIP أمام الباب', price: 3, score: 18, desc: 'انطباع أول مبهر' },
+          { id: 'r9', name: 'ثلاجة تعتيق لحوم واغيو دراي إيدجد', price: 6, score: 30, desc: 'أعلى جودة ستيكات' },
+          { id: 'r10', name: 'شرفة أطلال بانورامية مطلة على النافورة', price: 4, score: 22, desc: 'أجمل صور الغروب مع العشاء' },
+          { id: 'r11', name: 'بار حلويات استعراضي بالنيتروجين المثلج', price: 4, score: 21, desc: 'تجربة حلى ساحرة ومبهرة' },
+          { id: 'r12', name: 'عقود تموين لحوم محلية طازجة يومياً', price: 4, score: 19, desc: 'ثقة ومذاق بلدي مضمون' },
+          { id: 'r13', name: 'روبوتات تقديم ذكية لنقل الطلبات', price: 5, score: 27, desc: 'تقنية مبهرة وسرعة في الخدمة' },
+          { id: 'r14', name: 'توثيق تقييمات المشاهير وتغطية إعلامية', price: 5, score: 25, desc: 'ترند طوابير وزحمة يومية' }
+        ]
+      },
+      tower: {
+        id: 'tower',
+        title: '🏢 برج وناطحة سحاب',
+        desc: 'شيّد ناطحة سحاب شامخة مع مطعم دوار ومهبط تاكسي طائر',
+        svgRender: (upgrades) => renderTowerSVG(upgrades),
+        upgrades: [
+          { id: 't1', name: 'طوابق زجاجية شاهقة وعاكسة للشمس', price: 5, score: 25, desc: 'ارتفاع شاهق وتصميم مستقبلي' },
+          { id: 't2', name: 'مطعم دوار 360 درجة بأعلى قمة البرج', price: 7, score: 38, desc: 'إطلالة كاملة على أفق المدينة' },
+          { id: 't3', name: 'مهبط طائرات تاكسي طائر EVTOL متطور', price: 6, score: 32, desc: 'وسيلة نقل المستقبل' },
+          { id: 't4', name: 'عروض ليزر وإضاءات LED تفاعلية بالواجهة', price: 4, score: 22, desc: 'شاشة عملاقة للاحتفالات الوطنية' },
+          { id: 't5', name: 'مصاعد صاروخية هوائية تصعد في ثوانٍ', price: 4, score: 20, desc: 'سرعة فائقة بدون الشعور بالضغط' },
+          { id: 't6', name: 'حديقة معلقة داخلية في الطابق الخمسين', price: 4, score: 21, desc: 'واحة خضراء بين السحاب' },
+          { id: 't7', name: 'منصة مراقبة سياحية بأرضية زجاجية', price: 5, score: 26, desc: 'تذاكر سياحية وتجربة إثارة' },
+          { id: 't8', name: 'نظام إخماد حرائق ذكي وأعلى أمان', price: 3, score: 16, desc: 'حماية كاملة واستقرار دائم' },
+          { id: 't9', name: 'مكاتب شركات عالمية بتقنيات الميتافيرس', price: 6, score: 30, desc: 'أرقى بيئة عمل لرواد الأعمال' },
+          { id: 't10', name: 'قبة سماوية فلكية في القمة للرصد', price: 4, score: 23, desc: 'رؤية النجوم والمجرات' },
+          { id: 't11', name: 'نظام إدارة طاقة وتوليد بالرياح', price: 4, score: 20, desc: 'برج صديق للبيئة' },
+          { id: 't12', name: 'مواقف روبوتية ذكية تحت الأرض', price: 5, score: 25, desc: 'اصطفاف تلقائي بدون تدخل بشري' },
+          { id: 't13', name: 'صالة مؤتمرات وترجمة بالذكاء', price: 5, score: 27, desc: 'استضافة كبرى القمم العالمية' },
+          { id: 't14', name: 'برج اتصالات 6G وربط فضائي مباشر', price: 6, score: 33, desc: 'أسرع اتصال رقمي في المنطقة' }
+        ]
+      },
+      jet: {
+        id: 'jet',
+        title: '✈️ طائرة خاصة فاخرة',
+        desc: 'جهّز طائرة نفاثة عابرة للقارات بجناح نوم وجاكوزي بالسماء',
+        svgRender: (upgrades) => renderJetSVG(upgrades),
+        upgrades: [
+          { id: 'j1', name: 'أجنحة ذهبية وتطعيمات خارجية ملكية', price: 5, score: 26, desc: 'هيبة طيران تلفت كل المطارات' },
+          { id: 'j2', name: 'محركات نفاثة مزدوجة بتوهج حراري وهدوء', price: 8, score: 42, desc: 'سرعة تفوق الصوت بدون إزعاج' },
+          { id: 'j3', name: 'جناح نوم ماستر مع سرير ملكي كينغ', price: 6, score: 30, desc: 'نوم عميق وراحة متناهية بالغيوم' },
+          { id: 'j4', name: 'سقف بانورامي زجاجي يعرض النجوم ليلاً', price: 4, score: 22, desc: 'رؤية السماء الصافية في الرحلات' },
+          { id: 'j5', name: 'واي فاي فضائي ستارلينك مجاناً وبلا حدود', price: 2, score: 15, desc: 'بث 4K وتداول أسهم بالجو' },
+          { id: 'j6', name: 'جاكوزي مائي دافئ داخل حمام الطائرة', price: 5, score: 28, desc: 'استرخاء مائي استثنائي فوق السحاب' },
+          { id: 'j7', name: 'طاقم ضيافة خاص وشيف رحلات محترف', price: 4, score: 22, desc: 'وجبات 5 نجوم على ارتفاع 40 ألف قدم' },
+          { id: 'j8', name: 'مقصورة قيادة بالذكاء الاصطناعي مع رادار', price: 4, score: 24, desc: 'أقصى درجات الأمان وملاحة دقيقة' },
+          { id: 'j9', name: 'صالون اجتماعات مصفح بعزل صوتي 100%', price: 4, score: 21, desc: 'صفقات المليارات تُبرم بسرية تامة' },
+          { id: 'j10', name: 'مقاعد جلد تمساح تتحول لأسرة مسطحة', price: 5, score: 25, desc: 'راحة قصوى لجميع الضيوف' },
+          { id: 'j11', name: 'نظام تنقية هواء بأيونات الفضة والأكسجين', price: 3, score: 17, desc: 'تنشيط دائم والقضاء على إجهاد السفر' },
+          { id: 'j12', name: 'خزان وقود إضافي مدى 12,000 كم متواصل', price: 5, score: 27, desc: 'من الرياض إلى نيويورك بدون توقف' },
+          { id: 'j13', name: 'نظام دفاع جوي وتفادي مطبات بالليزر', price: 6, score: 31, desc: 'رحلة سلسة كالماء في أحلك الظروف' },
+          { id: 'j14', name: 'طلاء نانو ضد الخدوش وشهادة طيران VIP', price: 4, score: 20, desc: 'حفاظ على قيمة الطائرة لسنوات' }
+        ]
+      }
+    };
+
+    const QUICK_EMOJIS = ['🏎️', '👑', '🕶️', '🚀', '⚡', '💎', '🦁', '🌟', '🦅', '🔥', '🥷', '🎯'];
+
+    // ==========================================
+    // 2. PERSISTENT PLAYER IDENTITY (LOCALSTORAGE)
+    // ==========================================
+    const PROFILE_KEY = 'alagadjeebak_player_profile';
+    let myProfile = {
+      name: '',
+      tag: '#KSA-' + Math.floor(100 + Math.random() * 900),
+      avatar: '🏎️',
+      wins: 0
+    };
+
+    function loadProfile() {
+      try {
+        const raw = localStorage.getItem(PROFILE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.name) myProfile = parsed;
+        }
+      } catch (e) {}
+
+      if (!myProfile.name) {
+        myProfile.name = 'كابتن ' + Math.floor(10 + Math.random() * 90);
+        saveProfile();
+      }
+      syncProfileHeader();
+    }
+
+    function saveProfile() {
+      try {
+        localStorage.setItem(PROFILE_KEY, JSON.stringify(myProfile));
+      } catch (e) {}
+      syncProfileHeader();
+    }
+
+    function syncProfileHeader() {
+      const hName = document.getElementById('hName');
+      const hAvatar = document.getElementById('hAvatar');
+      const hTag = document.getElementById('hTag');
+      const hWins = document.getElementById('hWins');
+      if (hName) hName.innerText = myProfile.name;
+      if (hAvatar) hAvatar.innerText = myProfile.avatar;
+      if (hTag) hTag.innerText = myProfile.tag;
+      if (hWins) hWins.innerText = myProfile.wins || 0;
+
+      const entryName = document.getElementById('entryName');
+      const entryAvInput = document.getElementById('entryAvatarInput');
+      const avPrev = document.getElementById('avatarPreview');
+      if (entryName && !entryName.value) entryName.value = myProfile.name;
+      if (entryAvInput) entryAvInput.value = myProfile.avatar;
+      if (avPrev) avPrev.innerText = myProfile.avatar;
+    }
+
+    function openProfileModal() {
+      const newName = prompt('تعديل اسمك في اللعبة:', myProfile.name);
+      if (newName && newName.trim()) {
+        myProfile.name = newName.trim().slice(0, 18);
+        saveProfile();
+      }
+    }
+
+    // Strict Emoji Validator (rejects english/arabic letters, digits, symbols)
+    function validateAvatarInput(input) {
+      const val = input.value;
+      const err = document.getElementById('entryAvatarErr');
+      const preview = document.getElementById('avatarPreview');
+      err.innerText = '';
+
+      if (/[a-zA-Z0-9\u0600-\u06FF\s.,\/#!$%\^&\*;:{}=\-_`~()?]/.test(val)) {
+        err.innerText = '⚠️ الأيقونة يجب أن تكون إيموجي فقط من الكيبورد!';
+        return false;
+      }
+      if (val.trim()) {
+        preview.innerText = val.trim();
+        myProfile.avatar = val.trim();
+      }
+      return true;
+    }
+
+    function pickQuickEmoji(emo) {
+      document.getElementById('entryAvatarInput').value = emo;
+      document.getElementById('avatarPreview').innerText = emo;
+      document.getElementById('entryAvatarErr').innerText = '';
+      myProfile.avatar = emo;
+    }
+
+    // ==========================================
+    // 3. SOUND SYNTHESIZER (WEB AUDIO API)
+    // ==========================================
+    let soundEnabled = true;
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      document.getElementById('soundBtn').innerText = soundEnabled ? '🔊' : '🔇';
+    }
+
+    function playTone(freq, type = 'sine', duration = 0.15, gainVal = 0.2) {
+      if (!soundEnabled) return;
+      try {
+        initAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    function playSoundEffect(name) {
+      if (!soundEnabled) return;
+      initAudio();
+      if (name === 'buy') {
+        // Melodic ascending buy sound
+        playTone(523.25, 'triangle', 0.1, 0.25);
+        setTimeout(() => playTone(659.25, 'triangle', 0.15, 0.25), 90);
+        setTimeout(() => playTone(783.99, 'sine', 0.2, 0.3), 180);
+      } else if (name === 'skip') {
+        // Soft click
+        playTone(330, 'sine', 0.08, 0.15);
+      } else if (name === 'tick') {
+        // Clock tick
+        playTone(880, 'sine', 0.04, 0.08);
+      } else if (name === 'sabotage') {
+        // Dramatic low buzz
+        playTone(180, 'sawtooth', 0.25, 0.3);
+      } else if (name === 'victory') {
+        // Fanfare
+        [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+          setTimeout(() => playTone(freq, 'triangle', 0.3, 0.3), idx * 120);
+        });
+      }
+    }
+
+    // ==========================================
+    // 4. WEBSOCKET & STATE MANAGEMENT
+    // ==========================================
+    let ws = null;
+    let isConnected = false;
+    let isOfflineDemo = false;
+
+    let gameState = {
+      roomCode: '',
+      isHost: false,
+      myPlayerId: null,
+      theme: 'car',
+      budget: 25,
+      mode: 'ffa',
+      curtain: true,
+      state: 'lobby',
+      round: 0,
+      totalRounds: 6,
+      currentOffer: null,
+      timer: 20,
+      players: [],
+      myUpgrades: [],
+      mySabotageCards: []
+    };
+
+    let clientCodeTimerInt = null;
+    let clientRoundTimerInt = null;
+
+    function connectWebSocket() {
+      // Automatic detection of host protocol
+      const loc = window.location;
+      if (loc.protocol === 'file:') {
+        console.log('Running locally as file://, ready for demo or custom server.');
+        return;
+      }
+      const wsProto = loc.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${wsProto}//${loc.host}`;
+
+      try {
+        ws = new WebSocket(wsUrl);
+
+        ws.onopen = () => {
+          console.log('✅ Connected to Alagadjeebak WebSocket server');
+          isConnected = true;
+        };
+
+        ws.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            handleServerMessage(data);
+          } catch (e) {
+            console.error('Failed to parse WS msg:', e);
+          }
+        };
+
+        ws.onclose = () => {
+          console.log('WS Connection closed');
+          isConnected = false;
+        };
+
+        ws.onerror = (err) => {
+          console.warn('WS Error:', err);
+        };
+      } catch (e) {
+        console.warn('WS not supported or failed to connect:', e);
+      }
+    }
+
+    // ==========================================
+    // 5. SERVER MESSAGE HANDLERS
+    // ==========================================
+    function handleServerMessage(msg) {
+      console.log('📩 Msg from server:', msg.type, msg);
+
+      switch (msg.type) {
+        case 'ERROR':
+          alert(msg.message || 'حدث خطأ!');
+          break;
+
+        case 'ROOM_CREATED':
+          gameState.myPlayerId = msg.playerId;
+          gameState.isHost = true;
+          applyRoomUpdate(msg.room);
+          switchScreen('screenLobby');
+          startLobbyCodeTimer(msg.room.codeExpiresIn || 600);
+          break;
+
+        case 'JOINED_SUCCESS':
+          gameState.myPlayerId = msg.playerId;
+          gameState.isHost = (msg.room.hostId === msg.playerId);
+          closeJoinModal();
+          applyRoomUpdate(msg.room);
+          switchScreen('screenLobby');
+          startLobbyCodeTimer(msg.room.codeExpiresIn || 600);
+          break;
+
+        case 'ROOM_UPDATE':
+          applyRoomUpdate(msg.room);
+          break;
+
+        case 'CODE_RENEWED':
+          gameState.roomCode = msg.code;
+          document.getElementById('lobbyRoomCode').innerText = '#' + msg.code;
+          startLobbyCodeTimer(msg.expiresIn || 600);
+          showFloatingNotification(msg.message || '🔄 تم تجديد الكود');
+          break;
+
+        case 'ROUND_STARTED':
+          gameState.round = msg.round;
+          gameState.totalRounds = msg.totalRounds;
+          gameState.currentOffer = msg.offer;
+          gameState.timer = msg.timer || 20;
+          switchScreen('screenPlay');
+          renderPlayRound();
+          if (msg.event) {
+            triggerEventBanner(msg.event.title, msg.event.desc);
+          }
+          break;
+
+        case 'TIMER_TICK':
+          updateVisualTimer(msg.timer);
+          break;
+
+        case 'ROUND_ENDED':
+          playSoundEffect('skip');
+          break;
+
+        case 'AUCTION_STARTED':
+          openAuctionModal(msg.item);
+          break;
+
+        case 'AUCTION_RESOLVED':
+          closeAuctionModal();
+          showFloatingNotification(msg.message);
+          break;
+
+        case 'PEEK_SNAPSHOT':
+          renderPeekModal(msg);
+          break;
+
+        case 'SABOTAGE_TRIGGERED':
+          playSoundEffect('sabotage');
+          showFloatingNotification(msg.message);
+          break;
+
+        case 'FLOAT_REACTION':
+          spawnFloatingBubble(msg.emoji, msg.text, msg.senderName);
+          break;
+
+        case 'GRAND_REVEAL':
+          renderGrandReveal(msg);
+          break;
+      }
+    }
+
+    function applyRoomUpdate(r) {
+      if (!r) return;
+      gameState.roomCode = r.code;
+      gameState.theme = r.theme;
+      gameState.budget = r.budget;
+      gameState.mode = r.mode;
+      gameState.curtain = r.curtain;
+      gameState.state = r.state;
+      gameState.players = r.players || [];
+
+      // Update Lobby UI
+      document.getElementById('lobbyRoomCode').innerText = '#' + r.code;
+      document.getElementById('lobbyPlayerCount').innerText = gameState.players.length;
+
+      // Check host permissions
+      const me = gameState.players.find(p => p.id === gameState.myPlayerId);
+      gameState.isHost = me ? me.isHost : false;
+
+      const hostControls = document.getElementById('hostControlsCard');
+      const startBtn = document.getElementById('startGameBtn');
+      const waitNotice = document.getElementById('lobbyWaitingMsg');
+
+      if (gameState.isHost) {
+        hostControls.classList.remove('opacity-60', 'pointer-events-none');
+        startBtn.classList.remove('hidden');
+        waitNotice.classList.add('hidden');
+      } else {
+        hostControls.classList.add('opacity-60', 'pointer-events-none');
+        startBtn.classList.add('hidden');
+        waitNotice.classList.remove('hidden');
+      }
+
+      // Render players list in lobby
+      renderLobbyPlayers();
+      renderThemeCards();
+      renderBudgetCards();
+    }
+
+    // ==========================================
+    // 6. UI SCREEN SWITCHER & MODALS
+    // ==========================================
+    function switchScreen(screenId) {
+      ['screenEntry', 'screenLobby', 'screenPlay', 'screenResults'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+      });
+      const target = document.getElementById(screenId);
+      if (target) target.classList.remove('hidden');
+
+      const leaveBtn = document.getElementById('leaveBtn');
+      if (screenId === 'screenEntry') {
+        leaveBtn.classList.add('hidden');
+      } else {
+        leaveBtn.classList.remove('hidden');
+      }
+    }
+
+    function handleCreateRoomClick() {
+      const nameInput = document.getElementById('entryName');
+      const name = nameInput.value.trim();
+      const nameErr = document.getElementById('entryNameErr');
+      nameErr.innerText = '';
+
+      if (!name) {
+        nameErr.innerText = '⚠️ الاسم إلزامي لإنشاء الغرفة!';
+        nameInput.focus();
+        return;
+      }
+
+      const avInput = document.getElementById('entryAvatarInput');
+      if (!validateAvatarInput(avInput)) return;
+
+      myProfile.name = name;
+      myProfile.avatar = avInput.value.trim() || '🏎️';
+      saveProfile();
+
+      if (isConnected && ws) {
+        ws.send(JSON.stringify({
+          type: 'CREATE_ROOM',
+          name: myProfile.name,
+          avatar: myProfile.avatar,
+          options: {
+            theme: 'car',
+            budget: 25,
+            mode: 'ffa',
+            curtain: true
+          }
+        }));
+      } else {
+        // Offline demo room
+        startLocalDemoMode();
+      }
+    }
+
+    function handleOpenJoinModal() {
+      const nameInput = document.getElementById('entryName');
+      const name = nameInput.value.trim();
+      const nameErr = document.getElementById('entryNameErr');
+      nameErr.innerText = '';
+
+      if (!name) {
+        nameErr.innerText = '⚠️ أدخل اسمك أولاً للانضمام!';
+        nameInput.focus();
+        return;
+      }
+
+      const avInput = document.getElementById('entryAvatarInput');
+      if (!validateAvatarInput(avInput)) return;
+
+      myProfile.name = name;
+      myProfile.avatar = avInput.value.trim() || '🕶️';
+      saveProfile();
+
+      document.getElementById('modalJoin').classList.remove('hidden');
+      document.getElementById('joinCodeInput').focus();
+    }
+
+    function closeJoinModal() {
+      document.getElementById('modalJoin').classList.add('hidden');
+      document.getElementById('joinCodeErr').innerText = '';
+    }
+
+    function submitJoinRoom() {
+      const codeInput = document.getElementById('joinCodeInput');
+      const code = codeInput.value.trim().replace('#', '');
+      const err = document.getElementById('joinCodeErr');
+      err.innerText = '';
+
+      if (!code || code.length < 4) {
+        err.innerText = 'أدخل كوداً صحيحاً من 4 أرقام!';
+        return;
+      }
+
+      if (isConnected && ws) {
+        ws.send(JSON.stringify({
+          type: 'JOIN_ROOM',
+          code: code,
+          name: myProfile.name,
+          avatar: myProfile.avatar
+        }));
+      } else {
+        alert('أنت حالياً في الوضع التجريبي المحلي. ستبدأ جولة تجريبية مباشرة!');
+        closeJoinModal();
+        startLocalDemoMode();
+      }
+    }
+
+    function leaveRoom() {
+      if (confirm('هل أنت متأكد من مغادرة الغرفة؟')) {
+        location.reload();
+      }
+    }
+
+    // 10-Min Lobby Code Timer
+    function startLobbyCodeTimer(secondsRemaining) {
+      if (clientCodeTimerInt) clearInterval(clientCodeTimerInt);
+      let sec = secondsRemaining;
+
+      const cdEl = document.getElementById('lobbyCodeCountdown');
+      const updateText = () => {
+        const m = Math.floor(sec / 60);
+        const s = sec % 60;
+        cdEl.innerText = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+      };
+
+      updateText();
+      clientCodeTimerInt = setInterval(() => {
+        sec--;
+        if (sec <= 0) {
+          clearInterval(clientCodeTimerInt);
+          cdEl.innerText = '00:00';
+        } else {
+          updateText();
+        }
+      }, 1000);
+    }
+
+    function renewCodeManually() {
+      if (!gameState.isHost) {
+        alert('المضيف فقط يمكنه تجديد الكود!');
+        return;
+      }
+      if (isConnected && ws) {
+        ws.send(JSON.stringify({ type: 'REFRESH_CODE' }));
+      } else if (isOfflineDemo) {
+        gameState.roomCode = String(Math.floor(1000 + Math.random() * 9000));
+        document.getElementById('lobbyRoomCode').innerText = '#' + gameState.roomCode;
+        startLobbyCodeTimer(600);
+        showFloatingNotification('🔄 تم تجديد الكود السري لمدة 10 دقائق!');
+      }
+    }
+
+    function copyRoomCode() {
+      const code = gameState.roomCode || '8492';
+      navigator.clipboard.writeText(code).then(() => {
+        alert(`تم نسخ الكود (${code}) بنجاح! شاركه مع أصدقائك.`);
+      }).catch(() => {
+        alert(`كود الغرفة: ${code}`);
+      });
+    }
+
+    // ==========================================
+    // 7. LOBBY RENDERING: THEMES, BUDGET, PLAYERS
+    // ==========================================
+    function renderThemeCards() {
+      const cont = document.getElementById('themeCardsContainer');
+      cont.innerHTML = Object.values(THEMES).map(t => {
+        const isSel = (gameState.theme === t.id);
+        return `
+          <div onclick="selectTheme('${t.id}')"
+               class="cursor-pointer p-2.5 rounded-2xl border transition text-center ${isSel ? 'bg-indigo-600/20 border-indigo-500 shadow-md shadow-indigo-500/20' : 'bg-slate-950 border-slate-800 hover:border-slate-700'}">
+            <span class="text-xl block mb-0.5">${t.id === 'car' ? '🏎️' : t.id === 'villa' ? '🏡' : t.id === 'cafe' ? '☕' : t.id === 'restaurant' ? '🍔' : t.id === 'tower' ? '🏢' : '✈️'}</span>
+            <span class="text-[11px] font-black block text-white">${t.title.split(' ')[1] || t.title}</span>
+            <span class="text-[9px] text-slate-400 block line-clamp-1">${t.desc.split('مع')[0]}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function selectTheme(themeId) {
+      if (!gameState.isHost) return;
+      gameState.theme = themeId;
+      renderThemeCards();
+      broadcastSettingsChange();
+    }
+
+    function renderBudgetCards() {
+      const cont = document.getElementById('budgetCardsContainer');
+      const presets = [
+        { amt: 25, label: '25 ر.س', rounds: 6, tag: 'خاطف' },
+        { amt: 50, label: '50 ر.س', rounds: 8, tag: 'متوازن' },
+        { amt: 100, label: '100 ر.س', rounds: 10, tag: 'تكتيكي' },
+        { amt: 200, label: '200 ر.س', rounds: 14, tag: 'هوامير' }
+      ];
+
+      cont.innerHTML = presets.map(b => {
+        const isSel = (gameState.budget === b.amt);
+        return `
+          <div onclick="selectBudget(${b.amt})"
+               class="cursor-pointer p-2.5 rounded-2xl border transition text-center ${isSel ? 'bg-emerald-600/20 border-emerald-500 shadow-md shadow-emerald-500/20' : 'bg-slate-950 border-slate-800 hover:border-slate-700'}">
+            <span class="text-xs font-mono font-black block text-emerald-400">${b.label}</span>
+            <span class="text-[10px] font-black block text-white">${b.rounds} جولات</span>
+            <span class="text-[8px] text-slate-400 block">${b.tag}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function selectBudget(amt) {
+      if (!gameState.isHost) return;
+      gameState.budget = amt;
+      renderBudgetCards();
+      broadcastSettingsChange();
+    }
+
+    function updateHostSettings() {
+      if (!gameState.isHost) return;
+      gameState.mode = document.getElementById('lobbyGameMode').value;
+      gameState.curtain = document.getElementById('lobbyCurtainToggle').checked;
+      broadcastSettingsChange();
+    }
+
+    function broadcastSettingsChange() {
+      if (isConnected && ws) {
+        ws.send(JSON.stringify({
+          type: 'UPDATE_SETTINGS',
+          theme: gameState.theme,
+          budget: gameState.budget,
+          mode: gameState.mode,
+          curtain: gameState.curtain
+        }));
+      }
+    }
+
+    function renderLobbyPlayers() {
+      const list = document.getElementById('lobbyPlayersList');
+      list.innerHTML = gameState.players.map(p => {
+        const isMe = (p.id === gameState.myPlayerId);
+        return `
+          <div class="bg-slate-950 border ${isMe ? 'border-amber-500/60 shadow-md shadow-amber-500/10' : 'border-slate-800'} rounded-2xl p-2.5 flex items-center gap-2">
+            <span class="text-2xl">${p.avatar || '🏎️'}</span>
+            <div class="text-right overflow-hidden flex-1">
+              <div class="flex items-center gap-1">
+                <span class="text-xs font-black text-white truncate">${p.name}</span>
+                ${p.isHost ? '<span class="text-[8px] bg-indigo-500 text-white px-1 rounded font-bold">مضيف</span>' : ''}
+              </div>
+              <span class="text-[9px] text-emerald-400 font-bold block">${isMe ? 'أنت (جاهز)' : 'متصل الآن'}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function handleStartGameClick() {
+      if (!gameState.isHost) return;
+      if (isConnected && ws) {
+        ws.send(JSON.stringify({ type: 'START_GAME' }));
+      } else if (isOfflineDemo) {
+        startLocalRound();
+      }
+    }
+
+    // ==========================================
+    // 8. ACTIVE GAMEPLAY: TIMERS, OFFERS & DECISIONS
+    // ==========================================
+    function renderPlayRound() {
+      const themeData = THEMES[gameState.theme] || THEMES.car;
+      document.getElementById('playThemeTitle').innerText = themeData.title;
+      document.getElementById('currentRoundNum').innerText = gameState.round;
+      document.getElementById('totalRoundsNum').innerText = gameState.totalRounds;
+
+      // Update Offer
+      const off = gameState.currentOffer;
+      if (off) {
+        document.getElementById('offerName').innerText = off.name;
+        document.getElementById('offerPrice').innerText = `السعر: ${off.price} ر.س`;
+        document.getElementById('offerDesc').innerText = off.desc;
+        document.getElementById('offerScoreBonus').innerText = `+${off.score} نقطة تميز`;
+      }
+
+      // Re-enable choice buttons
+      const btnBuy = document.getElementById('btnBuy');
+      const btnSkip = document.getElementById('btnSkip');
+      const waitNotice = document.getElementById('choiceWaitNotice');
+      btnBuy.disabled = false;
+      btnSkip.disabled = false;
+      btnBuy.classList.remove('opacity-50');
+      btnSkip.classList.remove('opacity-50');
+      waitNotice.innerText = '';
+
+      updateMyProjectView();
+      renderCompetitorsGrid();
+      startRoundTimerCountdown(gameState.timer || 20);
+    }
+
+    function startRoundTimerCountdown(totalSec) {
+      if (clientRoundTimerInt) clearInterval(clientRoundTimerInt);
+      let sec = totalSec;
+      updateVisualTimer(sec);
+
+      clientRoundTimerInt = setInterval(() => {
+        sec--;
+        if (sec <= 0) {
+          clearInterval(clientRoundTimerInt);
+          updateVisualTimer(0);
+        } else {
+          updateVisualTimer(sec);
+          if (sec <= 5) playSoundEffect('tick');
+        }
+      }, 1000);
+    }
+
+    function updateVisualTimer(sec) {
+      const numEl = document.getElementById('roundTimerNumber');
+      const barEl = document.getElementById('roundTimerBar');
+      if (numEl) numEl.innerText = `${sec}s`;
+      if (barEl) {
+        const pct = Math.max(0, Math.min(100, (sec / 20) * 100));
+        barEl.style.width = pct + '%';
+        if (sec <= 5) {
+          barEl.className = 'h-full bg-rose-500 transition-all duration-1000';
+          numEl.className = 'text-xl font-black font-mono text-rose-500 animate-ping';
+        } else {
+          barEl.className = 'h-full bg-gradient-to-r from-emerald-500 via-amber-500 to-rose-500 transition-all duration-1000';
+          numEl.className = 'text-xl font-black font-mono text-rose-400';
+        }
+      }
+    }
+
+    function handleMakeChoice(action) {
+      const btnBuy = document.getElementById('btnBuy');
+      const btnSkip = document.getElementById('btnSkip');
+      const waitNotice = document.getElementById('choiceWaitNotice');
+      btnBuy.disabled = true;
+      btnSkip.disabled = true;
+      btnBuy.classList.add('opacity-50');
+      btnSkip.classList.add('opacity-50');
+
+      if (action === 'buy') {
+        playSoundEffect('buy');
+        waitNotice.innerText = '✅ تم اختيار شراء الترقية! بانتظار البقية...';
+      } else {
+        playSoundEffect('skip');
+        waitNotice.innerText = '❌ تم اختيار التخطي! بانتظار البقية...';
+      }
+
+      if (isConnected && ws) {
+        ws.send(JSON.stringify({ type: 'MAKE_CHOICE', action: action }));
+      } else if (isOfflineDemo) {
+        handleLocalPlayerChoice(action);
+      }
+    }
+
+    function updateMyProjectView() {
+      const me = gameState.players.find(p => p.id === gameState.myPlayerId) || {
+        name: myProfile.name,
+        avatar: myProfile.avatar,
+        budget: gameState.budget,
+        score: 10,
+        upgrades: gameState.myUpgrades
+      };
+
+      document.getElementById('playMyBudget').innerText = `${me.budget} ر.س`;
+      document.getElementById('myProjectName').innerText = `${me.name} (مشروعك)`;
+      document.getElementById('myProjectAvatar').innerText = me.avatar || '🏎️';
+      document.getElementById('myProjectScore').innerText = `💎 ${me.score || 10} نقطة فخامة`;
+
+      // Render Dynamic SVG for current theme
+      const themeData = THEMES[gameState.theme] || THEMES.car;
+      const svgViewport = document.getElementById('svgViewport');
+      svgViewport.innerHTML = themeData.svgRender(me.upgrades || []);
+    }
+
+    function renderCompetitorsGrid() {
+      const cont = document.getElementById('competitorsGrid');
+      const competitors = gameState.players.filter(p => p.id !== gameState.myPlayerId);
+
+      if (competitors.length === 0) {
+        cont.innerHTML = `<div class="col-span-2 text-center text-xs text-slate-500 py-3">لا يوجد منافسون متصلون حالياً</div>`;
+        return;
+      }
+
+      cont.innerHTML = competitors.map(comp => {
+        return `
+          <div class="bg-slate-950 border border-slate-800 rounded-2xl p-2.5 flex flex-col justify-between relative overflow-hidden shadow">
+            <!-- Header -->
+            <div class="flex items-center justify-between pb-1">
+              <div class="flex items-center gap-1.5 truncate">
+                <span class="text-base">${comp.avatar || '🕶️'}</span>
+                <span class="text-xs font-bold text-white truncate">${comp.name}</span>
+              </div>
+              <span class="text-[9px] font-mono text-emerald-400 font-bold">${comp.budget} ر.س</span>
+            </div>
+
+            <!-- Curtain View or Progress -->
+            <div class="h-16 rounded-xl curtain-pattern border border-indigo-950 flex flex-col items-center justify-center relative my-1">
+              <span class="text-base">🔒</span>
+              <span class="text-[9px] font-black text-indigo-300">ستارة سرية مشفرة</span>
+              <span class="text-[8px] text-slate-400">القطع المشتراة: ${comp.upgradesCount || (comp.upgrades ? comp.upgrades.length : 0)}</span>
+            </div>
+
+            <!-- Peek Action Button 👁️ -->
+            <button onclick="requestPeekOpponent('${comp.id}')"
+                    class="w-full py-1 bg-indigo-600/40 hover:bg-indigo-600 border border-indigo-500/40 rounded-lg text-[10px] font-bold text-indigo-200 transition flex items-center justify-center gap-1">
+              <span>معاينة خاطفة 👁️</span>
+              <span class="text-[8px] text-indigo-300">(1 ثانية)</span>
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 1-Second Peek Mechanic
+    function requestPeekOpponent(targetId) {
+      if (isConnected && ws) {
+        ws.send(JSON.stringify({ type: 'PEEK_OPPONENT', targetId: targetId }));
+      } else if (isOfflineDemo) {
+        const target = gameState.players.find(p => p.id === targetId);
+        if (target) {
+          renderPeekModal({
+            targetId: target.id,
+            name: target.name,
+            avatar: target.avatar,
+            budget: target.budget,
+            score: target.score,
+            upgrades: target.upgrades
+          });
+        }
+      }
+    }
+
+    function renderPeekModal(data) {
+      playSoundEffect('tick');
+      const themeData = THEMES[gameState.theme] || THEMES.car;
+      const peekBox = document.createElement('div');
+      peekBox.className = 'fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 animate-fade-in';
+      peekBox.innerHTML = `
+        <div class="bg-slate-900 border-2 border-indigo-400 rounded-3xl p-5 max-w-sm w-full text-center space-y-3">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+            <span class="text-xs font-black text-amber-400">👁️ معاينة خاطفة سريعة!</span>
+            <span class="text-xs text-rose-400 font-mono font-bold animate-ping">1s</span>
+          </div>
+          <div class="text-right">
+            <span class="text-sm font-black text-white">${data.avatar} ${data.name}</span>
+            <span class="text-xs text-emerald-400 font-mono block">المتبقي: ${data.budget} ر.س | الفخامة: ${data.score} نقطة</span>
+          </div>
+          <div class="h-40 flex items-center justify-center bg-slate-950 rounded-2xl p-2 border border-slate-800">
+            ${themeData.svgRender(data.upgrades || [])}
+          </div>
+        </div>
+      `;
+      document.body.appendChild(peekBox);
+
+      // Auto remove after 1 second strictly
+      setTimeout(() => {
+        peekBox.remove();
+      }, 1200);
+    }
+
+    // ==========================================
+    // 9. SABOTAGE CARDS MODAL & ACTIONS
+    // ==========================================
+    const DEFAULT_SABOTAGES = [
+      { id: 'saher', name: 'ساهر 📸', desc: 'خصم مخالفة فورية 4 ر.س من ميزانية المنافس' },
+      { id: 'satha', name: 'سطحة وتشليح 🧰', desc: 'إجبار الخصم على فك آخر ترقية اشتراها وبيعها بنصف السعر' },
+      { id: 'hasad', name: 'عين حسود 🧿', desc: 'تجميد خيار الشراء للخصم للجولة القادمة' },
+      { id: 'shareeti', name: 'شريطي المعارض 🤝', desc: 'تبديل إجباري لقطعة من عندك بأفضل قطعة عند خصمك' }
+    ];
+
+    function openSabotageModal() {
+      const modal = document.getElementById('modalSabotage');
+      const list = document.getElementById('mySabotageCardsList');
+      const select = document.getElementById('sabotageTargetSelect');
+
+      const me = gameState.players.find(p => p.id === gameState.myPlayerId);
+      const cards = (me && me.sabotageCards && me.sabotageCards.length > 0) ? me.sabotageCards : DEFAULT_SABOTAGES.slice(0, 1);
+
+      list.innerHTML = cards.map(c => `
+        <label class="block p-3 bg-slate-950 border border-slate-800 hover:border-rose-500 rounded-2xl cursor-pointer">
+          <div class="flex items-center gap-2">
+            <input type="radio" name="sabotageRadio" value="${c.id}" checked class="accent-rose-500">
+            <span class="text-sm font-black text-white">${c.name}</span>
+          </div>
+          <p class="text-[10px] text-slate-400 mt-1 mr-5">${c.desc}</p>
+        </label>
+      `).join('');
+
+      const competitors = gameState.players.filter(p => p.id !== gameState.myPlayerId);
+      select.innerHTML = competitors.map(c => `<option value="${c.id}">${c.avatar} ${c.name} (${c.budget} ر.س)</option>`).join('');
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeSabotageModal() {
+      document.getElementById('modalSabotage').classList.add('hidden');
+    }
+
+    function executeSabotageCard() {
+      const selectedRadio = document.querySelector('input[name="sabotageRadio"]:checked');
+      const targetSelect = document.getElementById('sabotageTargetSelect');
+      if (!selectedRadio || !targetSelect.value) {
+        alert('اختر الكرت والهدف أولاً!');
+        return;
+      }
+
+      const cardId = selectedRadio.value;
+      const targetId = targetSelect.value;
+
+      if (isConnected && ws) {
+        ws.send(JSON.stringify({
+          type: 'USE_SABOTAGE',
+          cardId: cardId,
+          targetId: targetId
+        }));
+      } else if (isOfflineDemo) {
+        handleLocalSabotage(cardId, targetId);
+      }
+
+      closeSabotageModal();
+    }
+
+    // ==========================================
+    // 10. BLIND AUCTION « حراج »
+    // ==========================================
+    function openAuctionModal(item) {
+      playSoundEffect('victory');
+      document.getElementById('auctionItemName').innerText = item.name;
+      document.getElementById('auctionItemDesc').innerText = `${item.desc} (+${item.bonus || item.scoreBonus} نقطة)`;
+      document.getElementById('modalAuction').classList.remove('hidden');
+    }
+
+    function closeAuctionModal() {
+      document.getElementById('modalAuction').classList.add('hidden');
+    }
+
+    function submitAuctionBid() {
+      const input = document.getElementById('auctionBidInput');
+      const bid = parseInt(input.value) || 0;
+      if (bid <= 0) {
+        alert('أدخل مبلغاً صحيحاً للمزايدة!');
+        return;
+      }
+
+      if (isConnected && ws) {
+        ws.send(JSON.stringify({ type: 'SUBMIT_AUCTION_BID', bid: bid }));
+      } else if (isOfflineDemo) {
+        handleLocalAuctionBid(bid);
+      }
+
+      closeAuctionModal();
+      showFloatingNotification('🔨 تم تسجيل مزايدتك السرية! النتائج بعد قليل...');
+    }
+
+    // ==========================================
+    // 11. LIVE FLOATING REACTIONS & NOTIFICATIONS
+    // ==========================================
+    function sendQuickReaction(emoji, text) {
+      if (isConnected && ws) {
+        ws.send(JSON.stringify({ type: 'SEND_REACTION', emoji: emoji, text: text }));
+      } else {
+        spawnFloatingBubble(emoji, text, myProfile.name);
+      }
+    }
+
+    function spawnFloatingBubble(emoji, text, senderName) {
+      const layer = document.getElementById('reactionsLayer');
+      const bubble = document.createElement('div');
+      const randomLeft = Math.floor(10 + Math.random() * 80);
+
+      bubble.className = 'absolute bottom-16 floating-reaction bg-slate-900/90 border border-slate-700/80 px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-2xl text-xs font-bold text-white z-50';
+      bubble.style.left = randomLeft + '%';
+      bubble.innerHTML = `
+        <span class="text-base">${emoji}</span>
+        <span class="text-[11px]">${text}</span>
+        <span class="text-[9px] text-slate-400 font-normal">(${senderName})</span>
+      `;
+
+      layer.appendChild(bubble);
+      setTimeout(() => bubble.remove(), 2900);
+    }
+
+    function showFloatingNotification(msg) {
+      const toast = document.createElement('div');
+      toast.className = 'fixed top-16 left-1/2 transform -translate-x-1/2 bg-slate-900 border-2 border-amber-500 text-amber-300 font-bold px-4 py-2 rounded-2xl shadow-2xl text-xs z-50 animate-bounce';
+      toast.innerText = msg;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3500);
+    }
+
+    function triggerEventBanner(title, desc) {
+      const b = document.getElementById('eventBanner');
+      const txt = document.getElementById('eventBannerText');
+      txt.innerText = `${title} ${desc}`;
+      b.classList.remove('hidden');
+      setTimeout(() => b.classList.add('hidden'), 5000);
+    }
+
+    // ==========================================
+    // 12. GRAND REVEAL & PODIUM
+    // ==========================================
+    function renderGrandReveal(data) {
+      playSoundEffect('victory');
+      confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+
+      const p1 = data.podium.first;
+      const p2 = data.podium.second;
+      const p3 = data.podium.third;
+
+      // Increment win count if I am champion
+      if (p1 && p1.name === myProfile.name) {
+        myProfile.wins = (myProfile.wins || 0) + 1;
+        saveProfile();
+      }
+
+      const themeData = THEMES[gameState.theme] || THEMES.car;
+
+      // Podium HTML
+      document.getElementById('podiumContainer').innerHTML = `
+        <!-- Runner Up (2nd) -->
+        ${p2 ? `
+          <div class="flex flex-col items-center">
+            <span class="text-2xl">${p2.avatar}</span>
+            <span class="text-xs font-bold text-slate-300 mt-1">${p2.name}</span>
+            <span class="text-xs font-mono font-black text-rose-400">${p2.pct}%</span>
+            <div class="w-20 md:w-24 h-24 bg-gradient-to-t from-slate-900 to-slate-800 border-t-4 border-slate-400 rounded-t-2xl flex flex-col items-center justify-center shadow-lg">
+              <span class="text-lg">🥈</span>
+              <span class="text-[10px] font-bold text-slate-300">المركز الثاني</span>
+            </div>
+          </div>
+        ` : ''}
+
+        <!-- Champion (1st) -->
+        ${p1 ? `
+          <div class="flex flex-col items-center z-10 scale-105">
+            <span class="text-4xl animate-bounce">👑</span>
+            <span class="text-3xl">${p1.avatar}</span>
+            <span class="text-sm font-black text-amber-300 mt-1">${p1.name}</span>
+            <span class="text-base font-mono font-black text-emerald-400">${p1.pct}%</span>
+            <div class="w-24 md:w-32 h-36 bg-gradient-to-t from-amber-600 to-amber-500 text-slate-950 rounded-t-2xl flex flex-col items-center justify-center shadow-2xl border-t-4 border-amber-300">
+              <span class="text-2xl">🥇</span>
+              <span class="text-xs font-black">البطل الأول</span>
+            </div>
+          </div>
+        ` : ''}
+
+        <!-- 3rd Place -->
+        ${p3 ? `
+          <div class="flex flex-col items-center">
+            <span class="text-2xl">${p3.avatar}</span>
+            <span class="text-xs font-bold text-slate-300 mt-1">${p3.name}</span>
+            <span class="text-xs font-mono font-black text-indigo-400">${p3.pct}%</span>
+            <div class="w-20 md:w-24 h-20 bg-gradient-to-t from-slate-900 to-slate-800 border-t-4 border-amber-700 rounded-t-2xl flex flex-col items-center justify-center shadow-lg">
+              <span class="text-lg">🥉</span>
+              <span class="text-[10px] font-bold text-amber-600">المركز الثالث</span>
+            </div>
+          </div>
+        ` : ''}
+      `;
+
+      // AI Commentary
+      document.getElementById('aiCommentaryText').innerText = data.commentary || 'تم تقييم المشاريع وفق معايير هندسية ومالية صارمة.';
+
+      // Full Rankings List
+      document.getElementById('fullRankingsList').innerHTML = data.rankings.map(r => `
+        <div class="bg-slate-950 border border-slate-800 p-3 rounded-2xl flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-slate-800 text-xs font-bold flex items-center justify-center text-slate-300">#${r.rank}</span>
+            <span class="text-xl">${r.avatar}</span>
+            <span class="text-xs font-black text-white">${r.name}</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-[10px] text-slate-400 font-mono">رصيد: ${r.budget} ر.س | قطع: ${r.upgrades ? r.upgrades.length : 0}</span>
+            <span class="text-sm font-mono font-black text-emerald-400">${r.percentage}%</span>
+          </div>
+        </div>
+      `).join('');
+
+      switchScreen('screenResults');
+    }
+
+    function handlePlayAgainClick() {
+      if (!gameState.isHost) {
+        alert('المضيف هو من يعيد الجولة!');
+        return;
+      }
+      if (isConnected && ws) {
+        ws.send(JSON.stringify({ type: 'PLAY_AGAIN' }));
+      } else if (isOfflineDemo) {
+        startLocalDemoMode();
+      }
+    }
+
+    // ==========================================
+    // 13. DYNAMIC VECTOR SVG RENDERING ENGINES
+    // ==========================================
+    function renderCarSVG(upgrades = []) {
+      const uNames = upgrades.map(u => u.name || '');
+      const hasGold = uNames.some(n => n.includes('ذهبي'));
+      const hasWheels = uNames.some(n => n.includes('جنوط'));
+      const hasMonster = uNames.some(n => n.includes('Monster'));
+      const hasSpoiler = uNames.some(n => n.includes('جناح'));
+      const hasNeon = uNames.some(n => n.includes('نيون'));
+      const hasLambo = uNames.some(n => n.includes('لمبو'));
+      const hasNitro = uNames.some(n => n.includes('نيترو'));
+
+      const bodyColor = hasGold ? 'url(#goldGrad)' : '#e11d48';
+      const tireSize = hasMonster ? 19 : 14;
+
+      return `
+        <svg viewBox="0 0 340 180" class="w-full max-h-56 select-none filter drop-shadow-xl" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#fef08a" />
+              <stop offset="50%" stop-color="#eab308" />
+              <stop offset="100%" stop-color="#ca8a04" />
+            </linearGradient>
+            <linearGradient id="neonGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#06b6d4" />
+              <stop offset="50%" stop-color="#ec4899" />
+              <stop offset="100%" stop-color="#10b981" />
+            </linearGradient>
+          </defs>
+
+          <!-- Underglow Neon -->
+          ${hasNeon ? `<ellipse cx="170" cy="148" rx="140" ry="12" fill="url(#neonGlow)" opacity="0.8" class="animate-pulse" />` : ''}
+
+          <!-- Car Shadow -->
+          <ellipse cx="170" cy="146" rx="130" ry="8" fill="#000" opacity="0.6" />
+
+          <!-- Rear Carbon GT Spoiler -->
+          ${hasSpoiler ? `
+            <path d="M 40 70 L 65 72 L 55 90 Z" fill="#0f172a" stroke="#334155" stroke-width="1.5" />
+            <rect x="25" y="65" width="45" height="5" rx="2" fill="#020617" />
+          ` : ''}
+
+          <!-- Nitro Flame / Tank -->
+          ${hasNitro ? `
+            <circle cx="50" cy="98" r="8" fill="#0284c7" />
+            <path d="M 28 120 Q 10 120 2 125 Q 15 130 28 126 Z" fill="#38bdf8" opacity="0.9" class="animate-pulse" />
+          ` : ''}
+
+          <!-- Car Body Main Shell -->
+          <path d="M 50 125 C 50 100 80 92 110 88 L 150 55 L 230 55 L 280 95 C 310 100 320 115 320 128 C 320 135 310 138 290 138 L 80 138 Z"
+                fill="${bodyColor}" stroke="#1e293b" stroke-width="2.5" />
+
+          <!-- Windows & Cockpit -->
+          <path d="M 155 60 L 225 60 L 265 92 L 125 92 Z" fill="#0f172a" opacity="0.85" stroke="#38bdf8" stroke-width="1.5" />
+
+          <!-- Lambo Scissor Doors -->
+          ${hasLambo ? `
+            <line x1="170" y1="92" x2="140" y2="35" stroke="#f43f5e" stroke-width="4" stroke-linecap="round" />
+            <path d="M 140 35 L 180 50 L 195 85 Z" fill="${bodyColor}" opacity="0.8" stroke="#f43f5e" stroke-width="1" />
+          ` : ''}
+
+          <!-- Front Headlights (LED) -->
+          <polygon points="305,108 318,114 310,120" fill="#38bdf8" class="animate-pulse" />
+
+          <!-- Rear Wheel -->
+          <g transform="translate(100, 138)">
+            <circle cx="0" cy="0" r="${tireSize}" fill="#0f172a" stroke="#334155" stroke-width="3" />
+            ${hasWheels ? `<circle cx="0" cy="0" r="10" fill="#e2e8f0" stroke="#ca8a04" stroke-width="2" />` : `<circle cx="0" cy="0" r="8" fill="#475569" />`}
+          </g>
+
+          <!-- Front Wheel -->
+          <g transform="translate(255, 138)">
+            <circle cx="0" cy="0" r="${tireSize}" fill="#0f172a" stroke="#334155" stroke-width="3" />
+            ${hasWheels ? `<circle cx="0" cy="0" r="10" fill="#e2e8f0" stroke="#ca8a04" stroke-width="2" />` : `<circle cx="0" cy="0" r="8" fill="#475569" />`}
+          </g>
+        </svg>
+      `;
+    }
+
+    function renderVillaSVG(upgrades = []) {
+      const uNames = upgrades.map(u => u.name || '');
+      const hasPool = uNames.some(n => n.includes('مسبح'));
+      const hasGarden = uNames.some(n => n.includes('حديقة'));
+      const hasRoof = uNames.some(n => n.includes('روف'));
+      const hasHeli = uNames.some(n => n.includes('هليكوبتر'));
+
+      return `
+        <svg viewBox="0 0 340 180" class="w-full max-h-56 select-none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Sky / Backdrop -->
+          <rect x="0" y="0" width="340" height="180" fill="#030712" rx="16" />
+
+          <!-- Villa Base Ground -->
+          <rect x="0" y="145" width="340" height="35" fill="#0f172a" />
+          ${hasGarden ? `<rect x="0" y="142" width="120" height="6" fill="#15803d" /><text x="30" y="138" font-size="20">🌴</text>` : ''}
+
+          <!-- Villa Main House Structure -->
+          <rect x="90" y="70" width="170" height="75" fill="#1e293b" stroke="#38bdf8" stroke-width="2" rx="4" />
+          <rect x="140" y="40" width="100" height="30" fill="#0f172a" stroke="#38bdf8" stroke-width="1.5" />
+
+          <!-- Windows -->
+          <rect x="105" y="85" width="35" height="25" fill="#38bdf8" opacity="0.6" rx="2" />
+          <rect x="160" y="85" width="45" height="40" fill="#38bdf8" opacity="0.8" rx="2" />
+          <rect x="225" y="85" width="25" height="25" fill="#38bdf8" opacity="0.6" rx="2" />
+
+          <!-- Infinity Pool -->
+          ${hasPool ? `
+            <rect x="200" y="140" width="120" height="20" fill="#0284c7" stroke="#38bdf8" stroke-width="2" rx="4" />
+            <text x="240" y="155" font-size="12" fill="#fff" font-weight="bold">مسبح 🌊</text>
+          ` : ''}
+
+          <!-- Rooftop Lounge & Cinema -->
+          ${hasRoof ? `
+            <rect x="150" y="32" width="80" height="8" fill="#e11d48" rx="2" />
+            <text x="180" y="30" font-size="12">🍸</text>
+          ` : ''}
+
+          <!-- Helipad on top -->
+          ${hasHeli ? `
+            <circle cx="115" cy="50" r="14" fill="#020617" stroke="#eab308" stroke-width="2" />
+            <text x="111" y="55" font-size="14" font-weight="black" fill="#eab308">H</text>
+          ` : ''}
+        </svg>
+      `;
+    }
+
+    function renderCafeSVG(upgrades = []) {
+      const uNames = upgrades.map(u => u.name || '');
+      const hasEspresso = uNames.some(n => n.includes('ماكينة'));
+      const hasNeon = uNames.some(n => n.includes('نيون'));
+      const hasTerrace = uNames.some(n => n.includes('جلسات'));
+
+      return `
+        <svg viewBox="0 0 340 180" class="w-full max-h-56 select-none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0" y="0" width="340" height="180" fill="#0a0a0a" rx="16" />
+          <rect x="50" y="50" width="240" height="100" fill="#1c1917" stroke="#78350f" stroke-width="2" rx="6" />
+
+          <!-- Neon Sign -->
+          ${hasNeon ? `
+            <rect x="90" y="25" width="160" height="25" fill="#030712" stroke="#ec4899" stroke-width="2" rx="10" />
+            <text x="170" y="42" font-size="13" font-weight="black" fill="#ec4899" text-anchor="middle" class="animate-pulse">☕ SPECIALTY COFFEE ☕</text>
+          ` : `
+            <rect x="120" y="30" width="100" height="20" fill="#292524" rx="4" />
+            <text x="170" y="44" font-size="10" fill="#a8a29e" text-anchor="middle">كافيه المدينة</text>
+          `}
+
+          <!-- Glass Storefront & Bar -->
+          <rect x="70" y="65" width="90" height="70" fill="#0c4a6e" opacity="0.7" rx="3" />
+          <rect x="180" y="65" width="90" height="70" fill="#0c4a6e" opacity="0.7" rx="3" />
+
+          <!-- Espresso Machine with Steam -->
+          ${hasEspresso ? `
+            <rect x="90" y="100" width="40" height="25" fill="#ca8a04" stroke="#eab308" stroke-width="1.5" rx="3" />
+            <text x="98" y="95" font-size="14" class="animate-bounce">♨️</text>
+          ` : ''}
+
+          <!-- Outdoor Terrace -->
+          ${hasTerrace ? `
+            <circle cx="230" cy="115" r="12" fill="#ca8a04" opacity="0.8" />
+            <text x="220" y="120" font-size="14">🪑</text>
+          ` : ''}
+        </svg>
+      `;
+    }
+
+    function renderRestaurantSVG(upgrades = []) {
+      return `
+        <svg viewBox="0 0 340 180" class="w-full max-h-56 select-none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0" y="0" width="340" height="180" fill="#111827" rx="16" />
+          <rect x="40" y="40" width="260" height="110" fill="#1f2937" stroke="#e11d48" stroke-width="2" rx="6" />
+          <text x="170" y="30" font-size="14" font-weight="black" fill="#f43f5e" text-anchor="middle">👑 مطعم فاخر وسحابي 5★</text>
+          <!-- Tables & Chandeliers -->
+          <circle cx="170" cy="55" r="8" fill="#eab308" opacity="0.9" />
+          <line x1="170" y1="40" x2="170" y2="55" stroke="#ca8a04" stroke-width="2" />
+          <rect x="80" y="95" width="50" height="25" fill="#e2e8f0" stroke="#cbd5e1" rx="4" />
+          <rect x="210" y="95" width="50" height="25" fill="#e2e8f0" stroke="#cbd5e1" rx="4" />
+          <text x="95" y="112" font-size="14">🍷</text>
+          <text x="225" y="112" font-size="14">🥩</text>
+        </svg>
+      `;
+    }
+
+    function renderTowerSVG(upgrades = []) {
+      const uNames = upgrades.map(u => u.name || '');
+      const hasRevolving = uNames.some(n => n.includes('دوار'));
+      const hasEvtol = uNames.some(n => n.includes('EVTOL') || n.includes('تاكسي'));
+
+      return `
+        <svg viewBox="0 0 340 180" class="w-full max-h-56 select-none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0" y="0" width="340" height="180" fill="#020617" rx="16" />
+          <!-- Tower Main Glass Shaft -->
+          <polygon points="140,165 155,25 185,25 200,165" fill="#0f172a" stroke="#38bdf8" stroke-width="2" />
+          <!-- Glass Floor Lines -->
+          ${[40, 60, 80, 100, 120, 140].map(y => `<line x1="145" y1="${y}" x2="195" y2="${y}" stroke="#0284c7" stroke-width="1.5" opacity="0.6" />`).join('')}
+
+          <!-- Revolving Restaurant at Top -->
+          ${hasRevolving ? `
+            <ellipse cx="170" cy="35" rx="30" ry="10" fill="#ca8a04" stroke="#fef08a" stroke-width="2" class="animate-pulse" />
+            <text x="170" y="39" font-size="9" fill="#020617" font-weight="black" text-anchor="middle">360°</text>
+          ` : ''}
+
+          <!-- EVTOL Flying Taxi Pad -->
+          ${hasEvtol ? `
+            <rect x="195" y="60" width="25" height="4" fill="#10b981" />
+            <text x="215" y="60" font-size="14" class="animate-bounce">🛸</text>
+          ` : ''}
+        </svg>
+      `;
+    }
+
+    function renderJetSVG(upgrades = []) {
+      const uNames = upgrades.map(u => u.name || '');
+      const hasGoldWings = uNames.some(n => n.includes('ذهبية'));
+      const hasEngines = uNames.some(n => n.includes('محركات'));
+
+      const wingColor = hasGoldWings ? '#eab308' : '#64748b';
+
+      return `
+        <svg viewBox="0 0 340 180" class="w-full max-h-56 select-none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0" y="0" width="340" height="180" fill="#030712" rx="16" />
+          <!-- Clouds -->
+          <ellipse cx="70" cy="140" rx="40" ry="12" fill="#1e293b" opacity="0.6" />
+          <ellipse cx="270" cy="130" rx="50" ry="15" fill="#1e293b" opacity="0.6" />
+
+          <!-- Jet Fuselage -->
+          <ellipse cx="170" cy="85" rx="120" ry="22" fill="#f8fafc" stroke="#0f172a" stroke-width="2" />
+          <!-- Cockpit Glass -->
+          <polygon points="260,80 280,85 260,90" fill="#0284c7" />
+
+          <!-- Wings -->
+          <polygon points="120,85 170,25 210,85" fill="${wingColor}" stroke="#334155" stroke-width="2" />
+          <polygon points="120,85 170,145 210,85" fill="${wingColor}" stroke="#334155" stroke-width="2" />
+
+          <!-- Jet Engines -->
+          ${hasEngines ? `
+            <rect x="130" y="45" width="30" height="10" rx="4" fill="#0f172a" stroke="#f59e0b" stroke-width="2" />
+            <polygon points="130,46 115,50 130,54" fill="#f97316" class="animate-ping" />
+            <rect x="130" y="115" width="30" height="10" rx="4" fill="#0f172a" stroke="#f59e0b" stroke-width="2" />
+            <polygon points="130,116 115,120 130,124" fill="#f97316" class="animate-ping" />
+          ` : ''}
+        </svg>
+      `;
+    }
+
+    // ==========================================
+    // 14. OFFLINE / LOCAL DEMO SIMULATION ENGINE
+    // ==========================================
+    function startLocalDemoMode() {
+      isOfflineDemo = true;
+      gameState.roomCode = '8492';
+      gameState.myPlayerId = 'p_me';
+      gameState.isHost = true;
+      gameState.theme = 'car';
+      gameState.budget = 25;
+      gameState.round = 0;
+      gameState.totalRounds = 6;
+      gameState.myUpgrades = [];
+
+      // 4 simulated players
+      gameState.players = [
+        { id: 'p_me', name: myProfile.name, avatar: myProfile.avatar, isHost: true, budget: 25, score: 10, upgrades: [], sabotageCards: [{ id: 'saher', name: 'ساهر 📸', desc: 'خصم مخالفة فورية 4 ر.س' }] },
+        { id: 'p_2', name: 'عبدالله', avatar: '🕶️', isHost: false, budget: 25, score: 10, upgrades: [], sabotageCards: [] },
+        { id: 'p_3', name: 'سارة', avatar: '👑', isHost: false, budget: 25, score: 10, upgrades: [], sabotageCards: [] },
+        { id: 'p_4', name: 'فهد', avatar: '🚀', isHost: false, budget: 25, score: 10, upgrades: [], sabotageCards: [] }
+      ];
+
+      switchScreen('screenLobby');
+      applyRoomUpdate({
+        code: gameState.roomCode,
+        theme: gameState.theme,
+        budget: gameState.budget,
+        mode: 'ffa',
+        curtain: true,
+        state: 'lobby',
+        players: gameState.players,
+        hostId: 'p_me',
+        codeExpiresIn: 600
+      });
+      startLobbyCodeTimer(600);
+      showFloatingNotification('🕹️ بدأت الغرفة التجريبية بنجاح!');
+    }
+
+    function startLocalRound() {
+      gameState.round++;
+      if (gameState.round > gameState.totalRounds) {
+        endLocalGame();
+        return;
+      }
+
+      // Midway auction check
+      if (gameState.round === Math.floor(gameState.totalRounds / 2)) {
+        openAuctionModal({
+          name: 'لوحة ملكية « ق د ك 1 »',
+          desc: 'أندر لوحة فردية تعطي فخامة أسطورية',
+          bonus: 45
+        });
+        return;
+      }
+
+      const themeData = THEMES[gameState.theme];
+      const off = themeData.upgrades[(gameState.round - 1) % themeData.upgrades.length];
+      gameState.currentOffer = off;
+      gameState.timer = 20;
+
+      switchScreen('screenPlay');
+      renderPlayRound();
+    }
+
+    function handleLocalPlayerChoice(action) {
+      const me = gameState.players[0];
+      const off = gameState.currentOffer;
+
+      if (action === 'buy' && me.budget >= off.price) {
+        me.budget -= off.price;
+        me.score += off.score;
+        me.upgrades.push(off);
+      }
+
+      // Simulate opponents
+      gameState.players.slice(1).forEach(comp => {
+        if (comp.budget >= off.price && Math.random() < 0.65) {
+          comp.budget -= off.price;
+          comp.score += off.score;
+          comp.upgrades.push(off);
+        }
+      });
+
+      setTimeout(() => {
+        startLocalRound();
+      }, 1200);
+    }
+
+    function handleLocalSabotage(cardId, targetId) {
+      const target = gameState.players.find(p => p.id === targetId);
+      if (target) {
+        target.budget = Math.max(0, target.budget - 4);
+        showFloatingNotification(`📸 رصد ساهر مخالفة على ${target.name} وخصم 4 ر.س!`);
+        playSoundEffect('sabotage');
+        renderCompetitorsGrid();
+      }
+    }
+
+    function handleLocalAuctionBid(bid) {
+      const me = gameState.players[0];
+      if (bid <= me.budget) {
+        me.budget -= bid;
+        me.score += 45;
+        me.upgrades.push({ name: 'لوحة ملكية « ق د ك 1 »', price: bid, score: 45 });
+        showFloatingNotification(`🔨 فزت بالمزاد بمبلغ ${bid} ر.س وأضفت +45 نقطة!`);
+      }
+      setTimeout(() => startLocalRound(), 1500);
+    }
+
+    function endLocalGame() {
+      const themeData = THEMES[gameState.theme];
+      gameState.players.forEach(p => {
+        p.finalScore = p.score + Math.round(p.budget * 1.5);
+      });
+      gameState.players.sort((a, b) => b.finalScore - a.finalScore);
+
+      const pool = gameState.players.reduce((sum, p) => sum + p.finalScore, 0) || 1;
+      gameState.players.forEach(p => {
+        p.percentage = Math.round((p.finalScore / pool) * 100);
+      });
+
+      const p1 = gameState.players[0];
+      const p2 = gameState.players[1];
+      const p3 = gameState.players[2] || null;
+
+      const commentary = `🏆 يتوّج الذكاء الاصطناعي المتسابق "${p1.name}" بالمركز الأول بنسبة ${p1.percentage}%! تميز في هندسة وتطوير (${themeData.title}) واحتفظ بـ (${p1.budget} ر.س) كرصيد استراتيجي منعته من الطفرة!`;
+
+      renderGrandReveal({
+        podium: {
+          first: { name: p1.name, avatar: p1.avatar, pct: p1.percentage },
+          second: p2 ? { name: p2.name, avatar: p2.avatar, pct: p2.percentage } : null,
+          third: p3 ? { name: p3.name, avatar: p3.avatar, pct: p3.percentage } : null
+        },
+        rankings: gameState.players.map((p, i) => ({
+          rank: i + 1,
+          name: p.name,
+          avatar: p.avatar,
+          budget: p.budget,
+          percentage: p.percentage,
+          upgrades: p.upgrades
+        })),
+        commentary: commentary
+      });
+    }
+
+    // ==========================================
+    // 15. INITIALIZATION ON PAGE LOAD
+    // ==========================================
+    window.addEventListener('DOMContentLoaded', () => {
+      loadProfile();
+
+      // Quick Emoji Palette Buttons
+      const palette = document.getElementById('quickEmojiPalette');
+      if (palette) {
+        palette.innerHTML = QUICK_EMOJIS.map(e => `
+          <button type="button" onclick="pickQuickEmoji('${e}')"
+                  class="w-8 h-8 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-700 flex items-center justify-center text-lg transition active:scale-90">
+            ${e}
+          </button>
+        `).join('');
+      }
+
+      // Connect to WebSocket server if running on server
+      connectWebSocket();
+    });
+  </script>
+</body>
+</html>

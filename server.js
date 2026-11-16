@@ -1,0 +1,908 @@
+/**
+ * « على قد جيبك 💸 » (Alagadjeebak) - Cloud Multiplayer Server
+ * Real-time WebSocket + Express Game Server
+ * Features: 2-8 players, 10-min code renewal, Anti-cheat curtain, Sabotage cards,
+ * Blind auction, Random events, Live reactions, and AI Judge.
+ */
+
+const express = require('express');
+const http = require('http');
+const path = require('path');
+const { WebSocketServer, WebSocket } = require('ws');
+
+const app = express();
+const server = http.createServer(app);
+const wss = new WebSocketServer({ server });
+
+const PORT = process.env.PORT || 3000;
+
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.json());
+
+// Health Check
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', time: new Date().toISOString(), rooms: rooms.size });
+});
+
+// ==========================================
+// 1. DATA: THEMES, UPGRADES, AUCTION & EVENTS
+// ==========================================
+
+const THEMES = {
+  car: {
+    id: 'car',
+    title: '🏎️ سيارة رياضية خارقة',
+    desc: 'حوّل سيارة متهالكة لوحش كربوني فخم مع نيترو وأبواب لمبو',
+    upgrades: [
+      { id: 'c1', name: 'مراتب جلد أحمر تطريز ملكي', price: 3, score: 15, tag: 'interior', desc: 'راحة فائقة ومظهر فاره' },
+      { id: 'c2', name: 'جنوط سبور أصلية مقاس 20', price: 4, score: 20, tag: 'wheels', desc: 'ثبات خرافي على المنعطفات' },
+      { id: 'c3', name: 'أبواب لمبو فراشة تنفتح للأعلى', price: 6, score: 30, tag: 'doors', desc: 'هيبة استعراضية تلفت الأنظار' },
+      { id: 'c4', name: 'شاحن تيربو مزدوج + هيدرز', price: 5, score: 25, tag: 'engine', desc: 'قوة حصانية ونغمة طرب' },
+      { id: 'c5', name: 'جناح خلفي كربوني GT Dynamic', price: 3, score: 16, tag: 'spoiler', desc: 'داون فورس ديناميكي هوائي' },
+      { id: 'c6', name: 'كفرات Monster ضخمة للطرق الوعرة', price: 4, score: 18, tag: 'tires', desc: 'شكل هجومي يفرش الخط' },
+      { id: 'c7', name: 'أسطوانة نيترو NOS زرقاء شحن سريع', price: 5, score: 28, tag: 'nitro', desc: 'تسارع صاروخي في الثواني الأخيرة' },
+      { id: 'c8', name: 'إضاءة نيون سفلية RGB متحركة', price: 2, score: 12, tag: 'neon', desc: 'أجواء ليلية سينمائية ساحرة' },
+      { id: 'c9', name: 'طلاء ذهبي ميتاليك طبقات نانو سيراميك', price: 7, score: 35, tag: 'paint', desc: 'بريق عاكس ولمعان لا يبهت' },
+      { id: 'c10', name: 'نظام صوتي 12 سماعة مع مضخم باص', price: 3, score: 14, tag: 'audio', desc: 'مسرح غنائي متنقل داخل المقصورة' },
+      { id: 'c11', name: 'مكابح كاربون سيراميك حمراء بريمبو', price: 4, score: 22, tag: 'brakes', desc: 'توقف فوري وأمان قصوى' },
+      { id: 'c12', name: 'فتحة سقف بانورامية مظللة بالذكاء', price: 4, score: 20, tag: 'roof', desc: 'رؤية سماوية وتحكم بالعزل' },
+      { id: 'c13', name: 'نظام قيادة ذاتي بالذكاء الاصطناعي', price: 8, score: 40, tag: 'ai', desc: 'سيارة تفهم عليك وتصطف لحالها' },
+      { id: 'c14', name: 'مفتاح كريستال رقمي وتطعيمات ألماس', price: 5, score: 26, tag: 'key', desc: 'لمسة ترف تليق بالهوامير' }
+    ]
+  },
+  villa: {
+    id: 'villa',
+    title: '🏡 فيلا وقصر الأحلام',
+    desc: 'ابنِ قصراً أسطورياً من الأرض إلى مهبط الهليكوبتر والمسبح',
+    upgrades: [
+      { id: 'v1', name: 'واجهة زجاجية سمارت بانورامية', price: 4, score: 20, tag: 'glass', desc: 'إطلالة عصرية وإنارة طبيعية' },
+      { id: 'v2', name: 'مسبح أولمبي إنفينيتي وشلال صخري', price: 6, score: 32, tag: 'pool', desc: 'استرخاء مائي فاخر يسر الناظرين' },
+      { id: 'v3', name: 'حديقة نخيل وثيل أمريكي وشواية BBQ', price: 3, score: 15, tag: 'garden', desc: 'جلسة خارجية لأحلى جمعات' },
+      { id: 'v4', name: 'روف لاونج وسينما خارجية تحت النجوم', price: 4, score: 22, tag: 'roof', desc: 'شاشة عملاقة وسماعات محيطية' },
+      { id: 'v5', name: 'مهبط هليكوبتر خاص على السطح', price: 7, score: 38, tag: 'helipad', desc: 'وصول ملكي وتسهيل للتنقل' },
+      { id: 'v6', name: 'مصعد بانورامي زجاجي مطل', price: 3, score: 18, tag: 'elevator', desc: 'سهولة الصعود بين الأدوار' },
+      { id: 'v7', name: 'صالة سينما منزلية مع كراسي مساج VIP', price: 5, score: 26, tag: 'cinema', desc: 'أجواء صالات هوليوود بالبيت' },
+      { id: 'v8', name: 'سور حجري أندلسي وبوابة ليزر ذكية', price: 3, score: 16, tag: 'gate', desc: 'خصوصية وأمان رقمي متطور' },
+      { id: 'v9', name: 'طاقة شمسية وتكييف مركزي ذكي', price: 4, score: 20, tag: 'solar', desc: 'توفير فواتير وتبريد استثنائي' },
+      { id: 'v10', name: 'مطبخ إيطالي مفتوح وجزيرة رخام كلكتا', price: 5, score: 25, tag: 'kitchen', desc: 'تصميم شيف راقٍ للضيافة' },
+      { id: 'v11', name: 'نافورة راقصة بإضاءات خافتة بالمدخل', price: 3, score: 17, tag: 'fountain', desc: 'ترحيب ملكي يليق بالزوار' },
+      { id: 'v12', name: 'نظام حماية أمني وكاميرات 360 بالذكاء', price: 3, score: 16, tag: 'security', desc: 'مراقبة وحماية بدون قلق' },
+      { id: 'v13', name: 'جناح سبا متكامل وحمام بخار تركي', price: 5, score: 28, tag: 'spa', desc: 'نقاء واستجمام بعد عناء العمل' },
+      { id: 'v14', name: 'غرفة تحف ومقتنيات نادرة معزولة', price: 6, score: 30, tag: 'gallery', desc: 'لمسة أرستقراطية فريدة' }
+    ]
+  },
+  cafe: {
+    id: 'cafe',
+    title: '☕ مقهى وكافيه عصري',
+    desc: 'أسس أرقى كافيه بالمدينة مع ماكينة إيطالية وجلسات خارجية',
+    upgrades: [
+      { id: 'k1', name: 'ماكينة إسبريسو لامارزوكو مذهبة مع بخار', price: 6, score: 32, tag: 'machine', desc: 'استخلاص قهوة مثالي ورغوة مخملية' },
+      { id: 'k2', name: 'لوحة نيون مضيئة بعبارة ترند', price: 2, score: 12, tag: 'neon', desc: 'منطقة تصوير سناب وتيك توك' },
+      { id: 'k3', name: 'جلسات خارجية وترّاس مظلل برذاذ بارد', price: 4, score: 20, tag: 'terrace', desc: 'إقبال مضاعف في الأجواء الحلوة' },
+      { id: 'k4', name: 'محمصة بن احترافية داخل الكافيه', price: 5, score: 28, tag: 'roaster', desc: 'رائحة التحميص تعبي الشارع' },
+      { id: 'k5', name: 'بار باريستا رخام أسود وإضاءة موجهة', price: 3, score: 16, tag: 'bar', desc: 'فخامة هندسية ومساحة خدمة مريحة' },
+      { id: 'k6', name: 'موسيقى جاز ولاونج هادئ وساوند سيستم', price: 2, score: 12, tag: 'music', desc: 'أجواء عمل ودراسة رايقة' },
+      { id: 'k7', name: 'ثلاجة مخبوزات وكرواسون فرنسي فاخر', price: 4, score: 22, tag: 'bakery', desc: 'مبيعات مضاعفة مع كل فنجان' },
+      { id: 'k8', name: 'أكواب سيراميك كورية وتغليف حصري', price: 3, score: 15, tag: 'cups', desc: 'هوية بصرية أنيقة يتمناها الزبائن' },
+      { id: 'k9', name: 'منطقة درايف ثرو سريعة للسيارات', price: 6, score: 30, tag: 'drivethru', desc: 'تدفق أرباح مستمر بدون انقطاع' },
+      { id: 'k10', name: 'ركن بوكسات الهدايا وحبوب البن المختص', price: 3, score: 17, tag: 'beans', desc: 'منتجات إضافية ترفع السلة' },
+      { id: 'k11', name: 'إنترنت فايبر فائق السرعة وأفياش مدمجة', price: 2, score: 14, tag: 'wifi', desc: 'مغناطيس لأصحاب العمل الحر' },
+      { id: 'k12', name: 'محطة مشروبات مبتكرة وخلطات صيفية', price: 3, score: 18, tag: 'drinks', desc: 'ماتشا وكركديه موهيتو منعش' },
+      { id: 'k13', name: 'تطبيق ولاء رقمي ونظام مكافآت بالـ AI', price: 4, score: 24, tag: 'loyalty', desc: 'زبائن دائمين وتكرار زيارات' },
+      { id: 'k14', name: 'فرع VIP وسجل امتياز تجاري قابل للتوسع', price: 7, score: 38, tag: 'franchise', desc: 'تحويل المقهى لعلامة تجارية كبرى' }
+    ]
+  },
+  restaurant: {
+    id: 'restaurant',
+    title: '🍔 مطعم فاخر وسحابي',
+    desc: 'مطبخ مفتوح، عازف بيانو كلاسيكي، وطاولات رخامية أرستقراطية',
+    upgrades: [
+      { id: 'r1', name: 'طاولات رخام إيطالي ومقاعد مخمل كرزي', price: 4, score: 20, tag: 'tables', desc: 'جلسات ضيافة بالغة الرقي' },
+      { id: 'r2', name: 'مطبخ مفتوح Open Kitchen وشواية حطب', price: 6, score: 32, tag: 'kitchen', desc: 'شوو حي ورائحة شواء تأسر القلوب' },
+      { id: 'r3', name: 'عازف بيانو كلاسيكي على مسرح هادئ', price: 4, score: 22, tag: 'piano', desc: 'نغمات كلاسيكية ترفع قيمة الوجبة' },
+      { id: 'r4', name: 'ثريات كريستال بوهيمي وإضاءة دافئة', price: 3, score: 16, tag: 'chandeliers', desc: 'فخامة بصرية تخطف الأبصار' },
+      { id: 'r5', name: 'شيف عالمي حاصل على نجمة ميشلان', price: 8, score: 45, tag: 'chef', desc: 'قائمة طعام استثنائية وأطباق فنية' },
+      { id: 'r6', name: 'غرفة VIP سرية لاجتماعات كبار الشخصيات', price: 5, score: 26, tag: 'vip', desc: 'خصوصية تامة وحجز مسبق بالأشهر' },
+      { id: 'r7', name: 'منطقة كيدز إلكترونية آمنة للأطفال', price: 3, score: 15, tag: 'kids', desc: 'راحة تامة للعائلات أثناء العشاء' },
+      { id: 'r8', name: 'خدمة صف سيارات فالي VIP أمام الباب', price: 3, score: 18, tag: 'valet', desc: 'انطباع أول يبهر كل زائر' },
+      { id: 'r9', name: 'ثلاجة تعتيق لحوم واغيو دراي إيدجد', price: 6, score: 30, tag: 'wagyu', desc: 'أعلى جودة ستيكات في السوق' },
+      { id: 'r10', name: 'شرفة أطلال بانورامية مطلة على النافورة', price: 4, score: 22, tag: 'terrace', desc: 'أجمل صور الغروب مع العشاء' },
+      { id: 'r11', name: 'بار حلويات استعراضي بالنيتروجين المثلج', price: 4, score: 21, tag: 'dessert', desc: 'تجربة حلى ساحرة ومبهرة' },
+      { id: 'r12', name: 'عقود تموين لحوم محلية طازجة يومياً', price: 4, score: 19, tag: 'supply', desc: 'ثقة ومذاق بلدي مضمون' },
+      { id: 'r13', name: 'روبوتات تقديم ذكية لنقل الطلبات', price: 5, score: 27, tag: 'robots', desc: 'تقنية مبهرة وسرعة في الخدمة' },
+      { id: 'r14', name: 'توثيق تقييمات المشاهير وتغطية إعلامية', price: 5, score: 25, tag: 'media', desc: 'ترند طوابير وزحمة يومية' }
+    ]
+  },
+  tower: {
+    id: 'tower',
+    title: '🏢 برج وناطحة سحاب',
+    desc: 'شيّد ناطحة سحاب شامخة مع مطعم دوار ومهبط تاكسي طائر',
+    upgrades: [
+      { id: 't1', name: 'طوابق زجاجية شاهقة وعاكسة للشمس', price: 5, score: 25, tag: 'glass', desc: 'ارتفاع شاهق وتصميم مستقبلي' },
+      { id: 't2', name: 'مطعم دوار 360 درجة بأعلى قمة البرج', price: 7, score: 38, tag: 'restaurant', desc: 'إطلالة كاملة على أفق المدينة' },
+      { id: 't3', name: 'مهبط طائرات تاكسي طائر EVTOL متطور', price: 6, score: 32, tag: 'evtol', desc: 'وسيلة نقل المستقبل لكبار التنفيذيين' },
+      { id: 't4', name: 'عروض ليزر وإضاءات LED تفاعلية بالواجهة', price: 4, score: 22, tag: 'led', desc: 'شاشة عملاقة للاحتفالات الوطنية' },
+      { id: 't5', name: 'مصاعد صاروخية هوائية تصعد في ثوانٍ', price: 4, score: 20, tag: 'lift', desc: 'سرعة فائقة بدون الشعور بالضغط' },
+      { id: 't6', name: 'حديقة معلقة داخلية في الطابق الخمسين', price: 4, score: 21, tag: 'skyforest', desc: 'واحة خضراء بين السحاب' },
+      { id: 't7', name: 'منصة مراقبة سياحية بأرضية زجاجية شفافة', price: 5, score: 26, tag: 'deck', desc: 'تذاكر سياحية وتجربة إثارة فريدة' },
+      { id: 't8', name: 'نظام إخماد حرائق ذكي وأعلى معايير أمان', price: 3, score: 16, tag: 'safety', desc: 'حماية كاملة واستقرار دائم' },
+      { id: 't9', name: 'مكاتب شركات عالمية بتقنيات الميتافيرس', price: 6, score: 30, tag: 'offices', desc: 'أرقى بيئة عمل لرواد الأعمال' },
+      { id: 't10', name: 'قبة سماوية فلكية في القمة للرصد', price: 4, score: 23, tag: 'dome', desc: 'رؤية النجوم والمجرات بدون تلوث' },
+      { id: 't11', name: 'نظام إدارة طاقة ذاتي وتوليد بالرياح', price: 4, score: 20, tag: 'green', desc: 'برج صديق للبيئة وشهادة بلاتينية' },
+      { id: 't12', name: 'مواقف روبوتية ذكية تحت الأرض لـ 500 سيارة', price: 5, score: 25, tag: 'parking', desc: 'اصطفاف تلقائي بدون تدخل بشري' },
+      { id: 't13', name: 'صالة مؤتمرات دبلوماسية مع ترجمة فورية بالذكاء', price: 5, score: 27, tag: 'summit', desc: 'استضافة كبرى القمم العالمية' },
+      { id: 't14', name: 'برج اتصالات 6G وربط فضائي مباشر', price: 6, score: 33, tag: 'telecom', desc: 'أسرع اتصال رقمي في المنطقة' }
+    ]
+  },
+  jet: {
+    id: 'jet',
+    title: '✈️ طائرة خاصة فاخرة',
+    desc: 'جهّز طائرة نفاثة عابرة للقارات بجناح نوم وجاكوزي بالسماء',
+    upgrades: [
+      { id: 'j1', name: 'أجنحة ذهبية وتطعيمات خارجية ملكية', price: 5, score: 26, tag: 'gold', desc: 'هيبة طيران تلفت كل المطارات' },
+      { id: 'j2', name: 'محركات نفاثة مزدوجة بتوهج حراري وهدوء', price: 8, score: 42, tag: 'engines', desc: 'سرعة تفوق الصوت بدون إزعاج' },
+      { id: 'j3', name: 'جناح نوم ماستر مع سرير ملكي كينغ', price: 6, score: 30, tag: 'bedroom', desc: 'نوم عميق وراحة متناهية بالغيوم' },
+      { id: 'j4', name: 'سقف بانورامي زجاجي يعرض النجوم ليلاً', price: 4, score: 22, tag: 'skylight', desc: 'رؤية السماء الصافية في الرحلات' },
+      { id: 'j5', name: 'واي فاي فضائي ستارلينك مجاناً وبلا حدود', price: 2, score: 15, tag: 'starlink', desc: 'بث 4K وتداول أسهم بالجو' },
+      { id: 'j6', name: 'جاكوزي مائي دافئ داخل حمام الطائرة', price: 5, score: 28, tag: 'jacuzzi', desc: 'استرخاء مائي استثنائي فوق السحاب' },
+      { id: 'j7', name: 'طاقم ضيافة خاص وشيف رحلات محترف', price: 4, score: 22, tag: 'crew', desc: 'تقديم وجبات 5 نجوم على ارتفاع 40 ألف قدم' },
+      { id: 'j8', name: 'مقصورة قيادة بالذكاء الاصطناعي مع رادار تضاريس', price: 4, score: 24, tag: 'cockpit', desc: 'أقصى درجات الأمان وملاحة دقيقة' },
+      { id: 'j9', name: 'صالون اجتماعات مصفح بعزل صوتي 100%', price: 4, score: 21, tag: 'lounge', desc: 'صفقات المليارات تُبرم بسرية تامة' },
+      { id: 'j10', name: 'مقاعد جلد تمساح فاخرة تتحول لأسرة مسطحة', price: 5, score: 25, tag: 'seats', desc: 'راحة قصوى لجميع الضيوف' },
+      { id: 'j11', name: 'نظام تنقية هواء بأيونات الفضة والأكسجين', price: 3, score: 17, tag: 'air', desc: 'تنشيط دائم والقضاء على إجهاد السفر' },
+      { id: 'j12', name: 'خزان وقود إضافي مدى 12,000 كم متواصل', price: 5, score: 27, tag: 'fuel', desc: 'من الرياض إلى نيويورك بدون توقف' },
+      { id: 'j13', name: 'نظام دفاع جوي ذكي وتفادي مطبات بالليزر', price: 6, score: 31, tag: 'defense', desc: 'رحلة سلسة كالماء في أحلك الظروف' },
+      { id: 'j14', name: 'طلاء نانو ضد الخدوش وشهادة طيران دولية VIP', price: 4, score: 20, tag: 'nano', desc: 'حفاظ على قيمة الطائرة لسنوات' }
+    ]
+  }
+};
+
+// Sabotage Cards
+const SABOTAGE_CARDS = [
+  { id: 'saher', name: 'ساهر 📸', icon: '📸', desc: 'خصم مخالفة فورية 4 ر.س من ميزانية المنافس', type: 'budget_cut', val: 4 },
+  { id: 'satha', name: 'سطحة وتشليح 🧰', icon: '🧰', desc: 'إجبار الخصم على فك آخر ترقية اشتراها وبيعها بنصف السعر', type: 'sell_last' },
+  { id: 'hasad', name: 'عين حسود 🧿', icon: '🧿', desc: 'تجميد خيار الشراء للخصم للجولة القادمة', type: 'freeze_turn' },
+  { id: 'shareeti', name: 'شريطي المعارض 🤝', icon: '🤝', desc: 'تبديل إجباري لقطعة من عندك بأفضل قطعة عند خصمك', type: 'swap_piece' }
+];
+
+// Random Events
+const RANDOM_EVENTS = [
+  { id: 'ghubar', title: '🌪️ موجة غبار موسمية!', desc: 'كل المتسابقين يدفعون 2 ر.س صيانة وتنظيف عاجل لمشروعهم.', effect: (room) => {
+    room.players.forEach(p => { p.budget = Math.max(0, p.budget - 2); });
+  }},
+  { id: 'baladiya', title: '📋 تفتيش بلدي مفاجئ!', desc: 'المشروع الأقل نقاطاً يحصل على مخالفة 3 ر.س، والأعلى يحصل على ترخيص ذهبي (+15 نقطة)!', effect: (room) => {
+    if (room.players.length === 0) return;
+    const sorted = [...room.players].sort((a,b) => b.score - a.score);
+    sorted[0].score += 15;
+    const lowest = sorted[sorted.length - 1];
+    lowest.budget = Math.max(0, lowest.budget - 3);
+  }},
+  { id: 'cashback', title: '💳 يوم الكاش باك البنكي!', desc: 'مكافأة 4 ر.س كاش باك تُضاف فوراً لجميع المتسابقين لدعم ميزانياتهم!', effect: (room) => {
+    room.players.forEach(p => { p.budget += 4; });
+  }},
+  { id: 'trend', title: '🔥 ترند تيك توك وسناب شات!', desc: 'جميع المشاريع تحصل على +10 نقاط شهرة إضافية بدون أي تكلفة!', effect: (room) => {
+    room.players.forEach(p => { p.score += 10; });
+  }}
+];
+
+// Blind Auction Items
+const AUCTION_ITEMS = {
+  car: { name: 'لوحة ملكية فردية « ق د ك 1 »', desc: 'أندر لوحة في المملكة تضاعف فخامة سيارتك!', scoreBonus: 45, startBid: 3 },
+  villa: { name: 'صك ملكي استثماري وصك أرض ملاصقة', desc: 'مساحة إضافية ترفع هيبة قصرك للسحاب!', scoreBonus: 45, startBid: 3 },
+  cafe: { name: 'وكالة بن مختص حصرية من جبال جازان', desc: 'أفضل محصول بن عربي أصيل يضمن طوابير الزبائن!', scoreBonus: 45, startBid: 3 },
+  restaurant: { name: 'ترخيص تصنيف 5 نجوم بلاتيني عالمي', desc: 'شهادة جودة استثنائية تجذب كبار الشخصيات!', scoreBonus: 45, startBid: 3 },
+  tower: { name: 'حقوق تسمية البرج وعقد إعلاني ملياري', desc: 'اسمك يعتلي قمة البرج ويضيء سماء العاصمة!', scoreBonus: 45, startBid: 3 },
+  jet: { name: 'تصريح عبور أجوائي ملكي بدون انتظار', desc: 'أولوية هبوط وإقلاع في كبرى مطارات العالم!', scoreBonus: 45, startBid: 3 }
+};
+
+// ==========================================
+// 2. ROOM & PLAYER MANAGEMENT
+// ==========================================
+
+const rooms = new Map();
+
+function generateCode() {
+  return String(Math.floor(1000 + Math.random() * 9000));
+}
+
+function isValidEmoji(str) {
+  if (!str) return false;
+  // Strictly reject latin, arabic, numbers, and basic punctuation
+  if (/[a-zA-Z0-9\u0600-\u06FF\s.,\/#!$%\^&\*;:{}=\-_`~()?]/.test(str)) return false;
+  // Emoji regex match
+  const emojiRegex = /(\p{Emoji_Presentation}|\p{Extended_Pictographic})/u;
+  return emojiRegex.test(str);
+}
+
+function createRoom(hostPlayer, options = {}) {
+  let code = generateCode();
+  while (rooms.has(code)) code = generateCode();
+
+  const room = {
+    code: code,
+    createdAt: Date.now(),
+    codeExpiresAt: Date.now() + 10 * 60 * 1000, // 10 minutes
+    hostId: hostPlayer.id,
+    players: [hostPlayer],
+    theme: options.theme || 'car',
+    budget: options.budget || 25,
+    mode: options.mode || 'ffa', // ffa | coop | survival
+    curtain: options.curtain !== false, // default true
+    state: 'lobby', // lobby | playing | auction | results
+    round: 0,
+    totalRounds: 6,
+    currentOffer: null,
+    roundTimerSec: 20,
+    roundTimerInterval: null,
+    codeTimerInterval: null,
+    auctionData: null,
+    history: []
+  };
+
+  // Determine rounds based on budget
+  room.totalRounds = calculateRounds(room.budget);
+
+  // Setup 10-minute code refresh interval
+  startRoomCodeTimer(room);
+
+  rooms.set(code, room);
+  return room;
+}
+
+function calculateRounds(budget) {
+  if (budget >= 200) return 14;
+  if (budget >= 100) return 10;
+  if (budget >= 50) return 8;
+  return 6;
+}
+
+function startRoomCodeTimer(room) {
+  if (room.codeTimerInterval) clearInterval(room.codeTimerInterval);
+  room.codeTimerInterval = setInterval(() => {
+    const remaining = Math.max(0, Math.floor((room.codeExpiresAt - Date.now()) / 1000));
+    if (remaining <= 0) {
+      // Auto renew
+      room.code = generateCode();
+      room.codeExpiresAt = Date.now() + 10 * 60 * 1000;
+      broadcastRoom(room, {
+        type: 'CODE_RENEWED',
+        code: room.code,
+        expiresIn: 600,
+        message: '🔄 تم تجديد كود الغرفة السري لمدة 10 دقائق جديدة تلقائياً!'
+      });
+    }
+  }, 1000);
+}
+
+function getSafeRoomView(room, forPlayerId) {
+  // Anti-cheat: hide opponent upgrades and SVG state when curtain is ON during gameplay
+  const hideDetails = room.curtain && room.state === 'playing';
+
+  const sanitizedPlayers = room.players.map(p => {
+    const isSelf = p.id === forPlayerId;
+    return {
+      id: p.id,
+      name: p.name,
+      avatar: p.avatar,
+      isHost: p.id === room.hostId,
+      budget: p.budget,
+      score: p.score,
+      isAlive: p.isAlive,
+      hasChosen: p.hasChosen,
+      upgradesCount: p.upgrades.length,
+      frozen: p.frozen,
+      // Only reveal full upgrades to self, or when curtain is off, or game finished
+      upgrades: (!hideDetails || isSelf) ? p.upgrades : null,
+      sabotageCards: isSelf ? p.sabotageCards : []
+    };
+  });
+
+  const remainingCodeSeconds = Math.max(0, Math.floor((room.codeExpiresAt - Date.now()) / 1000));
+
+  return {
+    code: room.code,
+    hostId: room.hostId,
+    theme: room.theme,
+    budget: room.budget,
+    mode: room.mode,
+    curtain: room.curtain,
+    state: room.state,
+    round: room.round,
+    totalRounds: room.totalRounds,
+    codeExpiresIn: remainingCodeSeconds,
+    currentOffer: room.currentOffer,
+    auctionData: room.auctionData ? {
+      name: room.auctionData.name,
+      desc: room.auctionData.desc,
+      startBid: room.auctionData.startBid,
+      bonus: room.auctionData.scoreBonus
+    } : null,
+    players: sanitizedPlayers
+  };
+}
+
+function broadcastRoom(room, data = null) {
+  room.players.forEach(p => {
+    if (p.ws && p.ws.readyState === WebSocket.OPEN) {
+      const payload = data ? { ...data, room: getSafeRoomView(room, p.id) } : { type: 'ROOM_UPDATE', room: getSafeRoomView(room, p.id) };
+      p.ws.send(JSON.stringify(payload));
+    }
+  });
+}
+
+// ==========================================
+// 3. GAMEPLAY ENGINE & ROUND TIMER
+// ==========================================
+
+function startGame(room) {
+  if (room.players.length < 1) return;
+  room.state = 'playing';
+  room.round = 0;
+  room.totalRounds = calculateRounds(room.budget);
+
+  // Distribute one random sabotage card to each player
+  room.players.forEach(p => {
+    p.budget = room.budget;
+    p.score = 10;
+    p.upgrades = [];
+    p.hasChosen = false;
+    p.isAlive = true;
+    p.frozen = false;
+    const card = SABOTAGE_CARDS[Math.floor(Math.random() * SABOTAGE_CARDS.length)];
+    p.sabotageCards = [{ ...card, id: card.id + '_' + Date.now() }];
+  });
+
+  startNextRound(room);
+}
+
+function startNextRound(room) {
+  if (room.roundTimerInterval) clearInterval(room.roundTimerInterval);
+
+  room.round++;
+
+  // Check if game over
+  if (room.round > room.totalRounds) {
+    endGame(room);
+    return;
+  }
+
+  // Check midway auction (e.g. at round 3 for 6 rounds, round 4 for 8, round 5 for 10)
+  const auctionRound = Math.floor(room.totalRounds / 2);
+  if (room.round === auctionRound && !room.hasHadAuction) {
+    triggerAuction(room);
+    return;
+  }
+
+  // Check random emergency event (25% chance on rounds > 1)
+  let triggeredEvent = null;
+  if (room.round > 1 && Math.random() < 0.35) {
+    const event = RANDOM_EVENTS[Math.floor(Math.random() * RANDOM_EVENTS.length)];
+    event.effect(room);
+    triggeredEvent = { title: event.title, desc: event.desc };
+  }
+
+  const themeData = THEMES[room.theme] || THEMES.car;
+  const offerIndex = (room.round - 1) % themeData.upgrades.length;
+  room.currentOffer = themeData.upgrades[offerIndex];
+
+  // Reset choices
+  room.players.forEach(p => {
+    p.hasChosen = false;
+    // unfreeze turn if was frozen
+    if (p.frozen) p.frozen = false;
+  });
+
+  room.roundTimerSec = 20;
+
+  broadcastRoom(room, {
+    type: 'ROUND_STARTED',
+    round: room.round,
+    totalRounds: room.totalRounds,
+    offer: room.currentOffer,
+    event: triggeredEvent,
+    timer: room.roundTimerSec
+  });
+
+  // 20-second active timer
+  room.roundTimerInterval = setInterval(() => {
+    room.roundTimerSec--;
+
+    // Broadcast timer tick
+    room.players.forEach(p => {
+      if (p.ws && p.ws.readyState === WebSocket.OPEN) {
+        p.ws.send(JSON.stringify({ type: 'TIMER_TICK', timer: room.roundTimerSec }));
+      }
+    });
+
+    if (room.roundTimerSec <= 0) {
+      clearInterval(room.roundTimerInterval);
+      // Auto skip for players who haven't chosen
+      room.players.forEach(p => {
+        if (!p.hasChosen) {
+          p.hasChosen = true;
+        }
+      });
+      broadcastRoom(room, { type: 'ROUND_ENDED', reason: 'timeout' });
+      setTimeout(() => startNextRound(room), 1500);
+    }
+  }, 1000);
+}
+
+function checkAllPlayersDecided(room) {
+  const activePlayers = room.players.filter(p => p.isAlive);
+  const allDone = activePlayers.every(p => p.hasChosen);
+  if (allDone) {
+    clearInterval(room.roundTimerInterval);
+    broadcastRoom(room, { type: 'ROUND_ENDED', reason: 'all_decided' });
+    setTimeout(() => startNextRound(room), 1200);
+  }
+}
+
+// Midway Auction
+function triggerAuction(room) {
+  room.hasHadAuction = true;
+  room.state = 'auction';
+  const item = AUCTION_ITEMS[room.theme] || AUCTION_ITEMS.car;
+  room.auctionData = { ...item, bids: {} };
+
+  broadcastRoom(room, {
+    type: 'AUCTION_STARTED',
+    item: item,
+    message: '🔨 بدأت جولة المزاد السري « حراج »! اكتب سراً كم تدفع للفوز بهذه القطعة النادرة!'
+  });
+
+  // 25 seconds for auction
+  let auctionSec = 25;
+  room.roundTimerInterval = setInterval(() => {
+    auctionSec--;
+    room.players.forEach(p => {
+      if (p.ws && p.ws.readyState === WebSocket.OPEN) {
+        p.ws.send(JSON.stringify({ type: 'TIMER_TICK', timer: auctionSec }));
+      }
+    });
+    if (auctionSec <= 0) {
+      resolveAuction(room);
+    }
+  }, 1000);
+}
+
+function resolveAuction(room) {
+  clearInterval(room.roundTimerInterval);
+  room.state = 'playing';
+
+  const bids = room.auctionData.bids;
+  let highestBid = -1;
+  let winner = null;
+
+  room.players.forEach(p => {
+    const bid = parseInt(bids[p.id]) || 0;
+    if (bid > highestBid && bid <= p.budget) {
+      highestBid = bid;
+      winner = p;
+    }
+  });
+
+  let resultMsg = 'لم يفز أحد بالمزاد!';
+  if (winner && highestBid >= (room.auctionData.startBid || 1)) {
+    winner.budget -= highestBid;
+    winner.score += room.auctionData.scoreBonus;
+    winner.upgrades.push({
+      id: 'auction_asset',
+      name: room.auctionData.name,
+      price: highestBid,
+      score: room.auctionData.scoreBonus,
+      desc: room.auctionData.desc,
+      isAuctionAsset: true
+    });
+    resultMsg = `🔨 مبروك للمتسابق ${winner.avatar} ${winner.name}! فاز بالمزاد بمبلغ ${highestBid} ر.س وأضاف (+${room.auctionData.scoreBonus} نقطة)!`;
+  }
+
+  room.auctionData = null;
+  broadcastRoom(room, {
+    type: 'AUCTION_RESOLVED',
+    message: resultMsg
+  });
+
+  setTimeout(() => startNextRound(room), 2500);
+}
+
+// End Game & AI Judge Evaluation
+function endGame(room) {
+  room.state = 'results';
+  if (room.roundTimerInterval) clearInterval(room.roundTimerInterval);
+
+  const themeData = THEMES[room.theme] || THEMES.car;
+
+  // Calculate final score = quality score + (remaining budget * 1.5)
+  room.players.forEach(p => {
+    const savingsBonus = Math.round(p.budget * 1.5);
+    p.finalScore = p.score + savingsBonus;
+  });
+
+  // Sort descending
+  room.players.sort((a, b) => b.finalScore - a.finalScore);
+
+  // Percentage distribution (pool total = 100%)
+  const pool = room.players.reduce((sum, p) => sum + p.finalScore, 0) || 1;
+  room.players.forEach(p => {
+    p.percentage = Math.max(1, Math.round((p.finalScore / pool) * 100));
+  });
+
+  // Ensure total adds up to exactly 100
+  const currentTotal = room.players.reduce((sum, p) => sum + p.percentage, 0);
+  if (currentTotal !== 100 && room.players.length > 0) {
+    room.players[0].percentage += (100 - currentTotal);
+  }
+
+  const champion = room.players[0];
+  const runnerUp = room.players[1] || null;
+  const third = room.players[2] || null;
+
+  // Generate witty, analytical AI commentary
+  let aiCommentary = `🏆 **حكم الـ AI:** يتوّج المتسابق **${champion.name}** بطلاً للجلسة بنسبة **${champion.percentage}%**! `;
+  if (champion.budget >= 5) {
+    aiCommentary += `أظهر ذكاءً استثمارياً نادراً باقتناء قطع ذات وزن نوعي لـ (${themeData.title}) واحتفظ بـ (${champion.budget} ر.س) كرصيد طوارئ منعه من الطفرة. `;
+  } else {
+    aiCommentary += `جازف بكل ما في جيبه حتى آخر قرش وصنع أفخم تحفة فنية تستحق الصدارة المطلقة! `;
+  }
+
+  if (runnerUp) {
+    aiCommentary += `بينما نال **${runnerUp.name}** المركز الثاني بنسبة **${runnerUp.percentage}%** بفضل بناء قوي لكن فارق إدارة الرصيد حسم المعركة.`;
+  }
+
+  // Lift curtain and reveal all projects
+  broadcastRoom(room, {
+    type: 'GRAND_REVEAL',
+    podium: {
+      first: champion ? { id: champion.id, name: champion.name, avatar: champion.avatar, pct: champion.percentage, score: champion.finalScore, budget: champion.budget, upgrades: champion.upgrades } : null,
+      second: runnerUp ? { id: runnerUp.id, name: runnerUp.name, avatar: runnerUp.avatar, pct: runnerUp.percentage, score: runnerUp.finalScore, budget: runnerUp.budget, upgrades: runnerUp.upgrades } : null,
+      third: third ? { id: third.id, name: third.name, avatar: third.avatar, pct: third.percentage, score: third.finalScore, budget: third.budget, upgrades: third.upgrades } : null
+    },
+    rankings: room.players.map((p, idx) => ({
+      rank: idx + 1,
+      id: p.id,
+      name: p.name,
+      avatar: p.avatar,
+      percentage: p.percentage,
+      finalScore: p.finalScore,
+      budget: p.budget,
+      upgrades: p.upgrades
+    })),
+    commentary: aiCommentary
+  });
+}
+
+// ==========================================
+// 4. WEBSOCKET MESSAGE DISPATCHER
+// ==========================================
+
+wss.on('connection', (ws) => {
+  let playerSession = { id: 'p_' + Date.now() + '_' + Math.floor(Math.random() * 1000), roomCode: null };
+
+  ws.on('message', (message) => {
+    try {
+      const data = JSON.parse(message);
+
+      switch (data.type) {
+
+        // 1. CREATE ROOM
+        case 'CREATE_ROOM': {
+          const { name, avatar, options } = data;
+          if (!name || !name.trim()) {
+            return ws.send(JSON.stringify({ type: 'ERROR', message: 'الاسم إلزامي لإنشاء الغرفة!' }));
+          }
+          if (avatar && !isValidEmoji(avatar)) {
+            return ws.send(JSON.stringify({ type: 'ERROR', message: 'الأيقونة يجب أن تكون إيموجي فقط من الكيبورد!' }));
+          }
+
+          const hostPlayer = {
+            id: playerSession.id,
+            ws: ws,
+            name: name.trim().slice(0, 18),
+            avatar: avatar || '🏎️',
+            budget: options?.budget || 25,
+            score: 10,
+            upgrades: [],
+            sabotageCards: [],
+            hasChosen: false,
+            isAlive: true,
+            frozen: false
+          };
+
+          const room = createRoom(hostPlayer, options || {});
+          playerSession.roomCode = room.code;
+
+          ws.send(JSON.stringify({
+            type: 'ROOM_CREATED',
+            playerId: hostPlayer.id,
+            room: getSafeRoomView(room, hostPlayer.id)
+          }));
+          break;
+        }
+
+        // 2. JOIN ROOM
+        case 'JOIN_ROOM': {
+          const { code, name, avatar } = data;
+          if (!name || !name.trim()) {
+            return ws.send(JSON.stringify({ type: 'ERROR', message: 'الاسم إلزامي للانضمام!' }));
+          }
+          if (avatar && !isValidEmoji(avatar)) {
+            return ws.send(JSON.stringify({ type: 'ERROR', message: 'الأيقونة يجب أن تكون إيموجي فقط من الكيبورد!' }));
+          }
+
+          const cleanCode = String(code || '').replace('#', '').trim();
+          const room = rooms.get(cleanCode);
+
+          if (!room) {
+            return ws.send(JSON.stringify({ type: 'ERROR', message: 'كود الغرفة غير موجود أو انتهت صلاحيته!' }));
+          }
+          if (room.state !== 'lobby') {
+            return ws.send(JSON.stringify({ type: 'ERROR', message: 'اللعبة بدأت بالفعل في هذه الغرفة!' }));
+          }
+          if (room.players.length >= 8) {
+            return ws.send(JSON.stringify({ type: 'ERROR', message: 'الغرفة ممتلئة (الحد الأقصى 8 لاعبين)!' }));
+          }
+
+          const player = {
+            id: playerSession.id,
+            ws: ws,
+            name: name.trim().slice(0, 18),
+            avatar: avatar || '🕶️',
+            budget: room.budget,
+            score: 10,
+            upgrades: [],
+            sabotageCards: [],
+            hasChosen: false,
+            isAlive: true,
+            frozen: false
+          };
+
+          room.players.push(player);
+          playerSession.roomCode = room.code;
+
+          ws.send(JSON.stringify({
+            type: 'JOINED_SUCCESS',
+            playerId: player.id,
+            room: getSafeRoomView(room, player.id)
+          }));
+
+          broadcastRoom(room);
+          break;
+        }
+
+        // 3. REFRESH CODE MANUALLY
+        case 'REFRESH_CODE': {
+          const room = rooms.get(playerSession.roomCode);
+          if (!room || room.hostId !== playerSession.id) return;
+          const oldCode = room.code;
+          rooms.delete(oldCode);
+          room.code = generateCode();
+          room.codeExpiresAt = Date.now() + 10 * 60 * 1000;
+          rooms.set(room.code, room);
+          broadcastRoom(room, {
+            type: 'CODE_RENEWED',
+            code: room.code,
+            expiresIn: 600,
+            message: '🔄 تم تجديد كود الغرفة السري لمدة 10 دقائق بنجاح!'
+          });
+          break;
+        }
+
+        // 4. UPDATE ROOM SETTINGS (HOST ONLY)
+        case 'UPDATE_SETTINGS': {
+          const room = rooms.get(playerSession.roomCode);
+          if (!room || room.hostId !== playerSession.id || room.state !== 'lobby') return;
+          if (data.theme && THEMES[data.theme]) room.theme = data.theme;
+          if (data.budget && [25, 50, 100, 200].includes(Number(data.budget))) {
+            room.budget = Number(data.budget);
+            room.totalRounds = calculateRounds(room.budget);
+          }
+          if (data.mode) room.mode = data.mode;
+          if (typeof data.curtain === 'boolean') room.curtain = data.curtain;
+          broadcastRoom(room);
+          break;
+        }
+
+        // 5. START GAME (HOST ONLY)
+        case 'START_GAME': {
+          const room = rooms.get(playerSession.roomCode);
+          if (!room || room.hostId !== playerSession.id || room.state !== 'lobby') return;
+          startGame(room);
+          break;
+        }
+
+        // 6. PLAYER CHOICE: BUY OR SKIP
+        case 'MAKE_CHOICE': {
+          const room = rooms.get(playerSession.roomCode);
+          if (!room || room.state !== 'playing' || !room.currentOffer) return;
+          const player = room.players.find(p => p.id === playerSession.id);
+          if (!player || player.hasChosen || !player.isAlive) return;
+
+          const action = data.action; // 'buy' or 'skip'
+
+          if (action === 'buy' && !player.frozen) {
+            if (player.budget >= room.currentOffer.price) {
+              player.budget -= room.currentOffer.price;
+              player.score += room.currentOffer.score;
+              player.upgrades.push({ ...room.currentOffer, boughtAtRound: room.round });
+            }
+          }
+
+          player.hasChosen = true;
+
+          // Notify room of progress (Anti-Cheat preserves secrecy)
+          broadcastRoom(room, {
+            type: 'PLAYER_DECIDED',
+            playerId: player.id
+          });
+
+          checkAllPlayersDecided(room);
+          break;
+        }
+
+        // 7. SNEAK PEEK (👁️ 1-second view of opponent project)
+        case 'PEEK_OPPONENT': {
+          const room = rooms.get(playerSession.roomCode);
+          if (!room || room.state !== 'playing') return;
+          const target = room.players.find(p => p.id === data.targetId);
+          if (!target) return;
+
+          // Send snapshot of target project ONLY to requesting player
+          ws.send(JSON.stringify({
+            type: 'PEEK_SNAPSHOT',
+            targetId: target.id,
+            name: target.name,
+            avatar: target.avatar,
+            budget: target.budget,
+            score: target.score,
+            upgrades: target.upgrades
+          }));
+          break;
+        }
+
+        // 8. USE SABOTAGE CARD 😈
+        case 'USE_SABOTAGE': {
+          const room = rooms.get(playerSession.roomCode);
+          if (!room || room.state !== 'playing') return;
+          const user = room.players.find(p => p.id === playerSession.id);
+          const target = room.players.find(p => p.id === data.targetId);
+          if (!user || !target || user.id === target.id) return;
+
+          const cardIndex = user.sabotageCards.findIndex(c => c.id === data.cardId);
+          if (cardIndex === -1) return;
+
+          const card = user.sabotageCards.splice(cardIndex, 1)[0];
+          let eventDescription = '';
+
+          if (card.type === 'budget_cut') {
+            target.budget = Math.max(0, target.budget - card.val);
+            eventDescription = `📸 رصد ساهر مخالفة على المتسابق ${target.avatar} ${target.name} وخصم ${card.val} ر.س من ميزانيته بتوجيه من ${user.name}!`;
+          } else if (card.type === 'sell_last') {
+            if (target.upgrades.length > 0) {
+              const removed = target.upgrades.pop();
+              const refund = Math.floor(removed.price / 2);
+              target.budget += refund;
+              target.score = Math.max(10, target.score - removed.score);
+              eventDescription = `🧰 سطحة وتشليح! أجبر ${user.name} منافسه ${target.name} على فك (${removed.name}) وبيعها بنصف السعر (+${refund} ر.س)!`;
+            } else {
+              eventDescription = `🧰 حاول ${user.name} سحب سيارة ${target.name} ولكن لم يجد بها أي قطع بعد!`;
+            }
+          } else if (card.type === 'freeze_turn') {
+            target.frozen = true;
+            eventDescription = `🧿 عين حسود! جمّد ${user.name} خيار الشراء للمتسابق ${target.name} لهذه الجولة!`;
+          } else if (card.type === 'swap_piece') {
+            if (user.upgrades.length > 0 && target.upgrades.length > 0) {
+              const myPiece = user.upgrades.pop();
+              const targetPiece = target.upgrades.pop();
+              user.upgrades.push(targetPiece);
+              target.upgrades.push(myPiece);
+              user.score = user.score - myPiece.score + targetPiece.score;
+              target.score = target.score - targetPiece.score + myPiece.score;
+              eventDescription = `🤝 شريطي المعارض! قام ${user.name} بتبديل قطعه إجبارياً مع ${target.name}!`;
+            }
+          }
+
+          broadcastRoom(room, {
+            type: 'SABOTAGE_TRIGGERED',
+            message: eventDescription,
+            sourceId: user.id,
+            targetId: target.id
+          });
+          break;
+        }
+
+        // 9. BLIND AUCTION BID
+        case 'SUBMIT_AUCTION_BID': {
+          const room = rooms.get(playerSession.roomCode);
+          if (!room || room.state !== 'auction' || !room.auctionData) return;
+          const bidAmount = parseInt(data.bid) || 0;
+          room.auctionData.bids[playerSession.id] = bidAmount;
+
+          const player = room.players.find(p => p.id === playerSession.id);
+          if (player) {
+            broadcastRoom(room, {
+              type: 'AUCTION_BID_RECEIVED',
+              playerId: player.id
+            });
+          }
+
+          // If all alive players submitted bids, resolve immediately
+          const allBidded = room.players.every(p => room.auctionData.bids[p.id] !== undefined);
+          if (allBidded) {
+            resolveAuction(room);
+          }
+          break;
+        }
+
+        // 10. LIVE FLOATING REACTIONS 💬
+        case 'SEND_REACTION': {
+          const room = rooms.get(playerSession.roomCode);
+          if (!room) return;
+          const player = room.players.find(p => p.id === playerSession.id);
+          if (!player) return;
+
+          const emoji = String(data.emoji || '💸').slice(0, 10);
+          const text = String(data.text || '').slice(0, 25);
+
+          broadcastRoom(room, {
+            type: 'FLOAT_REACTION',
+            playerId: player.id,
+            senderName: player.name,
+            emoji: emoji,
+            text: text
+          });
+          break;
+        }
+
+        // 11. PLAY AGAIN (RETURN TO LOBBY)
+        case 'PLAY_AGAIN': {
+          const room = rooms.get(playerSession.roomCode);
+          if (!room || room.hostId !== playerSession.id) return;
+          room.state = 'lobby';
+          room.round = 0;
+          room.currentOffer = null;
+          room.hasHadAuction = false;
+          room.auctionData = null;
+          room.players.forEach(p => {
+            p.budget = room.budget;
+            p.score = 10;
+            p.upgrades = [];
+            p.hasChosen = false;
+            p.isAlive = true;
+            p.frozen = false;
+          });
+          broadcastRoom(room);
+          break;
+        }
+      }
+    } catch (err) {
+      console.error('WS Error:', err);
+    }
+  });
+
+  // DISCONNECT HANDLER
+  ws.on('close', () => {
+    if (playerSession.roomCode) {
+      const room = rooms.get(playerSession.roomCode);
+      if (room) {
+        room.players = room.players.filter(p => p.id !== playerSession.id);
+
+        if (room.players.length === 0) {
+          clearInterval(room.roundTimerInterval);
+          clearInterval(room.codeTimerInterval);
+          rooms.delete(playerSession.roomCode);
+        } else {
+          // If host left, assign new host
+          if (room.hostId === playerSession.id && room.players.length > 0) {
+            room.hostId = room.players[0].id;
+          }
+          broadcastRoom(room);
+        }
+      }
+    }
+  });
+});
+
+server.listen(PORT, () => {
+  console.log(`🚀 « على قد جيبك 💸 » Server running at http://localhost:${PORT}`);
+});
