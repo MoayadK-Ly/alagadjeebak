@@ -330,8 +330,14 @@
         </div>
       </div>
 
-      <!-- Start Button (Host) -->
-      <div id="lobbyHostStartArea" class="text-center pt-2">
+      <!-- Host Action Area: Start & Add AI -->
+      <div id="lobbyHostStartArea" class="space-y-2.5 pt-2">
+        <button id="addAiBotBtn" onclick="handleAddAiBotClick()" class="w-full py-3.5 bg-gradient-to-r from-purple-700 via-indigo-600 to-blue-600 hover:from-purple-600 hover:to-blue-500 text-white font-black text-sm rounded-2xl shadow-lg shadow-indigo-600/20 border border-indigo-400/30 flex items-center justify-center gap-2 transition active:scale-98">
+          <span class="text-xl">🤖</span>
+          <span>إضافة ذكاء اصطناعي</span>
+          <span class="text-[10px] text-purple-200 bg-purple-500/20 px-2 py-0.5 rounded-full border border-purple-400/30 font-bold">(يحاكي تفكير البشر وتكتيكاتهم)</span>
+        </button>
+
         <button id="startGameBtn" onclick="handleStartGameClick()" class="w-full py-4 bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white font-black text-lg rounded-2xl shadow-xl shadow-emerald-600/30 transition transform active:scale-98">
           🚀 ابدأ التحدي الآن!
         </button>
@@ -760,6 +766,17 @@
     };
 
     const QUICK_EMOJIS = ['🏎️', '👑', '🕶️', '🚀', '⚡', '💎', '🦁', '🌟', '🦅', '🔥', '🥷', '🎯'];
+
+    // Realistic Saudi AI Personas with human-like playstyles
+    const AI_PERSONAS = [
+      { name: 'سلطان الـ AI 👑', avatar: '👑', persona: 'استراتيجي محنك', style: 'strategic' },
+      { name: 'نورة الذكية 💡', avatar: '💡', persona: 'قناصة الثواني الأخيرة', style: 'sniper' },
+      { name: 'بدر المحنك 🕶️', avatar: '🕶️', persona: 'تكتيكي متوازن', style: 'balanced' },
+      { name: 'مشعل الحماسي 🔥', avatar: '🔥', persona: 'متهور وراعي فزعة', style: 'aggressive' },
+      { name: 'فيصل الشريطي 🤝', avatar: '🤝', persona: 'صائد الصفقات', style: 'bargain_hunter' },
+      { name: 'سارة التقنية ⚡', avatar: '⚡', persona: 'خوارزمية ذكية', style: 'analytical' },
+      { name: 'سعود التكتيكي 🧠', avatar: '🧠', persona: 'عقل مدبر ومقالب', style: 'saboteur' }
+    ];
 
     // ==========================================
     // 2. PERSISTENT PLAYER IDENTITY (LOCALSTORAGE)
@@ -1461,18 +1478,98 @@
       list.innerHTML = gameState.players.map(p => {
         const isMe = (p.id === gameState.myPlayerId);
         return `
-          <div class="bg-slate-950 border ${isMe ? 'border-amber-500/60 shadow-md shadow-amber-500/10' : 'border-slate-800'} rounded-2xl p-2.5 flex items-center gap-2">
-            <span class="text-2xl">${p.avatar || '🏎️'}</span>
-            <div class="text-right overflow-hidden flex-1">
-              <div class="flex items-center gap-1">
-                <span class="text-xs font-black text-white truncate">${p.name}</span>
-                ${p.isHost ? '<span class="text-[8px] bg-indigo-500 text-white px-1 rounded font-bold">مضيف</span>' : ''}
+          <div class="bg-slate-950 border ${isMe ? 'border-amber-500/60 shadow-md shadow-amber-500/10' : (p.isBot ? 'border-purple-500/40 shadow-sm shadow-purple-500/10' : 'border-slate-800')} rounded-2xl p-2.5 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 overflow-hidden flex-1">
+              <span class="text-2xl">${p.avatar || '🏎️'}</span>
+              <div class="text-right overflow-hidden flex-1">
+                <div class="flex items-center gap-1">
+                  <span class="text-xs font-black text-white truncate">${p.name}</span>
+                  ${p.isHost ? '<span class="text-[8px] bg-indigo-500 text-white px-1 rounded font-bold">مضيف</span>' : ''}
+                  ${p.isBot ? '<span class="text-[8px] bg-purple-500/30 text-purple-300 border border-purple-500/50 px-1 rounded font-bold">🤖 AI</span>' : ''}
+                </div>
+                <span class="text-[9px] ${p.isBot ? 'text-purple-300' : 'text-emerald-400'} font-bold block truncate">
+                  ${isMe ? 'أنت (جاهز)' : (p.isBot ? (p.persona || 'تفكير بشري ذكي') : 'متصل الآن')}
+                </span>
               </div>
-              <span class="text-[9px] text-emerald-400 font-bold block">${isMe ? 'أنت (جاهز)' : 'متصل الآن'}</span>
             </div>
+            ${gameState.isHost && p.isBot ? `
+              <button onclick="handleRemoveAiBot('${p.id}')" class="text-xs text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 p-1.5 rounded-lg transition" title="طرد البوت">
+                ✕
+              </button>
+            ` : ''}
           </div>
         `;
       }).join('');
+
+      // Update Add AI Button state
+      const addBotBtn = document.getElementById('addAiBotBtn');
+      if (addBotBtn) {
+        if (gameState.players.length >= 8) {
+          addBotBtn.disabled = true;
+          addBotBtn.classList.add('opacity-50', 'cursor-not-allowed');
+          addBotBtn.innerHTML = '<span>🚫 الغرفة مكتملة (8/8 لاعبين)</span>';
+        } else {
+          addBotBtn.disabled = false;
+          addBotBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+          addBotBtn.innerHTML = `
+            <span class="text-xl">🤖</span>
+            <span>إضافة ذكاء اصطناعي</span>
+            <span class="text-[10px] text-purple-200 bg-purple-500/20 px-2 py-0.5 rounded-full border border-purple-400/30 font-bold">(${gameState.players.length}/8)</span>
+          `;
+        }
+      }
+    }
+
+    function handleAddAiBotClick() {
+      if (!gameState.isHost) return;
+      if (gameState.players.length >= 8) {
+        showFloatingNotification('⚠️ الغرفة مكتملة بالحد الأقصى (8 لاعبين)!');
+        return;
+      }
+
+      if (isConnected && ws) {
+        ws.send(JSON.stringify({ type: 'ADD_AI_BOT' }));
+      } else {
+        // Offline demo mode
+        const existingNames = new Set(gameState.players.map(p => p.name));
+        const available = AI_PERSONAS.filter(p => !existingNames.has(p.name));
+        const p = available.length > 0 ? available[0] : { name: 'سلطان الـ AI 👑', avatar: '👑', persona: 'استراتيجي محنك', style: 'strategic' };
+        
+        gameState.players.push({
+          id: 'bot_' + Date.now() + '_' + Math.floor(Math.random() * 100),
+          name: p.name,
+          avatar: p.avatar,
+          isHost: false,
+          isBot: true,
+          style: p.style,
+          persona: p.persona,
+          budget: gameState.budget,
+          score: 10,
+          upgrades: [],
+          sabotageCards: [{ id: 'saher', name: 'ساهر 📸', desc: 'خصم مخالفة فورية 4 ر.س' }]
+        });
+
+        playSoundEffect('buy');
+        renderLobbyPlayers();
+        document.getElementById('lobbyPlayerCount').innerText = gameState.players.length;
+        showFloatingNotification(`🤖 تم إضافة المتسابق الذكي (${p.name})!`);
+      }
+    }
+
+    function handleRemoveAiBot(botId) {
+      if (!gameState.isHost) return;
+      if (isConnected && ws) {
+        ws.send(JSON.stringify({ type: 'REMOVE_AI_BOT', botId }));
+      } else {
+        const idx = gameState.players.findIndex(p => p.id === botId);
+        if (idx !== -1) {
+          const removed = gameState.players.splice(idx, 1)[0];
+          playSoundEffect('skip');
+          renderLobbyPlayers();
+          document.getElementById('lobbyPlayerCount').innerText = gameState.players.length;
+          showFloatingNotification(`🚪 تم استبعاد (${removed.name})`);
+        }
+      }
     }
 
     function handleStartGameClick() {

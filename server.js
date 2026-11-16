@@ -256,6 +256,224 @@ function isOffensiveName(rawName) {
   return false;
 }
 
+// ==========================================
+// REALISTIC HUMAN-LIKE AI PERSONAS & STRATEGY
+// ==========================================
+const AI_PERSONAS = [
+  {
+    name: 'سلطان الـ AI 👑',
+    avatar: '👑',
+    persona: 'استراتيجي محنك',
+    style: 'strategic', // Saves budget, values score-to-cost ratio, bids prudently
+    maxBidPct: 0.38,
+    patience: 3500
+  },
+  {
+    name: 'نورة الذكية 💡',
+    avatar: '💡',
+    persona: 'قناصة الثواني الأخيرة',
+    style: 'sniper', // waits until timer <= 4s and snipes!
+    maxBidPct: 0.48,
+    patience: 11000
+  },
+  {
+    name: 'بدر المحنك 🕶️',
+    avatar: '🕶️',
+    persona: 'تكتيكي متوازن',
+    style: 'balanced', // bids steady, counter-bids if someone overtakes him
+    maxBidPct: 0.40,
+    patience: 2500
+  },
+  {
+    name: 'مشعل الحماسي 🔥',
+    avatar: '🔥',
+    persona: 'متهور وراعي فزعة',
+    style: 'aggressive', // pushes bids high to intimidate players
+    maxBidPct: 0.55,
+    patience: 1800
+  },
+  {
+    name: 'فيصل الشريطي 🤝',
+    avatar: '🤝',
+    persona: 'صائد الصفقات',
+    style: 'bargain_hunter', // only bids if price is low compared to score
+    maxBidPct: 0.30,
+    patience: 3800
+  },
+  {
+    name: 'سارة التقنية ⚡',
+    avatar: '⚡',
+    persona: 'خوارزمية ذكية',
+    style: 'analytical', // calculates optimal ROI
+    maxBidPct: 0.42,
+    patience: 2800
+  },
+  {
+    name: 'سعود التكتيكي 🧠',
+    avatar: '🧠',
+    persona: 'عقل مدبر ومقالب',
+    style: 'saboteur', // balances bids and loves using sabotage cards
+    maxBidPct: 0.45,
+    patience: 2600
+  }
+];
+
+function scheduleAiBotsBidding(room) {
+  const bots = room.players.filter(p => p.isBot && p.isAlive && !p.frozen);
+  if (bots.length === 0) return;
+
+  const offer = room.currentOffer;
+  if (!offer) return;
+
+  bots.forEach(bot => {
+    // 1. Valuation based on personality & style
+    let multiplier = 1.1;
+    if (bot.style === 'aggressive') multiplier = 1.35;
+    else if (bot.style === 'strategic') multiplier = 1.05;
+    else if (bot.style === 'bargain_hunter') multiplier = 0.85;
+    else if (bot.style === 'sniper') multiplier = 1.25;
+
+    const maxValuation = Math.min(
+      bot.budget,
+      Math.max(2, Math.round(offer.price * multiplier)),
+      Math.floor(bot.budget * (bot.maxBidPct || 0.45))
+    );
+
+    // If bot cannot afford even minimum 1 SAR or doesn't value it:
+    if (maxValuation < 1) {
+      setTimeout(() => {
+        if (room.state !== 'playing' || !room.liveAuction) return;
+        bot.hasPassed = true;
+        checkAuctionAllPassed(room);
+      }, 2500 + Math.random() * 2000);
+      return;
+    }
+
+    // 2. Schedule human-like bidding times
+    if (bot.style === 'sniper') {
+      // Sniper waits for the final 3-4 seconds!
+      const sniperDelay = Math.max(1000, (15 - Math.floor(2 + Math.random() * 2.5)) * 1000);
+      setTimeout(() => {
+        if (room.state !== 'playing' || !room.liveAuction) return;
+        if (bot.hasPassed || room.liveAuction.highestBidderId === bot.id) return;
+        const nextBid = room.liveAuction.highestBid + 1;
+        if (nextBid <= maxValuation && nextBid <= bot.budget) {
+          executeAiBid(room, bot, nextBid, `🎯 قناص الثواني الأخيرة! ${bot.name} خطف السومة بـ ${nextBid} ر.س!`);
+        } else {
+          bot.hasPassed = true;
+          checkAuctionAllPassed(room);
+        }
+      }, sniperDelay);
+    } else {
+      // Normal bot evaluates after human-like hesitation delay
+      const hesitation = 2000 + Math.random() * 4500;
+      setTimeout(() => {
+        if (room.state !== 'playing' || !room.liveAuction) return;
+        if (bot.hasPassed || room.liveAuction.highestBidderId === bot.id) return;
+        const nextBid = room.liveAuction.highestBid + 1;
+        if (nextBid <= maxValuation && nextBid <= bot.budget) {
+          executeAiBid(room, bot, nextBid);
+        } else {
+          bot.hasPassed = true;
+          checkAuctionAllPassed(room);
+        }
+      }, hesitation);
+    }
+
+    // 3. Sabotage Card trigger (Round >= 2, 30% probability)
+    if (room.round >= 2 && bot.sabotageCards && bot.sabotageCards.length > 0 && Math.random() < 0.3) {
+      setTimeout(() => {
+        if (room.state !== 'playing') return;
+        const humanOpponents = room.players.filter(p => !p.isBot && p.isAlive);
+        if (humanOpponents.length > 0) {
+          // Target opponent with highest budget
+          humanOpponents.sort((a, b) => b.budget - a.budget);
+          const target = humanOpponents[0];
+          const card = bot.sabotageCards.shift();
+          target.budget = Math.max(0, target.budget - 4);
+          broadcastRoom(room, {
+            type: 'SABOTAGE_TRIGGERED',
+            actorName: bot.name,
+            targetName: target.name,
+            cardName: 'ساهر 📸',
+            message: `📸 رصد ساهر مخالفة مفاجئة من ${bot.name} على ${target.name} وخصم 4 ر.س!`
+          });
+        }
+      }, 4000 + Math.random() * 4000);
+    }
+  });
+}
+
+function executeAiBid(room, bot, amount, customMsg = null) {
+  if (!room.liveAuction || room.state !== 'playing') return;
+  if (amount <= room.liveAuction.highestBid || amount > bot.budget) return;
+
+  room.liveAuction.highestBid = amount;
+  room.liveAuction.highestBidderId = bot.id;
+  room.liveAuction.highestBidderName = bot.name;
+  room.liveAuction.highestBidderAvatar = bot.avatar;
+
+  if (room.liveAuction.timerSec < 5) {
+    room.liveAuction.timerSec = 5;
+  }
+
+  const aiPhrases = [
+    `🔨 رفع ${bot.avatar} ${bot.name} السومة إلى ${amount} ر.س!`,
+    `⚡ ${bot.name}: "القطعة هذي نازلة لمشروعي لا تعاندون!" (${amount} ر.س)`,
+    `🔥 ${bot.name}: "زودت السومة إلى ${amount} ر.س ومستمر!"`,
+    `💎 ${bot.name}: "تكتيك ذكي بـ ${amount} ر.س!"`
+  ];
+  const msg = customMsg || aiPhrases[Math.floor(Math.random() * aiPhrases.length)];
+
+  broadcastRoom(room, {
+    type: 'BID_PLACED',
+    highestBid: amount,
+    highestBidderId: bot.id,
+    highestBidderName: bot.name,
+    highestBidderAvatar: bot.avatar,
+    timer: room.liveAuction.timerSec,
+    message: msg
+  });
+}
+
+function triggerAiCounterBids(room, excludePlayerId) {
+  if (!room.liveAuction || room.state !== 'playing') return;
+  const bots = room.players.filter(p => p.isBot && p.isAlive && !p.frozen && p.id !== excludePlayerId && !p.hasPassed);
+  if (bots.length === 0) return;
+
+  bots.forEach(bot => {
+    let multiplier = (bot.style === 'aggressive') ? 1.4 : 1.1;
+    const maxValuation = Math.min(
+      bot.budget,
+      Math.max(2, Math.round(room.currentOffer.price * multiplier)),
+      Math.floor(bot.budget * (bot.maxBidPct || 0.45))
+    );
+
+    const nextBid = room.liveAuction.highestBid + 1;
+    if (nextBid <= maxValuation && nextBid <= bot.budget) {
+      const reactionDelay = 2200 + Math.random() * 3500;
+      setTimeout(() => {
+        if (room.state !== 'playing' || !room.liveAuction) return;
+        if (bot.hasPassed || room.liveAuction.highestBidderId === bot.id) return;
+        if (room.liveAuction.highestBid + 1 <= maxValuation && room.liveAuction.highestBid + 1 <= bot.budget) {
+          executeAiBid(room, bot, room.liveAuction.highestBid + 1, `⚔️ رد سريع من ${bot.name} بسومة ${room.liveAuction.highestBid + 1} ر.س!`);
+        } else {
+          bot.hasPassed = true;
+          checkAuctionAllPassed(room);
+        }
+      }, reactionDelay);
+    } else {
+      setTimeout(() => {
+        if (room.state !== 'playing' || !room.liveAuction) return;
+        if (!bot.hasPassed) {
+          bot.hasPassed = true;
+          checkAuctionAllPassed(room);
+        }
+      }, 1500 + Math.random() * 2000);
+    }
+  });
+}
+
 function createRoom(hostPlayer, options = {}) {
   let code = generateCode();
   while (rooms.has(code)) code = generateCode();
@@ -327,6 +545,9 @@ function getSafeRoomView(room, forPlayerId) {
       name: p.name,
       avatar: p.avatar,
       isHost: p.id === room.hostId,
+      isBot: p.isBot || false,
+      style: p.style || null,
+      persona: p.persona || null,
       budget: p.budget,
       score: p.score,
       isAlive: p.isAlive,
@@ -456,6 +677,9 @@ function startNextRound(room) {
     highestBidderName: 'لا توجد سومة حتى الآن',
     timer: room.liveAuction.timerSec
   });
+
+  // Schedule smart AI Bots decisions
+  scheduleAiBotsBidding(room);
 
   // Active 15-second countdown with sniper-extension
   room.roundTimerInterval = setInterval(() => {
@@ -796,6 +1020,64 @@ wss.on('connection', (ws) => {
           break;
         }
 
+        // 4b. ADD AI BOT (HOST ONLY)
+        case 'ADD_AI_BOT': {
+          const room = rooms.get(playerSession.roomCode);
+          if (!room || room.hostId !== playerSession.id || room.state !== 'lobby') return;
+          if (room.players.length >= 8) {
+            return ws.send(JSON.stringify({ type: 'ERROR', message: 'الغرفة ممتلئة بالكامل (8 لاعبين)!' }));
+          }
+
+          const existingNames = new Set(room.players.map(p => p.name));
+          const availablePersonas = AI_PERSONAS.filter(p => !existingNames.has(p.name));
+          const persona = availablePersonas.length > 0
+            ? availablePersonas[Math.floor(Math.random() * availablePersonas.length)]
+            : { name: 'سلطان الـ AI 👑', avatar: '👑', persona: 'استراتيجي محنك', style: 'strategic', maxBidPct: 0.38, patience: 3500 };
+
+          const botPlayer = {
+            id: 'bot_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+            ws: null,
+            isBot: true,
+            style: persona.style,
+            persona: persona.persona,
+            maxBidPct: persona.maxBidPct,
+            patience: persona.patience,
+            name: persona.name,
+            avatar: persona.avatar,
+            budget: room.budget,
+            score: 10,
+            upgrades: [],
+            sabotageCards: [{ id: 'saher_' + Date.now(), name: 'ساهر 📸', desc: 'خصم مخالفة فورية 4 ر.س' }],
+            hasChosen: false,
+            hasPassed: false,
+            isAlive: true,
+            frozen: false
+          };
+
+          room.players.push(botPlayer);
+          broadcastRoom(room, {
+            type: 'AI_BOT_ADDED',
+            botName: botPlayer.name,
+            message: `🤖 انضم المتسابق الذكي (${botPlayer.name}) للغرفة!`
+          });
+          break;
+        }
+
+        // 4c. REMOVE AI BOT (HOST ONLY)
+        case 'REMOVE_AI_BOT': {
+          const room = rooms.get(playerSession.roomCode);
+          if (!room || room.hostId !== playerSession.id || room.state !== 'lobby') return;
+          const botIdx = room.players.findIndex(p => p.id === data.botId && p.isBot);
+          if (botIdx !== -1) {
+            const removed = room.players.splice(botIdx, 1)[0];
+            broadcastRoom(room, {
+              type: 'AI_BOT_REMOVED',
+              message: `🚪 تم استبعاد (${removed.name}) من الغرفة.`
+            });
+          }
+          break;
+        }
+
         // 5. START GAME (HOST ONLY)
         case 'START_GAME': {
           const room = rooms.get(playerSession.roomCode);
@@ -838,6 +1120,9 @@ wss.on('connection', (ws) => {
             timer: room.liveAuction.timerSec,
             message: `🔨 رفع ${player.avatar} ${player.name} السومة إلى ${amount} ر.س!`
           });
+
+          // Trigger AI counter-bids
+          triggerAiCounterBids(room, player.id);
           break;
         }
 
