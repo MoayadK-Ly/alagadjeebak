@@ -381,11 +381,11 @@
 
     </div>
 
-    <!-- ================= SCREEN 4: ACTIVE GAMEPLAY ================= -->
-    <div id="screenPlay" class="hidden space-y-4 max-w-4xl mx-auto w-full">
+        <!-- ================= SCREEN 4: ACTIVE GAMEPLAY ================= -->
+    <div id="screenPlay" class="hidden space-y-3.5 max-w-5xl mx-auto w-full pb-6">
       
       <!-- Top Gameplay Bar -->
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3 flex items-center justify-between">
+      <div class="bg-slate-900/90 backdrop-blur border border-slate-800 rounded-2xl p-3 flex items-center justify-between shadow-lg">
         <div>
           <span class="text-[10px] text-slate-400 font-bold block" id="playThemeTitle">سيارة خارقة</span>
           <span class="text-xs font-black text-amber-300 font-mono">
@@ -393,20 +393,20 @@
           </span>
         </div>
 
-        <!-- 20-Second Visual Timer -->
+        <!-- 30-Second Visual Timer -->
         <div class="flex items-center gap-2">
           <div class="text-right">
             <span class="text-[9px] text-slate-400 block font-bold">الوقت المتبقي</span>
-            <span id="roundTimerNumber" class="text-xl font-black font-mono text-rose-400">20s</span>
+            <span id="roundTimerNumber" class="text-xl font-black font-mono text-rose-400">30s</span>
           </div>
-          <div class="w-20 md:w-28 h-3 bg-slate-950 rounded-full overflow-hidden border border-slate-700">
+          <div class="w-20 md:w-32 h-3 bg-slate-950 rounded-full overflow-hidden border border-slate-700">
             <div id="roundTimerBar" class="h-full bg-gradient-to-r from-emerald-500 via-amber-500 to-rose-500 transition-all duration-1000 w-full"></div>
           </div>
         </div>
 
         <!-- My Budget & Score -->
-        <div class="text-left bg-slate-950 border border-slate-800 px-3 py-1 rounded-xl">
-          <span class="text-[9px] text-slate-400 block font-bold">رصيدك الحالي</span>
+        <div class="text-left bg-slate-950 border border-slate-800 px-3.5 py-1.5 rounded-xl shadow-inner">
+          <span class="text-[9px] text-slate-400 block font-bold">رصيدك المتبقي</span>
           <span id="playMyBudget" class="text-sm font-black text-emerald-400 font-mono">25 ر.س</span>
         </div>
       </div>
@@ -416,22 +416,129 @@
         <span id="eventBannerText">🌪️ حدث طارئ!</span>
       </div>
 
-      <!-- Split View: My Project (Live SVG) & Current Offer -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <!-- Main Play Area: Project Blueprint (Right) & Live Bidding Arena (Left) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-3.5 items-start">
         
-        <!-- Live SVG Canvas (My Project) -->
-        <div class="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-3xl p-4 flex flex-col justify-between relative shadow-xl min-h-[320px]">
+        <!-- Live Bidding Arena Card (Clean, Focused & Informative) - lg:col-span-5 -->
+        <div class="lg:col-span-5 bg-slate-900 border-2 border-amber-500/50 rounded-3xl p-4 sm:p-5 space-y-3.5 shadow-2xl relative overflow-hidden">
+          
+          <!-- Header: Tag, Points & Category -->
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-black text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/30 flex items-center gap-1.5 shadow-sm">
+              <span>🔨</span>
+              <span>حراج ومزايدة حية</span>
+            </span>
+            <span id="offerScoreBonus" class="text-xs font-black text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/30">
+              +20 نقطة تميز
+            </span>
+          </div>
+
+          <!-- Item Name & Desc with Category Badge -->
+          <div class="text-right space-y-1">
+            <div class="flex items-center justify-between gap-2">
+              <h3 id="offerName" class="text-base sm:text-lg font-black text-white tracking-wide">جنوط سبور مقاس 20</h3>
+              <span id="offerCategoryBadge" class="text-[10px] font-bold text-slate-300 bg-slate-800 px-2.5 py-0.5 rounded-lg border border-slate-700 whitespace-nowrap">
+                🛞 الجنوط والكفرات
+              </span>
+            </div>
+            <p id="offerDesc" class="text-xs text-slate-400 line-clamp-2">ثبات خرافي على المنعطفات ويعطي شكل هجومي للسيارة</p>
+          </div>
+
+          <!-- Project Need Indicator Banner (Shows whether project needs this item) -->
+          <div id="offerNeedBanner" class="p-2 rounded-xl text-xs font-black flex items-center justify-between gap-2 bg-emerald-950/40 border border-emerald-500/30 text-emerald-300">
+            <span class="flex items-center gap-1.5">
+              <span id="offerNeedIcon">💡</span>
+              <span id="offerNeedText">مشروعك يحتاج هذه القطعة! (خانة شاغرة)</span>
+            </span>
+            <span id="offerNeedBadge" class="text-[10px] bg-emerald-500/20 px-2 py-0.5 rounded-md font-mono">موصى به ⭐</span>
+          </div>
+
+          <!-- Unified Clean Spotlight: Current Bid & Leader -->
+          <div class="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border border-amber-500/40 rounded-2xl p-3.5 flex items-center justify-between shadow-lg">
+            <div class="text-right">
+              <span class="text-[10px] text-slate-400 font-bold block mb-0.5">أعلى سومة حالياً:</span>
+              <div class="flex items-baseline gap-1">
+                <span id="liveHighestBidVal" class="text-2xl sm:text-3xl font-black font-mono text-amber-300">0</span>
+                <span class="text-xs font-bold text-amber-400">ر.س</span>
+              </div>
+            </div>
+
+            <div class="text-left bg-slate-950/90 border border-slate-800 px-3 py-1.5 rounded-xl max-w-[58%]">
+              <span class="text-[9px] text-slate-400 font-bold block">المتصدر:</span>
+              <span id="liveHighestBidderName" class="text-xs font-black text-white truncate block">
+                لا توجد سومة حتى الآن
+              </span>
+            </div>
+          </div>
+
+          <!-- Simple Direct 1-Click Bidding Controls -->
+          <div id="bidControlsArea" class="space-y-2 pt-0.5">
+            <!-- Primary Instant Bid Button (+1 SAR) -->
+            <button id="btnSubmitBid" onclick="executeInstantBid(1)" class="w-full py-3 sm:py-3.5 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 hover:from-emerald-500 hover:to-teal-400 text-white font-black rounded-2xl text-sm sm:text-base shadow-xl shadow-emerald-600/30 transition transform active:scale-98 flex items-center justify-center gap-2 border border-emerald-400/40">
+              <span class="text-lg">🔨</span>
+              <span>زِد السومة بمقدار 1 ر.س</span>
+              <span class="bg-emerald-700/60 text-emerald-100 font-mono text-xs px-2 py-0.5 rounded-lg border border-emerald-400/30" id="nextBidAmount">1 ر.س</span>
+            </button>
+
+            <!-- Secondary Quick Power Bids (+2 and +5) & Pass Button -->
+            <div class="grid grid-cols-3 gap-2">
+              <button type="button" onclick="executeInstantBid(2)" class="py-2 bg-slate-950 hover:bg-slate-800 border border-amber-500/40 hover:border-amber-400 text-amber-300 font-bold rounded-xl text-xs flex flex-col items-center justify-center transition active:scale-95 shadow-sm">
+                <span class="text-[10px] font-black">+2 ر.س (فرق سومة)</span>
+                <span class="text-[10px] text-slate-400 font-mono" id="nextBidPlus2">2 ر.س</span>
+              </button>
+
+              <button type="button" onclick="executeInstantBid(5)" class="py-2 bg-slate-950 hover:bg-slate-800 border border-purple-500/40 hover:border-purple-400 text-purple-300 font-bold rounded-xl text-xs flex flex-col items-center justify-center transition active:scale-95 shadow-sm">
+                <span class="text-[10px] font-black">+5 ر.س (ضربة قاضية)</span>
+                <span class="text-[10px] text-slate-400 font-mono" id="nextBidPlus5">5 ر.س</span>
+              </button>
+
+              <button id="btnPassBid" onclick="handlePassBid()" class="py-2 bg-slate-950 hover:bg-rose-950/40 border border-slate-700 hover:border-rose-500/50 text-slate-400 hover:text-rose-300 font-bold rounded-xl text-xs flex flex-col items-center justify-center transition active:scale-95">
+                <span class="text-[10px] font-black">🏳️ انسحاب</span>
+                <span class="text-[9px] text-slate-500">خلها لهم</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Status Notice -->
+          <p id="bidStatusNotice" class="text-xs text-center font-black min-h-[16px] text-amber-300"></p>
+        </div>
+
+        <!-- Project Blueprint & Interactive Canvas (Right Column - lg:col-span-7) -->
+        <div class="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-5 flex flex-col justify-between shadow-xl space-y-3">
+          
+          <!-- Project Header: Name, Score & Completion Indicator -->
           <div class="flex items-center justify-between pb-2 border-b border-slate-800">
             <div class="flex items-center gap-2">
               <span id="myProjectAvatar" class="text-lg">🏎️</span>
               <span id="myProjectName" class="text-xs font-black text-white">مشروعك المباشر</span>
             </div>
-            <span id="myProjectScore" class="text-xs font-mono font-black text-amber-400">💎 10 نقطة فخامة</span>
+            <div class="flex items-center gap-2">
+              <span id="projectSlotsProgress" class="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/20">
+                0 / 6 ملامح مكتملة
+              </span>
+              <span id="myProjectScore" class="text-xs font-mono font-black text-amber-400">💎 10 نقطة فخامة</span>
+            </div>
           </div>
 
-          <!-- Dynamic SVG Drawing Area -->
-          <div class="flex-1 flex items-center justify-center p-2" id="svgViewport">
+          <!-- Dynamic SVG Drawing Area (Centered, No Ugly Blank Void) -->
+          <div class="flex items-center justify-center py-2 px-1 relative bg-gradient-to-b from-slate-950/70 to-slate-900/90 rounded-2xl border border-slate-800/80 shadow-inner" id="svgViewport">
             <!-- Injected dynamic SVG for theme -->
+          </div>
+
+          <!-- Project Blueprint Checklist (6 Core Theme Features / Slots HUD) -->
+          <div class="bg-slate-950/80 border border-slate-800/90 rounded-2xl p-3 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-black text-slate-300 flex items-center gap-1.5">
+                <span>🛠️</span>
+                <span>ملامح وتجهيزات المشروع (ما تم وما يحتاجه):</span>
+              </span>
+              <span class="text-[10px] text-slate-400 font-bold">تتحدث مع كل سومة تفوز بها</span>
+            </div>
+
+            <!-- The 6 Slots Grid -->
+            <div id="projectSlotsGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <!-- Dynamically populated via JS -->
+            </div>
           </div>
 
           <!-- Sabotage & Floating Reactions Dock -->
@@ -450,97 +557,24 @@
               <button onclick="sendQuickReaction('🚀', 'ولعت!')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs font-bold text-slate-300">🚀 ولعت!</button>
             </div>
           </div>
-        </div>
-
-        <!-- Current Offer & Competitors Curtain Bar -->
-        <div class="lg:col-span-5 flex flex-col gap-4">
-          
-          <!-- Live Bidding Arena Card (Clean, Modern & Intuitive) -->
-          <div class="bg-slate-900 border-2 border-amber-500/50 rounded-3xl p-5 space-y-4 shadow-2xl relative overflow-hidden">
-            
-            <!-- Header: Tag & Points -->
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-black text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/30 flex items-center gap-1.5 shadow-sm">
-                <span>🔨</span>
-                <span>حراج ومزايدة حية</span>
-              </span>
-              <span id="offerScoreBonus" class="text-xs font-black text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/30">
-                +20 نقطة تميز
-              </span>
-            </div>
-
-            <!-- Item Name & Desc -->
-            <div class="text-right">
-              <h3 id="offerName" class="text-lg font-black text-white tracking-wide">جنوط سبور مقاس 20</h3>
-              <p id="offerDesc" class="text-xs text-slate-400 mt-1 line-clamp-2">ثبات خرافي على المنعطفات ويعطي شكل هجومي للسيارة</p>
-            </div>
-
-            <!-- Unified Clean Spotlight: Current Bid & Leader -->
-            <div class="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border border-amber-500/40 rounded-2xl p-4 flex items-center justify-between shadow-lg">
-              <div class="text-right">
-                <span class="text-[11px] text-slate-400 font-bold block mb-0.5">أعلى سومة حالياً:</span>
-                <div class="flex items-baseline gap-1.5">
-                  <span id="liveHighestBidVal" class="text-3xl font-black font-mono text-amber-300">0</span>
-                  <span class="text-sm font-bold text-amber-400">ر.س</span>
-                </div>
-              </div>
-
-              <div class="text-left bg-slate-950/80 border border-slate-800 px-3.5 py-2 rounded-xl max-w-[55%]">
-                <span class="text-[10px] text-slate-400 font-bold block">المتصدر:</span>
-                <span id="liveHighestBidderName" class="text-xs font-black text-white truncate block">
-                  لا توجد سومة حتى الآن
-                </span>
-              </div>
-            </div>
-
-            <!-- Simple Direct 1-Click Bidding Controls -->
-            <div id="bidControlsArea" class="space-y-2.5 pt-1">
-              
-              <!-- Primary Instant Bid Button (+1 SAR) -->
-              <button id="btnSubmitBid" onclick="executeInstantBid(1)" class="w-full py-4 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 hover:from-emerald-500 hover:to-teal-400 text-white font-black rounded-2xl text-base shadow-xl shadow-emerald-600/30 transition transform active:scale-98 flex items-center justify-center gap-2 border border-emerald-400/40">
-                <span class="text-xl">🔨</span>
-                <span>زِد السومة بمقدار 1 ر.س</span>
-                <span class="bg-emerald-700/60 text-emerald-100 font-mono text-xs px-2 py-0.5 rounded-lg border border-emerald-400/30" id="nextBidAmount">1 ر.س</span>
-              </button>
-
-              <!-- Secondary Quick Power Bids (+2 and +5) & Pass Button -->
-              <div class="grid grid-cols-3 gap-2">
-                <button type="button" onclick="executeInstantBid(2)" class="py-2.5 bg-slate-950 hover:bg-slate-800 border border-amber-500/40 hover:border-amber-400 text-amber-300 font-bold rounded-xl text-xs flex flex-col items-center justify-center transition active:scale-95 shadow-sm">
-                  <span class="text-[11px] font-black">+2 ر.س (فرق سومة)</span>
-                  <span class="text-[10px] text-slate-400 font-mono" id="nextBidPlus2">2 ر.س</span>
-                </button>
-
-                <button type="button" onclick="executeInstantBid(5)" class="py-2.5 bg-slate-950 hover:bg-slate-800 border border-purple-500/40 hover:border-purple-400 text-purple-300 font-bold rounded-xl text-xs flex flex-col items-center justify-center transition active:scale-95 shadow-sm">
-                  <span class="text-[11px] font-black">+5 ر.س (ضربة قاضية)</span>
-                  <span class="text-[10px] text-slate-400 font-mono" id="nextBidPlus5">5 ر.س</span>
-                </button>
-
-                <button id="btnPassBid" onclick="handlePassBid()" class="py-2.5 bg-slate-950 hover:bg-rose-950/40 border border-slate-700 hover:border-rose-500/50 text-slate-400 hover:text-rose-300 font-bold rounded-xl text-xs flex flex-col items-center justify-center transition active:scale-95">
-                  <span class="text-[11px] font-black">🏳️ انسحاب</span>
-                  <span class="text-[10px] text-slate-500">خلها لهم</span>
-                </button>
-              </div>
-
-            </div>
-
-            <!-- Status Notice -->
-            <p id="bidStatusNotice" class="text-xs text-center font-black min-h-[16px] text-amber-300"></p>
-          </div>
-
-          <!-- Competitors Grid with Secret Curtain & Peek 👁️ -->
-          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 space-y-2">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-black text-slate-300">المنافسون (الستارة السرية 🔒)</span>
-              <span class="text-[10px] text-slate-500">اضغط 👁️ للمعاينة ثانية واحدة</span>
-            </div>
-
-            <div class="grid grid-cols-2 gap-2" id="competitorsGrid">
-              <!-- Rendered via JS -->
-            </div>
-          </div>
 
         </div>
 
+      </div>
+
+      <!-- Competitors Horizontal Curtain Strip (Bottom full width, No Page Stretch) -->
+      <div class="bg-slate-900 border border-slate-800 rounded-3xl p-3.5 space-y-2 shadow-xl">
+        <div class="flex items-center justify-between px-1">
+          <span class="text-xs font-black text-slate-300 flex items-center gap-1.5">
+            <span>👥</span>
+            <span>المنافسون بالستارة المشفرة (اضغط 👁️ للمعاينة ثانية واحدة):</span>
+          </span>
+          <span class="text-[10px] text-slate-500 font-bold">تكشف الستارة بالكامل في حفل التتويج النهائي</span>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5" id="competitorsGrid">
+          <!-- Rendered via JS -->
+        </div>
       </div>
 
     </div>
@@ -886,6 +920,60 @@
           { id: 'j28', name: 'رخصة إقلاع وهبوط استثنائي في المطارات الدولية القصيرة', price: 4, score: 21, tag: 'short_runway', desc: 'وصولك لأقرب نقطة لوجهتك بدون تضييع دقيقة' },
         ]
       }
+    };
+
+    // ==========================================
+    // 1b. CORE PROJECT BLUEPRINT SLOTS DEFINITIONS (ملامح وخانات المشاريع)
+    // ==========================================
+    const THEME_SLOTS_DEF = {
+      car: [
+        { key: 'engine', name: 'المحرك والأداء', icon: '⚡', tags: ['engine', 'nitro', 'boost', 'exhaust', 'تيربو', 'نيترو', 'عادم', 'ميثانول'] },
+        { key: 'wheels', name: 'الجنوط والكفرات', icon: '🛞', tags: ['wheels', 'tires', 'stance', 'brakes', 'جنوط', 'كفرات', 'مكابح', 'هيدروليك'] },
+        { key: 'interior', name: 'الداخلية والمقصورة', icon: '💺', tags: ['interior', 'steering', 'massage', 'roof', 'جلد', 'مراتب', 'دركسون', 'سقف', 'مساج'] },
+        { key: 'body', name: 'الهيكل والطلاء', icon: '🎨', tags: ['paint', 'doors', 'widebody', 'diffuser', 'spoiler', 'ذهبي', 'لمبو', 'أبواب', 'جناح', 'وايد بودي', 'ديفيوزر'] },
+        { key: 'tech', name: 'التقنية والذكاء', icon: '🖥️', tags: ['hud', 'ai', 'cameras', 'security', 'laser_lights', 'HUD', 'بروجكتر', 'شاشة', 'قيادة', 'كاميرات', 'ليزر', 'بصمة'] },
+        { key: 'audio', name: 'الصوتيات والترفيه', icon: '🔊', tags: ['audio', 'neon', 'fridge', 'key', 'tint', 'plate', 'صوتي', 'سماعة', 'نيون', 'لوحة', 'ثلاجة', 'عازل'] }
+      ],
+      villa: [
+        { key: 'facade', name: 'المعمار والواجهة', icon: '🏛️', tags: ['glass', 'gate', 'carved_doors', 'elevator', 'زجاج', 'سور', 'أبواب', 'مصعد'] },
+        { key: 'pool', name: 'المسبح واللاونج', icon: '🏊', tags: ['pool', 'roof', 'outdoor_jacuzzi', 'spa', 'مسبح', 'جاكوزي', 'روف', 'سبا'] },
+        { key: 'garden', name: 'الحديقة والجمعات', icon: '🌴', tags: ['garden', 'fountain', 'cooling_mist', 'garden_sound', 'palms', 'حديقة', 'نخيل', 'نافورة', 'رذاذ'] },
+        { key: 'living', name: 'المجلس والصالات', icon: '🛋️', tags: ['majlis', 'kitchen', 'wardrobe', 'guest_suite', 'مجلس', 'مطبخ', 'ملابس', 'ضيوف'] },
+        { key: 'fun', name: 'الترفيه والسينما', icon: '🎮', tags: ['cinema', 'bowling', 'vr_room', 'gallery', 'سينما', 'بولينج', 'محاكي', 'تحف'] },
+        { key: 'smart', name: 'التقنية والأمان', icon: '⚡', tags: ['helipad', 'solar', 'security', 'smart_curtains', 'ev_chargers', 'water_purifier', 'soundproofing', 'هليكوبتر', 'طاقة', 'حماية', 'ستائر', 'تسلا', 'عزل'] }
+      ],
+      cafe: [
+        { key: 'coffee', name: 'محطة القهوة والباريستا', icon: '☕', tags: ['machine', 'roaster', 'bar', 'v60', 'master_barista', 'water_minerals', 'إسبريسو', 'محمصة', 'باريستا', 'تقطير'] },
+        { key: 'bakery', name: 'المخبوزات والحلويات', icon: '🥐', tags: ['bakery', 'oven', 'cups', 'tumbler', 'drinks', 'saudi_flavors', 'مخبوزات', 'تشيز كيك', 'أكواب', 'نكهات'] },
+        { key: 'seating', name: 'الجلسات والترّاس', icon: '🪑', tags: ['terrace', 'patio_heaters', 'study_pods', 'board_games', 'جلسات', 'ترّاس', 'دفايات', 'دراسة', 'بلوت'] },
+        { key: 'vibe', name: 'الديكور والتصوير', icon: '📸', tags: ['neon', 'photo_light', 'foam_art', 'music', 'نيون', 'تصوير', 'جاز', 'طباعة'] },
+        { key: 'tech', name: 'الخدمة والتقنية', icon: '📱', tags: ['drivethru', 'kiosk', 'curbside', 'loyalty', 'subscription', 'درايف ثرو', 'شاشات', 'تطبيق', 'اشتراكات', 'استلام'] },
+        { key: 'expansion', name: 'الهوية والتوسع', icon: '🌟', tags: ['franchise', 'beans', 'wifi', 'امتياز', 'بوكسات', 'فايبر'] }
+      ],
+      restaurant: [
+        { key: 'kitchen', name: 'المطبخ والشيف', icon: '👨‍🍳', tags: ['chef', 'kitchen', 'pizza_oven', 'steak_show', 'culinary_lab', 'شيف', 'مطبخ', 'فرن', 'شواء'] },
+        { key: 'food', name: 'اللحوم والمأكولات', icon: '🥩', tags: ['wagyu', 'live_seafood', 'supply', 'dessert', 'mocktail_cellar', 'secret_menu', 'herb_wall', 'واغيو', 'لوبستر', 'لحوم', 'حلويات'] },
+        { key: 'dining', name: 'الصالة والطاولات', icon: '🍽️', tags: ['tables', 'chandeliers', 'custom_plates', 'acoustic_tables', 'طاولات', 'ثريات', 'أواني', 'عزل'] },
+        { key: 'show', name: 'الأجواء والترفيه', icon: '🎻', tags: ['piano', 'fountain_terrace', 'terrace', 'media', 'بيانو', 'نوافير', 'شرفة', 'مشاهير'] },
+        { key: 'vip', name: 'الضيافة والـ VIP', icon: '🚪', tags: ['vip', 'valet', 'events_desk', 'uniforms', 'kids', 'VIP', 'فالي', 'أزياء', 'كونسيرج'] },
+        { key: 'systems', name: 'الأنظمة والخدمة', icon: '🤖', tags: ['robots', 'smart_booking', 'thermal_pack', 'روبوتات', 'حجوزات', 'تغليف'] }
+      ],
+      tower: [
+        { key: 'structure', name: 'البرج والواجهة', icon: '🏢', tags: ['glass', 'led', 'hologram_crown', 'facade_drones', 'زجاج', 'LED', 'هولوجرام', 'درونز'] },
+        { key: 'pinnacle', name: 'القمة والمطاعم', icon: '🍽️', tags: ['restaurant', 'dome', 'penthouse', 'deck', 'دوار', 'قبة', 'بنتهاوس', 'مراقبة'] },
+        { key: 'transit', name: 'المواصلات والمصاعد', icon: '🚁', tags: ['evtol', 'lift', 'parking', 'skybridges', 'ev_hub', 'iris_transit', 'تاكسي', 'مصاعد', 'مواقف', 'جسور'] },
+        { key: 'parks', name: 'الحدائق والمسبح', icon: '🌳', tags: ['skyforest', 'glass_pool', 'sky_gym', 'atrium_gardens', 'حديقة', 'مسبح', 'لياقة'] },
+        { key: 'business', name: 'الأعمال والقمم', icon: '💼', tags: ['offices', 'summit', 'ballroom', 'data_center', 'مكاتب', 'مؤتمرات', 'احتفالات', 'خوادم'] },
+        { key: 'eco', name: 'الأمان والاستدامة', icon: '🌿', tags: ['safety', 'green', 'clean_energy', 'air_filtration', 'mass_damper', 'telecom', 'إخماد', 'طاقة', 'فلترة', '6G'] }
+      ],
+      jet: [
+        { key: 'power', name: 'المحركات والسرعة', icon: '🚀', tags: ['engines', 'gold', 'fuel', 'defense', 'short_runway', 'محركات', 'ذهب', 'وقود', 'دفاع', 'إقلاع'] },
+        { key: 'master', name: 'الجناح وغرفة النوم', icon: '🛏️', tags: ['bedroom', 'seats', 'circadian_light', 'mahogany_floor', 'نوم', 'تمساح', 'إضاءة', 'ماهوجني'] },
+        { key: 'wellness', name: 'السبا والاستجمام', icon: '🛁', tags: ['jacuzzi', 'grooming', 'oxygen_pod', 'air', 'جاكوزي', 'حلاقة', 'أكسجين', 'تنقية'] },
+        { key: 'salon', name: 'السينما والصالون', icon: '🎬', tags: ['sky_cinema', 'lounge', 'skylight', 'active_silence', 'سينما', 'صالون', 'بانورامي', 'صمت'] },
+        { key: 'dining', name: 'المائدة والضيافة', icon: '🍽️', tags: ['crew', 'sky_chef', 'crystal_dining', 'supercar_bay', 'ضيافة', 'شيف', 'فضة', 'سيارة'] },
+        { key: 'avionics', name: 'الملاحة والأقمار', icon: '🛰️', tags: ['starlink', 'cockpit', 'turbulence_radar', 'autoland', 'secure_satcom', '8k_cameras', 'nano', 'ستارلينك', 'قيادة', 'رادار', 'هبوط', 'مشفر', 'كاميرات'] }
+      ]
     };
 
     const QUICK_EMOJIS = ['🏎️', '👑', '🕶️', '🚀', '⚡', '💎', '🦁', '🌟', '🦅', '🔥', '🥷', '🎯'];
@@ -1911,12 +1999,51 @@
       document.getElementById('currentRoundNum').innerText = gameState.round;
       document.getElementById('totalRoundsNum').innerText = gameState.totalRounds;
 
-      // Update Offer
+      // Update Offer & Blueprint category badge & need status
       const off = gameState.currentOffer;
       if (off) {
         document.getElementById('offerName').innerText = off.name;
         document.getElementById('offerDesc').innerText = off.desc;
         document.getElementById('offerScoreBonus').innerText = `+${off.score} نقطة تميز`;
+
+        const slotsDef = THEME_SLOTS_DEF[gameState.theme] || THEME_SLOTS_DEF.car;
+        const offerSlot = slotsDef.find(s => {
+          if (off.tag && s.tags.includes(off.tag)) return true;
+          return s.tags.some(t => off.name.includes(t));
+        }) || slotsDef[0];
+
+        const catBadge = document.getElementById('offerCategoryBadge');
+        if (catBadge) {
+          catBadge.innerText = `${offerSlot.icon} ${offerSlot.name}`;
+        }
+
+        const me = gameState.players.find(p => p.id === gameState.myPlayerId) || { upgrades: gameState.myUpgrades || [] };
+        const myUpgrades = me.upgrades || [];
+        const hasSlotAlready = myUpgrades.some(u => {
+          if (u.tag && offerSlot.tags.includes(u.tag)) return true;
+          return offerSlot.tags.some(t => (u.name || '').includes(t));
+        });
+
+        const needBanner = document.getElementById('offerNeedBanner');
+        const needIcon = document.getElementById('offerNeedIcon');
+        const needText = document.getElementById('offerNeedText');
+        const needBadge = document.getElementById('offerNeedBadge');
+
+        if (needBanner && needText) {
+          if (!hasSlotAlready) {
+            needBanner.className = 'p-2 rounded-xl text-xs font-black flex items-center justify-between gap-2 bg-emerald-950/60 border border-emerald-500/40 text-emerald-300';
+            needIcon.innerText = '💡';
+            needText.innerText = `مشروعك يحتاج هذه القطعة بشدة! (خانة ${offerSlot.name} شاغرة)`;
+            needBadge.className = 'text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-md font-bold';
+            needBadge.innerText = 'موصى به لمشروعك ⭐';
+          } else {
+            needBanner.className = 'p-2 rounded-xl text-xs font-black flex items-center justify-between gap-2 bg-indigo-950/50 border border-indigo-500/30 text-indigo-300';
+            needIcon.innerText = '⚡';
+            needText.innerText = `لديك تجهيز في (${offerSlot.name}) - ترقية إضافية للقوة والفخامة!`;
+            needBadge.className = 'text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-md font-bold';
+            needBadge.innerText = 'ترقية مضافة 🚀';
+          }
+        }
       }
 
       currentProposedBid = currentHighestBid + 1;
@@ -2055,7 +2182,7 @@
         avatar: myProfile.avatar,
         budget: gameState.budget,
         score: 10,
-        upgrades: gameState.myUpgrades
+        upgrades: gameState.myUpgrades || []
       };
 
       document.getElementById('playMyBudget').innerText = `${me.budget} ر.س`;
@@ -2066,7 +2193,69 @@
       // Render Dynamic SVG for current theme
       const themeData = THEMES[gameState.theme] || THEMES.car;
       const svgViewport = document.getElementById('svgViewport');
-      svgViewport.innerHTML = themeData.svgRender(me.upgrades || []);
+      if (svgViewport) {
+        svgViewport.innerHTML = themeData.svgRender(me.upgrades || []);
+      }
+
+      // Render the 6 Core Blueprint Slots (ملامح وخانات المشروع الستة)
+      const slotsDef = THEME_SLOTS_DEF[gameState.theme] || THEME_SLOTS_DEF.car;
+      const myUpgrades = me.upgrades || [];
+      const slotsCont = document.getElementById('projectSlotsGrid');
+      let completedSlotsCount = 0;
+
+      if (slotsCont) {
+        slotsCont.innerHTML = slotsDef.map(slot => {
+          const matchingUpgrade = myUpgrades.find(u => {
+            if (u.tag && slot.tags.includes(u.tag)) return true;
+            const uName = u.name || '';
+            return slot.tags.some(t => uName.includes(t));
+          });
+
+          if (matchingUpgrade) {
+            completedSlotsCount++;
+            return `
+              <div class="bg-gradient-to-r from-emerald-950/70 via-slate-900 to-emerald-950/50 border border-emerald-500/50 rounded-xl p-2 flex flex-col justify-between shadow-sm">
+                <div class="flex items-center justify-between gap-1">
+                  <span class="text-[11px] font-black text-emerald-300 flex items-center gap-1 truncate">
+                    <span>${slot.icon}</span>
+                    <span class="truncate">${slot.name}</span>
+                  </span>
+                  <span class="text-[9px] text-emerald-400 font-mono font-black">✅ جاهز</span>
+                </div>
+                <div class="mt-1 pt-1 border-t border-emerald-500/20 text-right">
+                  <span class="text-[10px] font-bold text-white block truncate" title="${matchingUpgrade.name}">
+                    ${matchingUpgrade.name}
+                  </span>
+                  <span class="text-[9px] font-mono text-amber-300">+${matchingUpgrade.score} نقطة</span>
+                </div>
+              </div>
+            `;
+          } else {
+            return `
+              <div class="bg-slate-950/60 border border-dashed border-slate-700/80 rounded-xl p-2 flex flex-col justify-between opacity-75 hover:opacity-100 transition">
+                <div class="flex items-center justify-between gap-1">
+                  <span class="text-[11px] font-black text-slate-300 flex items-center gap-1 truncate">
+                    <span>${slot.icon}</span>
+                    <span class="truncate">${slot.name}</span>
+                  </span>
+                  <span class="text-[9px] text-rose-400 font-bold">⭕ شاغر</span>
+                </div>
+                <div class="mt-1 pt-1 border-t border-slate-800 text-right">
+                  <span class="text-[10px] text-amber-300/80 font-bold block">
+                    بحاجة لترقية
+                  </span>
+                  <span class="text-[9px] text-slate-500">غير مكتمل بعد</span>
+                </div>
+              </div>
+            `;
+          }
+        }).join('');
+      }
+
+      const progressEl = document.getElementById('projectSlotsProgress');
+      if (progressEl) {
+        progressEl.innerText = `${completedSlotsCount} / 6 ملامح مكتملة`;
+      }
     }
 
     function renderCompetitorsGrid() {
@@ -2458,11 +2647,15 @@
       const uNames = upgrades.map(u => u.name || '');
       const hasGold = uNames.some(n => n.includes('ذهبي'));
       const hasWheels = uNames.some(n => n.includes('جنوط'));
-      const hasMonster = uNames.some(n => n.includes('Monster'));
-      const hasSpoiler = uNames.some(n => n.includes('جناح'));
+      const hasMonster = uNames.some(n => n.includes('Monster') || n.includes('كفرات'));
+      const hasSpoiler = uNames.some(n => n.includes('جناح') || n.includes('ديفيوزر'));
       const hasNeon = uNames.some(n => n.includes('نيون'));
-      const hasLambo = uNames.some(n => n.includes('لمبو'));
-      const hasNitro = uNames.some(n => n.includes('نيترو'));
+      const hasLambo = uNames.some(n => n.includes('لمبو') || n.includes('أبواب'));
+      const hasNitro = uNames.some(n => n.includes('نيترو') || n.includes('عادم') || n.includes('لهب'));
+      const hasHud = uNames.some(n => n.includes('HUD') || n.includes('بروجكتر') || n.includes('شاشة') || n.includes('قيادة'));
+      const hasTurbo = uNames.some(n => n.includes('تيربو') || n.includes('ميثانول') || n.includes('هيدرز'));
+      const hasRedSeats = uNames.some(n => n.includes('جلد') || n.includes('مراتب') || n.includes('مساج') || n.includes('دركسون'));
+      const hasLaser = uNames.some(n => n.includes('ليزر'));
 
       const bodyColor = hasGold ? 'url(#goldGrad)' : '#e11d48';
       const tireSize = hasMonster ? 19 : 14;
@@ -2494,7 +2687,7 @@
             <rect x="25" y="65" width="45" height="5" rx="2" fill="#020617" />
           ` : ''}
 
-          <!-- Nitro Flame / Tank -->
+          <!-- Nitro & Exhaust Flame -->
           ${hasNitro ? `
             <circle cx="50" cy="98" r="8" fill="#0284c7" />
             <path d="M 28 120 Q 10 120 2 125 Q 15 130 28 126 Z" fill="#38bdf8" opacity="0.9" class="animate-pulse" />
@@ -2504,8 +2697,27 @@
           <path d="M 50 125 C 50 100 80 92 110 88 L 150 55 L 230 55 L 280 95 C 310 100 320 115 320 128 C 320 135 310 138 290 138 L 80 138 Z"
                 fill="${bodyColor}" stroke="#1e293b" stroke-width="2.5" />
 
+          <!-- Twin Turbo / Engine Hood Glow Vents -->
+          ${hasTurbo ? `
+            <rect x="238" y="88" width="16" height="3" rx="1" fill="#f59e0b" class="animate-pulse" />
+            <rect x="258" y="93" width="14" height="3" rx="1" fill="#f59e0b" class="animate-pulse" />
+          ` : ''}
+
           <!-- Windows & Cockpit -->
           <path d="M 155 60 L 225 60 L 265 92 L 125 92 Z" fill="#0f172a" opacity="0.85" stroke="#38bdf8" stroke-width="1.5" />
+
+          <!-- Red Racing Leather Seats Inside Cockpit -->
+          ${hasRedSeats ? `
+            <rect x="162" y="68" width="12" height="20" rx="3" fill="#dc2626" opacity="0.9" />
+            <circle cx="168" cy="65" r="3.5" fill="#ef4444" />
+          ` : ''}
+
+          <!-- Holographic HUD Projector Display on Windshield -->
+          ${hasHud ? `
+            <path d="M 218 68 L 248 74 L 240 88 L 210 82 Z" fill="#06b6d4" opacity="0.35" class="animate-pulse" />
+            <text x="214" y="79" fill="#38bdf8" font-size="6.5" font-weight="bold" font-family="monospace">HUD 180</text>
+            <line x1="212" y1="82" x2="238" y2="82" stroke="#38bdf8" stroke-width="0.7" stroke-dasharray="1.5,1.5" />
+          ` : ''}
 
           <!-- Lambo Scissor Doors -->
           ${hasLambo ? `
@@ -2513,8 +2725,11 @@
             <path d="M 140 35 L 180 50 L 195 85 Z" fill="${bodyColor}" opacity="0.8" stroke="#f43f5e" stroke-width="1" />
           ` : ''}
 
-          <!-- Front Headlights (LED) -->
+          <!-- Front Laser Headlights -->
           <polygon points="305,108 318,114 310,120" fill="#38bdf8" class="animate-pulse" />
+          ${hasLaser ? `
+            <polygon points="318,114 338,106 338,122" fill="#06b6d4" opacity="0.5" class="animate-pulse" />
+          ` : ''}
 
           <!-- Rear Wheel -->
           <g transform="translate(100, 138)">
