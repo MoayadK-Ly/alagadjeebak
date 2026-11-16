@@ -820,9 +820,13 @@ function calculateRounds(budget) {
 function startRoomCodeTimer(room) {
   if (room.codeTimerInterval) clearInterval(room.codeTimerInterval);
   room.codeTimerInterval = setInterval(() => {
+    // Never expire or change code while game is actively playing or in results!
+    if (room.state === 'playing' || room.state === 'auction' || room.state === 'results') {
+      room.codeExpiresAt = Date.now() + 10 * 60 * 1000;
+      return;
+    }
     const remaining = Math.max(0, Math.floor((room.codeExpiresAt - Date.now()) / 1000));
     if (remaining <= 0) {
-      // Auto renew
       room.code = generateCode();
       room.codeExpiresAt = Date.now() + 10 * 60 * 1000;
       broadcastRoom(room, {
@@ -1162,8 +1166,16 @@ function endGame(room) {
     p.finalScore = p.score + savingsBonus + contractBonus;
   });
 
-  // Sort descending
-  room.players.sort((a, b) => b.finalScore - a.finalScore);
+  // Sort descending with definitive 4-tier tie-breaker:
+  // 1. finalScore -> 2. Remaining Budget -> 3. Contract Fulfilled -> 4. Upgrade count
+  room.players.sort((a, b) => {
+    if (b.finalScore !== a.finalScore) return b.finalScore - a.finalScore;
+    if (b.budget !== a.budget) return b.budget - a.budget;
+    const aCon = a.contractFulfilled ? 1 : 0;
+    const bCon = b.contractFulfilled ? 1 : 0;
+    if (bCon !== aCon) return bCon - aCon;
+    return (b.upgrades?.length || 0) - (a.upgrades?.length || 0);
+  });
 
   // Percentage distribution (pool total = 100%)
   const pool = room.players.reduce((sum, p) => sum + p.finalScore, 0) || 1;
@@ -1235,6 +1247,40 @@ wss.on('connection', (ws) => {
       switch (data.type) {
 
         // 1. CREATE ROOM
+                // PONG HEARTBEAT RESPONSE
+        case 'PONG': {
+          playerSession.lastActive = Date.now();
+          break;
+        }
+
+        // 2b. RECONNECT EXISTING SESSION (GRACE PERIOD)
+        case 'RECONNECT_SESSION': {
+          const { code, playerId } = data;
+          const cleanCode = String(code || '').replace('#', '').trim();
+          const room = rooms.get(cleanCode);
+          if (!room) return;
+          const player = room.players.find(p => p.id === playerId);
+          if (!player) return;
+
+          player.isDisconnected = false;
+          player.ws = ws;
+          playerSession.id = player.id;
+          playerSession.roomCode = room.code;
+
+          ws.send(JSON.stringify({
+            type: 'RECONNECTED_SUCCESS',
+            playerId: player.id,
+            isHost: (player.id === room.hostId),
+            room: getSafeRoomView(room, player.id)
+          }));
+
+          broadcastRoom(room, {
+            type: 'PLAYER_RECONNECTED',
+            playerName: player.name,
+            message: `⚡ عاد ${player.name} إلى الغرفة واستعاد مكانه بنجاح!`
+          });
+          break;
+        }
         case 'CREATE_ROOM': {
           const { name, avatar, options } = data;
           if (!name || !name.trim()) {
@@ -1520,6 +1566,11 @@ wss.on('connection', (ws) => {
           const player = room.players.find(p => p.id === playerSession.id);
           if (!player || !player.isAlive || player.frozen || player.hasPassed) return;
 
+          // Anti-Self Bidding: Cannot bid against oneself
+          if (room.liveAuction.highestBidderId === player.id) {
+            return ws.send(JSON.stringify({ type: 'ERROR', message: '⚠️ أنت صاحب أعلى سومة حالياً! لا يمكنك المزايدة على نفسك.' }));
+          }
+
           const amount = parseInt(data.amount) || 0;
           if (amount <= room.liveAuction.highestBid) {
             return ws.send(JSON.stringify({ type: 'ERROR', message: `السومة يجب أن تكون أعلى من ${room.liveAuction.highestBid} ر.س!` }));
@@ -1533,9 +1584,11 @@ wss.on('connection', (ws) => {
           room.liveAuction.highestBidderName = player.name;
           room.liveAuction.highestBidderAvatar = player.avatar;
 
-          // Sniper extension: if under 5 seconds, add time
-          if (room.liveAuction.timerSec < 5) {
+          // Anti-Sniper Extension with Maximum 3 extensions cap per round
+          room.liveAuction.extensionCount = room.liveAuction.extensionCount || 0;
+          if (room.liveAuction.timerSec < 5 && room.liveAuction.extensionCount < 3) {
             room.liveAuction.timerSec = 5;
+            room.liveAuction.extensionCount++;
           }
 
           broadcastRoom(room, {
@@ -1607,31 +1660,34 @@ wss.on('connection', (ws) => {
           let eventDescription = '';
 
           if (card.type === 'budget_cut') {
+            const actualCut = Math.min(target.budget, card.val);
             target.budget = Math.max(0, target.budget - card.val);
-            eventDescription = `📸 رصد ساهر مخالفة على اللاعب ${target.avatar} ${target.name} وخصم ${card.val} ر.س من ميزانيته بتوجيه من ${user.name}!`;
+            eventDescription = `📸 رصد ساهر مخالفة على اللاعب ${target.avatar} ${target.name} وخصم ${actualCut} ر.س من ميزانيته بتوجيه من ${user.name}!`;
           } else if (card.type === 'sell_last') {
-            if (target.upgrades.length > 0) {
-              const removed = target.upgrades.pop();
-              const refund = Math.floor(removed.price / 2);
-              target.budget += refund;
-              target.score = Math.max(10, target.score - removed.score);
-              eventDescription = `🧰 سطحة وتشليح! أجبر ${user.name} منافسه ${target.name} على فك (${removed.name}) وبيعها بنصف السعر (+${refund} ر.س)!`;
-            } else {
-              eventDescription = `🧰 حاول ${user.name} سحب سيارة ${target.name} ولكن لم يجد بها أي قطع بعد!`;
+            if (target.upgrades.length === 0) {
+              user.sabotageCards.splice(cardIndex, 0, card); // Restore card so it's not wasted
+              return ws.send(JSON.stringify({ type: 'ERROR', message: '⚠️ هذا الخصم لا يملك أي قطعة لتشليحها حتى الآن! احتفظت بكرتك.' }));
             }
+            const removed = target.upgrades.pop();
+            const refund = Math.max(1, Math.floor(removed.price / 2));
+            target.budget += refund;
+            target.score = Math.max(10, target.score - (removed.score || 10));
+            eventDescription = `🧰 سطحة وتشليح! أجبر ${user.name} منافسه ${target.name} على فك (${removed.name}) وبيعها بنصف السعر (+${refund} ر.س)!`;
           } else if (card.type === 'freeze_turn') {
             target.frozen = true;
             eventDescription = `🧿 عين حسود! جمّد ${user.name} خيار الشراء للاعب ${target.name} لهذه الجولة!`;
           } else if (card.type === 'swap_piece') {
-            if (user.upgrades.length > 0 && target.upgrades.length > 0) {
-              const myPiece = user.upgrades.pop();
-              const targetPiece = target.upgrades.pop();
-              user.upgrades.push(targetPiece);
-              target.upgrades.push(myPiece);
-              user.score = user.score - myPiece.score + targetPiece.score;
-              target.score = target.score - targetPiece.score + myPiece.score;
-              eventDescription = `🤝 شريطي المعارض! قام ${user.name} بتبديل قطعه إجبارياً مع ${target.name}!`;
+            if (user.upgrades.length === 0 || target.upgrades.length === 0) {
+              user.sabotageCards.splice(cardIndex, 0, card); // Restore card
+              return ws.send(JSON.stringify({ type: 'ERROR', message: '⚠️ لا يمكن التبديل! يجب أن تملك أنت وخصمك قطعة واحدة على الأقل. احتفظت بكرتك.' }));
             }
+            const myPiece = user.upgrades.pop();
+            const targetPiece = target.upgrades.pop();
+            user.upgrades.push(targetPiece);
+            target.upgrades.push(myPiece);
+            user.score = user.score - myPiece.score + targetPiece.score;
+            target.score = target.score - targetPiece.score + myPiece.score;
+            eventDescription = `🤝 شريطي المعارض! قام ${user.name} بتبديل قطعه إجبارياً مع ${target.name}!`;
           }
 
           broadcastRoom(room, {
@@ -1721,13 +1777,28 @@ wss.on('connection', (ws) => {
           room.currentOffer = null;
           room.hasHadAuction = false;
           room.auctionData = null;
-          room.players.forEach(p => {
+          room.liveAuction = null;
+          room.usedOfferIds = []; // Fresh question bank reset!
+
+          const themeContracts = CONTRACTS[room.theme] || CONTRACTS.car;
+          room.players.forEach((p, idx) => {
             p.budget = room.budget;
             p.score = 10;
             p.upgrades = [];
             p.hasChosen = false;
+            p.hasPassed = false;
             p.isAlive = true;
             p.frozen = false;
+            p.contractFulfilled = false;
+            p.contractBonus = 0;
+            p.finalScore = 0;
+            // Guests must re-confirm ready, Host & Bots remain ready
+            p.isReady = (p.id === room.hostId || p.isBot);
+
+            const card = SABOTAGE_CARDS[Math.floor(Math.random() * SABOTAGE_CARDS.length)];
+            p.sabotageCards = [{ ...card, id: card.id + '_' + Date.now() }];
+            const contract = themeContracts[idx % themeContracts.length];
+            p.secretContract = { ...contract };
           });
           broadcastRoom(room);
           break;
@@ -1760,6 +1831,18 @@ wss.on('connection', (ws) => {
     }
   });
 });
+
+
+// 25-Second WebSocket Keep-Alive Ping (Prevents Render 55s Idle Drop)
+const heartbeatInterval = setInterval(() => {
+  wss.clients.forEach(client => {
+    if (client.readyState === WebSocket.OPEN) {
+      try {
+        client.send(JSON.stringify({ type: 'PING' }));
+      } catch (e) {}
+    }
+  });
+}, 25000);
 
 server.listen(PORT, () => {
   console.log(`🚀 « على قد جيبك 💸 » Server running at http://localhost:${PORT}`);

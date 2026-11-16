@@ -96,6 +96,10 @@
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: #020617; }
     ::-webkit-scrollbar-thumb { background: #334155; border-radius: 999px; }
+    /* Mobile Dynamic Viewport Height (dvh) support */
+    @supports (min-height: 100dvh) {
+      body { min-height: 100dvh; }
+    }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between overflow-x-hidden relative selection:bg-rose-500 selection:text-white">
@@ -156,8 +160,14 @@
     <!-- ================= SCREEN 1: ENTRY GATEKEEPER (CREATE / JOIN) ================= -->
     <div id="screenEntry" class="space-y-6 max-w-lg mx-auto w-full">
       <div class="text-center space-y-2">
-        <div class="inline-block px-3 py-1 bg-rose-500/10 border border-rose-500/30 rounded-full text-xs font-bold text-rose-300">
-          🎮 سعة الغرف: من 2 إلى 8 لاعبين
+        <div class="flex items-center justify-center gap-2 flex-wrap">
+          <div class="inline-block px-3 py-1 bg-rose-500/10 border border-rose-500/30 rounded-full text-xs font-bold text-rose-300">
+            🎮 سعة الغرف: من 2 إلى 8 لاعبين
+          </div>
+          <div id="cloudStatusBadge" class="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/10 border border-amber-500/30 rounded-full text-xs font-bold text-amber-300 shadow-sm">
+            <span id="cloudStatusDot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+            <span id="cloudStatusText">جاري الاتصال بالسيرفر السحابي...</span>
+          </div>
         </div>
         <h2 class="text-2xl md:text-3xl font-black text-white">ابنِ مشروعك وإياك تطفر! 💸</h2>
         <p class="text-xs text-slate-400">اختر اسمك وإيموجي شخصيتك وابدأ اللعب أونلاين بكود سري مؤقت</p>
@@ -176,7 +186,7 @@
             </button>
           </div>
           <input type="text" id="entryName" placeholder="اكتب اسمك الصريح أو اختر اسماً عشوائياً..." maxlength="18"
-                 oninput="validateNameInput(this)"
+                 onfocus="this.scrollIntoView({ behavior: 'smooth', block: 'center' })" oninput="validateNameInput(this)"
                  class="w-full bg-slate-950 border border-slate-700 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 outline-none transition font-bold">
           <p id="entryNameErr" class="text-[10px] text-rose-400 font-bold mt-1 min-h-[14px]"></p>
         </div>
@@ -1611,6 +1621,29 @@
         ws.onopen = () => {
           console.log('✅ Connected to Alagadjeebak WebSocket server');
           isConnected = true;
+          
+          // Update cloud status badge
+          const dot = document.getElementById('cloudStatusDot');
+          const text = document.getElementById('cloudStatusText');
+          const badge = document.getElementById('cloudStatusBadge');
+          if (dot) dot.className = 'w-2 h-2 rounded-full bg-emerald-400';
+          if (text) text.innerText = 'متصل بالسيرفر السحابي 🇸🇦';
+          if (badge) badge.className = 'inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 rounded-full text-xs font-bold text-emerald-300 shadow-sm';
+
+          // Attempt session resume if reconnecting from phone sleep
+          try {
+            const rawSession = sessionStorage.getItem('alagadjeebak_active_session');
+            if (rawSession) {
+              const sess = JSON.parse(rawSession);
+              if (sess && sess.code && sess.playerId) {
+                ws.send(JSON.stringify({
+                  type: 'RECONNECT_SESSION',
+                  code: sess.code,
+                  playerId: sess.playerId
+                }));
+              }
+            }
+          } catch(e) {}
         };
 
         ws.onmessage = (event) => {
@@ -1657,6 +1690,28 @@
       }
 
       switch (msg.type) {
+        case 'PING':
+          if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: 'PONG' }));
+          }
+          break;
+
+        case 'RECONNECTED_SUCCESS':
+          gameState.myPlayerId = msg.playerId;
+          gameState.isHost = msg.isHost;
+          switchScreen('screenLobby');
+          applyRoomUpdate(msg.room);
+          showFloatingNotification('⚡ تم استعادة اتصالك ومكانك في الغرفة بنجاح!');
+          break;
+
+        case 'PLAYER_TEMP_DISCONNECTED':
+          showFloatingNotification(msg.message || '📶 انقطع اتصال أحد اللاعبين مؤقتاً');
+          break;
+
+        case 'PLAYER_RECONNECTED':
+          showFloatingNotification(msg.message || '⚡ عاد اللاعب إلى الغرفة!');
+          break;
+
         case 'ERROR':
           alert(msg.message || 'حدث خطأ!');
           break;
@@ -2008,6 +2063,7 @@
 
     function leaveRoom() {
       if (confirm('هل أنت متأكد من مغادرة الغرفة؟')) {
+        try { sessionStorage.removeItem('alagadjeebak_active_session'); } catch(e){}
         location.reload();
       }
     }
@@ -2823,8 +2879,27 @@
     }
 
     // Direct 1-Click Instant Bidding (Simplified & Clutter-Free)
+    let lastBidTimestamp = 0;
     function executeInstantBid(increment = 1) {
+      const now = Date.now();
+      if (now - lastBidTimestamp < 400) return; // Prevent rapid-tap double clicks
+      lastBidTimestamp = now;
+
       if (myHasPassed) return;
+
+      // Anti-Self Bidding Guard
+      if (currentHighestBidder && (currentHighestBidder.includes(myProfile.name) || (gameState.myPlayerId && currentHighestBidder.includes(gameState.myPlayerId)))) {
+        showFloatingNotification('⚠️ أنت صاحب أعلى سومة حالياً! لا يمكنك المزايدة على نفسك.');
+        return;
+      }
+
+      // Quick visual debounce lock
+      const btnSubmit = document.getElementById('btnSubmitBid');
+      if (btnSubmit) {
+        btnSubmit.classList.add('pointer-events-none', 'opacity-70');
+        setTimeout(() => btnSubmit && btnSubmit.classList.remove('pointer-events-none', 'opacity-70'), 400);
+      }
+
       const me = gameState.players.find(p => p.id === gameState.myPlayerId) || { budget: gameState.budget };
       const bidAmount = currentHighestBid + increment;
 
