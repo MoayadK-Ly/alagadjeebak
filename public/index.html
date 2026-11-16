@@ -319,7 +319,7 @@
               <h3 class="text-sm font-black text-indigo-400 flex items-center gap-2">
                 👑 إعدادات المضيف (تُقفل تماماً عند بدء اللعب)
               </h3>
-              <span class="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full font-bold">المضيف يتحكم</span>
+              <span id="hostControlsHeaderBadge" class="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full font-bold">المضيف يتحكم</span>
             </div>
 
             <!-- 6 Themes Selector -->
@@ -1764,12 +1764,12 @@
       if (roomCodeEl) roomCodeEl.innerText = '#' + r.code;
       if (playerCountEl) playerCountEl.innerText = gameState.players.length;
 
-      // Check host permissions robustly
-      const me = gameState.players.find(p => p.id === gameState.myPlayerId);
-      const isActualHost = (me && me.isHost) || (r.hostId && gameState.myPlayerId && r.hostId === gameState.myPlayerId) || (gameState.isHost === true && gameState.players.length <= 1);
-      if (gameState.myPlayerId || isActualHost) {
-        gameState.isHost = !!isActualHost;
-      }
+      // Strict Host Verification: Host is ONLY the player whose ID strictly matches r.hostId
+      const isActualHost = Boolean(
+        (r.hostId && gameState.myPlayerId && r.hostId === gameState.myPlayerId) ||
+        (gameState.players.find(p => p.id === gameState.myPlayerId)?.isHost === true)
+      );
+      gameState.isHost = isActualHost;
 
       const hostControls = document.getElementById('hostControlsCard');
       const startBtn = document.getElementById('startGameBtn');
@@ -1777,18 +1777,27 @@
       const waitNotice = document.getElementById('lobbyWaitingMsg');
       const codeTimerCont = document.getElementById('lobbyCodeCountdownContainer');
 
+      const hostBadge = document.getElementById('hostControlsHeaderBadge');
       if (gameState.isHost) {
-        if (hostControls) hostControls.classList.remove('opacity-60', 'pointer-events-none');
+        if (hostControls) hostControls.classList.remove('opacity-50', 'pointer-events-none');
         if (startBtn) startBtn.classList.remove('hidden');
         if (addBotBtn) addBotBtn.classList.remove('hidden');
         if (waitNotice) waitNotice.classList.add('hidden');
         if (codeTimerCont) codeTimerCont.classList.remove('hidden');
+        if (hostBadge) {
+          hostBadge.innerText = '👑 أنت المضيف (تتحكم بالإعدادات)';
+          hostBadge.className = 'text-[10px] bg-indigo-500/20 text-indigo-300 px-2.5 py-0.5 rounded-full font-bold border border-indigo-500/30';
+        }
       } else {
-        if (hostControls) hostControls.classList.add('opacity-60', 'pointer-events-none');
+        if (hostControls) hostControls.classList.add('opacity-50', 'pointer-events-none');
         if (startBtn) startBtn.classList.add('hidden');
         if (addBotBtn) addBotBtn.classList.add('hidden');
         if (waitNotice) waitNotice.classList.remove('hidden');
         if (codeTimerCont) codeTimerCont.classList.add('hidden');
+        if (hostBadge) {
+          hostBadge.innerText = '🔒 للعرض فقط (المضيف يحدد الإعدادات)';
+          hostBadge.className = 'text-[10px] bg-slate-800 text-slate-400 px-2.5 py-0.5 rounded-full font-bold border border-slate-700';
+        }
       }
 
       // Sync form controls if needed
@@ -1900,6 +1909,8 @@
     }
 
     function submitJoinRoom() {
+      // Joining a room: strictly non-host
+      gameState.isHost = false;
       const codeInput = document.getElementById('joinCodeInput');
       const code = codeInput.value.trim().replace('#', '');
       const err = document.getElementById('joinCodeErr');
@@ -2079,8 +2090,8 @@
           statusBadge = '<span class="text-[9px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded-full font-black flex items-center gap-1"><span>⏳</span><span>ينتظر...</span></span>';
         }
 
-        // Kick button for room creator / host: can kick any other player or bot
-        const canKick = gameState.isHost && !isHost;
+        // Kick button for room creator / host: can kick any other player or bot, NEVER self
+        const canKick = gameState.isHost && !isMe;
 
         return `
           <div class="bg-slate-950 border ${isMe ? 'border-amber-500/60 shadow-md shadow-amber-500/10' : (isBot ? 'border-purple-500/30' : 'border-slate-800')} rounded-2xl p-2.5 flex items-center justify-between gap-2 transition hover:border-slate-700">
@@ -2227,7 +2238,14 @@
     }
 
     function handleKickPlayer(playerId, playerName) {
-      if (!gameState.isHost) return;
+      if (!gameState.isHost) {
+        showFloatingNotification('⚠️ المضيف فقط يملك صلاحية طرد اللاعبين!');
+        return;
+      }
+      if (playerId === gameState.myPlayerId) {
+        alert('⚠️ لا يمكنك طرد نفسك من الغرفة!');
+        return;
+      }
       if (!confirm(`هل أنت متأكد من طرد اللاعب (${playerName}) من الغرفة؟`)) return;
       playSoundEffect('skip');
       if (isConnected && ws && ws.readyState === WebSocket.OPEN) {

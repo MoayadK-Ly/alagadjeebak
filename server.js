@@ -1448,7 +1448,7 @@ wss.on('connection', (ws) => {
           const targetIdx = room.players.findIndex(p => p.id === targetId);
           if (targetIdx === -1) return;
           const targetPlayer = room.players[targetIdx];
-          if (targetPlayer.id === room.hostId) return; // Cannot kick the host
+          if (targetPlayer.id === room.hostId || targetPlayer.id === playerSession.id) return; // Cannot kick host or self
 
           // Notify kicked player if connected via WebSocket
           if (targetPlayer.ws && targetPlayer.ws.readyState === WebSocket.OPEN) {
