@@ -249,7 +249,7 @@
     </div>
 
     <!-- ================= SCREEN 3: LOBBY (UP TO 8 PLAYERS + 10-MIN CODE) ================= -->
-    <div id="screenLobby" class="hidden space-y-4 max-w-2xl mx-auto w-full">
+    <div id="screenLobby" class="hidden space-y-4 max-w-5xl mx-auto w-full">
       
       <!-- Top Lobby Banner: Secret Code & 10-Min Timer -->
       <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 md:p-5 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xl">
@@ -279,77 +279,104 @@
         </div>
       </div>
 
-      <!-- Pre-Game Settings (Host Only) -->
-      <div id="hostControlsCard" class="bg-slate-900/90 border border-indigo-500/30 rounded-3xl p-5 space-y-4 shadow-xl">
-        <div class="flex items-center justify-between pb-2 border-b border-slate-800">
-          <h3 class="text-sm font-black text-indigo-400 flex items-center gap-2">
-            👑 إعدادات المضيف (تُقفل تماماً عند بدء اللعب)
-          </h3>
-          <span class="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full font-bold">المضيف يتحكم</span>
-        </div>
+      <!-- Main Lobby Grid: Players on the Right, Controls on the Left (RTL Layout) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+        
+        <!-- RIGHT COLUMN: Connected Players & Joiner Ready Button (lg:col-span-5) -->
+        <div class="lg:col-span-5 space-y-3">
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 md:p-5 space-y-3 shadow-xl">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+              <h4 class="text-xs font-black text-slate-200 flex items-center gap-1.5">
+                <span>👥</span>
+                <span>قائمة المتسابقين في الغرفة</span>
+              </h4>
+              <span class="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20 font-bold">
+                <span id="lobbySidePlayerCount">1</span> / 8 لاعبين
+              </span>
+            </div>
 
-        <!-- 6 Themes Selector -->
-        <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1.5">موضوع التحدي (6 مشاريع حية):</label>
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="themeCardsContainer">
-            <!-- Rendered via JS -->
-          </div>
-        </div>
+            <!-- Joiner Interactive Ready Toggle Card -->
+            <div id="joinerReadyCard" class="hidden">
+              <button id="toggleReadyBtn" onclick="handleToggleReady()" class="w-full py-2.5 px-3 rounded-2xl border font-black text-xs flex items-center justify-center gap-2 transition active:scale-95 shadow-md">
+                <!-- Injected via JS -->
+              </button>
+            </div>
 
-        <!-- Budget & Dynamic Rounds Selector -->
-        <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1.5">الميزانية وعدد الجولات بالريال:</label>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="budgetCardsContainer">
-            <!-- 25, 50, 100, 200 SAR -->
-          </div>
-        </div>
-
-        <!-- Mode & Curtain Toggles -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-          <div>
-            <label class="block text-xs font-bold text-slate-300 mb-1">طور اللعب:</label>
-            <select id="lobbyGameMode" onchange="updateHostSettings()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-white outline-none">
-              <option value="ffa">فردي تنافسي (Free For All)</option>
-              <option value="coop">ثنائيات (2 ضد 2 - Co-op)</option>
-              <option value="survival">طور الطفرة القاتلة (Survival)</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="block text-xs font-bold text-slate-300 mb-1">الستارة السرية المشفرة:</label>
-            <div class="flex items-center gap-2 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2">
-              <input type="checkbox" id="lobbyCurtainToggle" checked onchange="updateHostSettings()" class="w-4 h-4 accent-rose-500 rounded">
-              <label for="lobbyCurtainToggle" class="text-xs font-bold text-slate-300 cursor-pointer">
-                تفعيل الستارة (حجب مشاريع الخصوم)
-              </label>
+            <!-- Players Cards Vertical Stack -->
+            <div class="space-y-2 max-h-[480px] overflow-y-auto pr-0.5" id="lobbyPlayersList">
+              <!-- Injected via JS -->
             </div>
           </div>
         </div>
 
-      </div>
+        <!-- LEFT COLUMN: Pre-Game Settings & Host Actions (lg:col-span-7) -->
+        <div class="lg:col-span-7 space-y-4">
+          <!-- Pre-Game Settings (Host Only) -->
+          <div id="hostControlsCard" class="bg-slate-900/90 border border-indigo-500/30 rounded-3xl p-5 space-y-4 shadow-xl">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+              <h3 class="text-sm font-black text-indigo-400 flex items-center gap-2">
+                👑 إعدادات المضيف (تُقفل تماماً عند بدء اللعب)
+              </h3>
+              <span class="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full font-bold">المضيف يتحكم</span>
+            </div>
 
-      <!-- Connected Players Grid -->
-      <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 space-y-3">
-        <h4 class="text-xs font-black text-slate-300">قائمة المتسابقين في الغرفة:</h4>
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="lobbyPlayersList">
-          <!-- Injected via JS -->
+            <!-- 6 Themes Selector -->
+            <div>
+              <label class="block text-xs font-bold text-slate-300 mb-1.5">موضوع التحدي (6 مشاريع حية):</label>
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="themeCardsContainer">
+                <!-- Rendered via JS -->
+              </div>
+            </div>
+
+            <!-- Budget & Dynamic Rounds Selector -->
+            <div>
+              <label class="block text-xs font-bold text-slate-300 mb-1.5">الميزانية وعدد الجولات بالريال:</label>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="budgetCardsContainer">
+                <!-- 25, 50, 100, 200 SAR -->
+              </div>
+            </div>
+
+            <!-- Mode & Curtain Toggles -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              <div>
+                <label class="block text-xs font-bold text-slate-300 mb-1">طور اللعب:</label>
+                <select id="lobbyGameMode" onchange="updateHostSettings()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-white outline-none">
+                  <option value="ffa">فردي تنافسي (Free For All)</option>
+                  <option value="coop">ثنائيات (2 ضد 2 - Co-op)</option>
+                  <option value="survival">طور الطفرة القاتلة (Survival)</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-300 mb-1">الستارة السرية المشفرة:</label>
+                <div class="flex items-center gap-2 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2">
+                  <input type="checkbox" id="lobbyCurtainToggle" checked onchange="updateHostSettings()" class="w-4 h-4 accent-rose-500 rounded">
+                  <label for="lobbyCurtainToggle" class="text-xs font-bold text-slate-300 cursor-pointer">
+                    تفعيل الستارة (حجب مشاريع الخصوم)
+                  </label>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Host Action Area: Start & Add AI -->
+          <div id="lobbyHostStartArea" class="space-y-2.5 pt-1">
+            <button id="addAiBotBtn" onclick="handleAddAiBotClick()" class="w-full py-3.5 bg-gradient-to-r from-purple-700 via-indigo-600 to-blue-600 hover:from-purple-600 hover:to-blue-500 text-white font-black text-sm rounded-2xl shadow-lg shadow-indigo-600/20 border border-indigo-400/30 flex items-center justify-center gap-2 transition active:scale-98">
+              <span class="text-xl">🤖</span>
+              <span>إضافة ذكاء اصطناعي</span>
+              <span class="text-[10px] text-purple-200 bg-purple-500/20 px-2 py-0.5 rounded-full border border-purple-400/30 font-bold">(يحاكي تفكير البشر وتكتيكاتهم)</span>
+            </button>
+
+            <button id="startGameBtn" onclick="handleStartGameClick()" class="w-full py-4 bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white font-black text-lg rounded-2xl shadow-xl shadow-emerald-600/30 transition transform active:scale-98">
+              🚀 ابدأ التحدي الآن!
+            </button>
+          </div>
+          <div id="lobbyWaitingMsg" class="hidden text-center text-xs text-amber-300 font-bold p-3.5 bg-amber-500/10 rounded-2xl border border-amber-500/20">
+            ⏳ بانتظار مضيف الغرفة لبدء اللعبة...
+          </div>
         </div>
-      </div>
 
-      <!-- Host Action Area: Start & Add AI -->
-      <div id="lobbyHostStartArea" class="space-y-2.5 pt-2">
-        <button id="addAiBotBtn" onclick="handleAddAiBotClick()" class="w-full py-3.5 bg-gradient-to-r from-purple-700 via-indigo-600 to-blue-600 hover:from-purple-600 hover:to-blue-500 text-white font-black text-sm rounded-2xl shadow-lg shadow-indigo-600/20 border border-indigo-400/30 flex items-center justify-center gap-2 transition active:scale-98">
-          <span class="text-xl">🤖</span>
-          <span>إضافة ذكاء اصطناعي</span>
-          <span class="text-[10px] text-purple-200 bg-purple-500/20 px-2 py-0.5 rounded-full border border-purple-400/30 font-bold">(يحاكي تفكير البشر وتكتيكاتهم)</span>
-        </button>
-
-        <button id="startGameBtn" onclick="handleStartGameClick()" class="w-full py-4 bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white font-black text-lg rounded-2xl shadow-xl shadow-emerald-600/30 transition transform active:scale-98">
-          🚀 ابدأ التحدي الآن!
-        </button>
-      </div>
-      <div id="lobbyWaitingMsg" class="hidden text-center text-xs text-amber-300 font-bold p-3 bg-amber-500/10 rounded-2xl border border-amber-500/20">
-        ⏳ بانتظار مضيف الغرفة لبدء اللعبة...
       </div>
 
     </div>
@@ -1129,8 +1156,20 @@
           break;
 
         case 'AI_BOT_REMOVED':
+        case 'PLAYER_KICKED':
           playSoundEffect('skip');
           showFloatingNotification(msg.message || '🚪 تم استبعاد المتسابق');
+          break;
+
+        case 'KICKED_FROM_ROOM':
+          alert(msg.message || '🚪 تم استبعادك من الغرفة بواسطة صانع الغرفة.');
+          gameState.roomCode = null;
+          gameState.players = [];
+          switchScreen('screenEntry');
+          break;
+
+        case 'PLAYER_READY_CHANGED':
+          playSoundEffect('pop');
           break;
 
         case 'ROOM_CREATED':
@@ -1553,33 +1592,85 @@
 
     function renderLobbyPlayers() {
       const list = document.getElementById('lobbyPlayersList');
+      const sideCount = document.getElementById('lobbySidePlayerCount');
+      if (sideCount) sideCount.innerText = gameState.players.length;
+
+      // 1. Render all player cards
       list.innerHTML = gameState.players.map(p => {
         const isMe = (p.id === gameState.myPlayerId);
+        const isHost = p.isHost;
+        const isBot = p.isBot;
+        const isReady = p.isReady;
+
+        // Status text & style
+        let statusBadge = '';
+        if (isHost) {
+          statusBadge = '<span class="text-[9px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 px-2 py-0.5 rounded-full font-black">👑 مضيف (جاهز)</span>';
+        } else if (isBot) {
+          statusBadge = '<span class="text-[9px] bg-purple-500/20 text-purple-300 border border-purple-500/40 px-2 py-0.5 rounded-full font-black">🤖 ذكاء اصطناعي (جاهز)</span>';
+        } else if (isReady) {
+          statusBadge = '<span class="text-[9px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 rounded-full font-black flex items-center gap-1"><span>✅</span><span>جاهز</span></span>';
+        } else {
+          statusBadge = '<span class="text-[9px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded-full font-black flex items-center gap-1"><span>⏳</span><span>ينتظر...</span></span>';
+        }
+
+        // Kick button for room creator / host: can kick any other player or bot
+        const canKick = gameState.isHost && !isHost;
+
         return `
-          <div class="bg-slate-950 border ${isMe ? 'border-amber-500/60 shadow-md shadow-amber-500/10' : (p.isBot ? 'border-purple-500/40 shadow-sm shadow-purple-500/10' : 'border-slate-800')} rounded-2xl p-2.5 flex items-center justify-between gap-2">
-            <div class="flex items-center gap-2 overflow-hidden flex-1">
+          <div class="bg-slate-950 border ${isMe ? 'border-amber-500/60 shadow-md shadow-amber-500/10' : (isBot ? 'border-purple-500/30' : 'border-slate-800')} rounded-2xl p-2.5 flex items-center justify-between gap-2 transition hover:border-slate-700">
+            <div class="flex items-center gap-2.5 overflow-hidden flex-1">
               <span class="text-2xl">${p.avatar || '🏎️'}</span>
               <div class="text-right overflow-hidden flex-1">
-                <div class="flex items-center gap-1">
+                <div class="flex items-center gap-1.5">
                   <span class="text-xs font-black text-white truncate">${p.name}</span>
-                  ${p.isHost ? '<span class="text-[8px] bg-indigo-500 text-white px-1 rounded font-bold">مضيف</span>' : ''}
-                  ${p.isBot ? '<span class="text-[8px] bg-purple-500/30 text-purple-300 border border-purple-500/50 px-1 rounded font-bold">🤖 AI</span>' : ''}
+                  ${isMe ? '<span class="text-[8px] bg-amber-500/30 text-amber-200 border border-amber-400/40 px-1 rounded font-bold">أنت</span>' : ''}
                 </div>
-                <span class="text-[9px] ${p.isBot ? 'text-purple-300' : 'text-emerald-400'} font-bold block truncate">
-                  ${isMe ? 'أنت (جاهز)' : (p.isBot ? (p.persona || 'تفكير بشري ذكي') : 'متصل الآن')}
-                </span>
+                <div class="mt-1 flex items-center gap-1">
+                  ${statusBadge}
+                </div>
               </div>
             </div>
-            ${gameState.isHost && p.isBot ? `
-              <button onclick="handleRemoveAiBot('${p.id}')" class="text-xs text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 p-1.5 rounded-lg transition" title="طرد البوت">
-                ✕
+            
+            ${canKick ? `
+              <button onclick="handleKickPlayer('${p.id}', '${p.name.replace(/'/g, "\\'")}')" 
+                      class="text-rose-400 hover:text-white hover:bg-rose-600 border border-rose-500/40 hover:border-rose-600 px-2.5 py-1 rounded-xl text-[10px] font-black transition flex items-center gap-1 active:scale-95 shadow-sm" 
+                      title="طرد هذا اللاعب من الغرفة">
+                <span>❌</span>
+                <span>طرد</span>
               </button>
             ` : ''}
           </div>
         `;
       }).join('');
 
-      // Update Add AI Button state
+      // 2. Update Joiner Ready Toggle Card
+      const joinerCard = document.getElementById('joinerReadyCard');
+      const toggleBtn = document.getElementById('toggleReadyBtn');
+      if (joinerCard && toggleBtn) {
+        if (!gameState.isHost) {
+          joinerCard.classList.remove('hidden');
+          const me = gameState.players.find(p => p.id === gameState.myPlayerId);
+          const myReady = me ? me.isReady : false;
+          if (myReady) {
+            toggleBtn.className = 'w-full py-2.5 px-3 rounded-2xl border font-black text-xs flex items-center justify-center gap-2 transition active:scale-95 shadow-md bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border-emerald-500/50';
+            toggleBtn.innerHTML = `
+              <span class="text-base">✅</span>
+              <span>أنت جاهز للعب! (اضغط للإلغاء)</span>
+            `;
+          } else {
+            toggleBtn.className = 'w-full py-2.5 px-3 rounded-2xl border font-black text-xs flex items-center justify-center gap-2 transition active:scale-95 shadow-md bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border-amber-500/50 animate-pulse';
+            toggleBtn.innerHTML = `
+              <span class="text-base">⏳</span>
+              <span>اضغط هنا لتأكيد أنك جاهز للعب</span>
+            `;
+          }
+        } else {
+          joinerCard.classList.add('hidden');
+        }
+      }
+
+      // 3. Update Add AI Button state
       const addBotBtn = document.getElementById('addAiBotBtn');
       if (addBotBtn) {
         if (gameState.players.length >= 8) {
@@ -1594,6 +1685,43 @@
             <span>إضافة ذكاء اصطناعي</span>
             <span class="text-[10px] text-purple-200 bg-purple-500/20 px-2 py-0.5 rounded-full border border-purple-400/30 font-bold">(${gameState.players.length}/8)</span>
           `;
+        }
+      }
+    }
+
+    function handleToggleReady() {
+      playSoundEffect('pop');
+      if (isConnected && ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ 
+          type: 'TOGGLE_READY',
+          code: gameState.roomCode 
+        }));
+      } else if (isOfflineDemo) {
+        const me = gameState.players.find(p => p.id === gameState.myPlayerId);
+        if (me) {
+          me.isReady = !me.isReady;
+          renderLobbyPlayers();
+        }
+      }
+    }
+
+    function handleKickPlayer(playerId, playerName) {
+      if (!gameState.isHost) return;
+      if (!confirm(`هل أنت متأكد من طرد المتسابق (${playerName}) من الغرفة؟`)) return;
+      playSoundEffect('skip');
+      if (isConnected && ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ 
+          type: 'KICK_PLAYER',
+          playerId: playerId,
+          code: gameState.roomCode 
+        }));
+      } else if (isOfflineDemo) {
+        const idx = gameState.players.findIndex(p => p.id === playerId);
+        if (idx !== -1) {
+          const removed = gameState.players.splice(idx, 1)[0];
+          renderLobbyPlayers();
+          document.getElementById('lobbyPlayerCount').innerText = gameState.players.length;
+          showFloatingNotification(`🚪 تم استبعاد (${removed.name})`);
         }
       }
     }

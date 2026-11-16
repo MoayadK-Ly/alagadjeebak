@@ -546,6 +546,7 @@ function getSafeRoomView(room, forPlayerId) {
       avatar: p.avatar,
       isHost: p.id === room.hostId,
       isBot: p.isBot || false,
+      isReady: typeof p.isReady === 'boolean' ? p.isReady : (p.id === room.hostId || p.isBot ? true : false),
       style: p.style || null,
       persona: p.persona || null,
       budget: p.budget,
@@ -920,7 +921,8 @@ wss.on('connection', (ws) => {
             sabotageCards: [],
             hasChosen: false,
             isAlive: true,
-            frozen: false
+            frozen: false,
+            isReady: true
           };
 
           const room = createRoom(hostPlayer, options || {});
@@ -971,7 +973,8 @@ wss.on('connection', (ws) => {
             sabotageCards: [],
             hasChosen: false,
             isAlive: true,
-            frozen: false
+            frozen: false,
+            isReady: false
           };
 
           room.players.push(player);
@@ -1055,7 +1058,8 @@ wss.on('connection', (ws) => {
             hasChosen: false,
             hasPassed: false,
             isAlive: true,
-            frozen: false
+            frozen: false,
+            isReady: true
           };
 
           room.players.push(botPlayer);
@@ -1080,6 +1084,51 @@ wss.on('connection', (ws) => {
               message: `🚪 تم استبعاد (${removed.name}) من الغرفة.`
             });
           }
+          break;
+        }
+
+        // 4d. TOGGLE READY (JOINED PLAYERS)
+        case 'TOGGLE_READY': {
+          const roomCode = playerSession.roomCode || (data.code ? String(data.code).replace('#', '').trim() : null);
+          const room = rooms.get(roomCode);
+          if (!room || room.state !== 'lobby') return;
+          const player = room.players.find(p => p.id === playerSession.id);
+          if (!player) return;
+          player.isReady = !player.isReady;
+          broadcastRoom(room, {
+            type: 'PLAYER_READY_CHANGED',
+            playerId: player.id,
+            playerName: player.name,
+            isReady: player.isReady
+          });
+          break;
+        }
+
+        // 4e. KICK PLAYER (HOST CAN KICK ANY PLAYER OR BOT)
+        case 'KICK_PLAYER': {
+          const roomCode = playerSession.roomCode || (data.code ? String(data.code).replace('#', '').trim() : null);
+          const room = rooms.get(roomCode);
+          if (!room || room.hostId !== playerSession.id || room.state !== 'lobby') return;
+          const targetId = data.playerId || data.botId;
+          const targetIdx = room.players.findIndex(p => p.id === targetId);
+          if (targetIdx === -1) return;
+          const targetPlayer = room.players[targetIdx];
+          if (targetPlayer.id === room.hostId) return; // Cannot kick the host
+
+          // Notify kicked player if connected via WebSocket
+          if (targetPlayer.ws && targetPlayer.ws.readyState === WebSocket.OPEN) {
+            targetPlayer.ws.send(JSON.stringify({
+              type: 'KICKED_FROM_ROOM',
+              message: '🚪 تم استبعادك من الغرفة بواسطة صانع الغرفة.'
+            }));
+          }
+
+          room.players.splice(targetIdx, 1);
+          broadcastRoom(room, {
+            type: 'PLAYER_KICKED',
+            kickedName: targetPlayer.name,
+            message: `🚪 تم طرد المتسابق (${targetPlayer.name}) من الغرفة.`
+          });
           break;
         }
 
