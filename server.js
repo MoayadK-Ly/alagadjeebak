@@ -1007,7 +1007,8 @@ wss.on('connection', (ws) => {
 
         // 4. UPDATE ROOM SETTINGS (HOST ONLY)
         case 'UPDATE_SETTINGS': {
-          const room = rooms.get(playerSession.roomCode);
+          const roomCode = playerSession.roomCode || (data.code ? String(data.code).replace('#', '').trim() : null);
+          const room = rooms.get(roomCode);
           if (!room || room.hostId !== playerSession.id || room.state !== 'lobby') return;
           if (data.theme && THEMES[data.theme]) room.theme = data.theme;
           if (data.budget && [25, 50, 100, 200].includes(Number(data.budget))) {
@@ -1084,7 +1085,8 @@ wss.on('connection', (ws) => {
 
         // 5. START GAME (HOST ONLY)
         case 'START_GAME': {
-          const room = rooms.get(playerSession.roomCode);
+          const roomCode = playerSession.roomCode || (data.code ? String(data.code).replace('#', '').trim() : null);
+          const room = rooms.get(roomCode);
           if (!room || room.hostId !== playerSession.id || room.state !== 'lobby') return;
           startGame(room);
           break;

@@ -1103,7 +1103,17 @@
     function handleServerMessage(msg) {
       console.log('📩 Msg from server:', msg.type, msg);
 
-      // CRITICAL: Always synchronize room whenever msg.room is provided
+      // 1. CRITICAL: Immediately record player ID and host flag before updating room UI
+      if (msg.playerId) {
+        gameState.myPlayerId = msg.playerId;
+      }
+      if (msg.type === 'ROOM_CREATED') {
+        gameState.isHost = true;
+      } else if (msg.type === 'JOINED_SUCCESS') {
+        gameState.isHost = (msg.room?.hostId === msg.playerId);
+      }
+
+      // 2. Always synchronize room whenever msg.room is provided
       if (msg.room) {
         applyRoomUpdate(msg.room);
       }
@@ -1128,6 +1138,7 @@
           gameState.isHost = true;
           switchScreen('screenLobby');
           startLobbyCodeTimer(msg.room?.codeExpiresIn || 600);
+          if (msg.room) applyRoomUpdate(msg.room);
           break;
 
         case 'JOINED_SUCCESS':
@@ -1136,6 +1147,7 @@
           closeJoinModal();
           switchScreen('screenLobby');
           startLobbyCodeTimer(msg.room?.codeExpiresIn || 600);
+          if (msg.room) applyRoomUpdate(msg.room);
           break;
 
         case 'ROOM_UPDATE':
@@ -1243,12 +1255,17 @@
       gameState.players = r.players || [];
 
       // Update Lobby UI
-      document.getElementById('lobbyRoomCode').innerText = '#' + r.code;
-      document.getElementById('lobbyPlayerCount').innerText = gameState.players.length;
+      const roomCodeEl = document.getElementById('lobbyRoomCode');
+      const playerCountEl = document.getElementById('lobbyPlayerCount');
+      if (roomCodeEl) roomCodeEl.innerText = '#' + r.code;
+      if (playerCountEl) playerCountEl.innerText = gameState.players.length;
 
-      // Check host permissions
+      // Check host permissions robustly
       const me = gameState.players.find(p => p.id === gameState.myPlayerId);
-      gameState.isHost = me ? me.isHost : false;
+      const isActualHost = (me && me.isHost) || (r.hostId && gameState.myPlayerId && r.hostId === gameState.myPlayerId) || (gameState.isHost === true && gameState.players.length <= 1);
+      if (gameState.myPlayerId || isActualHost) {
+        gameState.isHost = !!isActualHost;
+      }
 
       const hostControls = document.getElementById('hostControlsCard');
       const startBtn = document.getElementById('startGameBtn');
@@ -1256,16 +1273,22 @@
       const waitNotice = document.getElementById('lobbyWaitingMsg');
 
       if (gameState.isHost) {
-        hostControls.classList.remove('opacity-60', 'pointer-events-none');
+        if (hostControls) hostControls.classList.remove('opacity-60', 'pointer-events-none');
         if (startBtn) startBtn.classList.remove('hidden');
         if (addBotBtn) addBotBtn.classList.remove('hidden');
         if (waitNotice) waitNotice.classList.add('hidden');
       } else {
-        hostControls.classList.add('opacity-60', 'pointer-events-none');
+        if (hostControls) hostControls.classList.add('opacity-60', 'pointer-events-none');
         if (startBtn) startBtn.classList.add('hidden');
         if (addBotBtn) addBotBtn.classList.add('hidden');
         if (waitNotice) waitNotice.classList.remove('hidden');
       }
+
+      // Sync form controls if needed
+      const modeSelect = document.getElementById('lobbyGameMode');
+      if (modeSelect && r.mode) modeSelect.value = r.mode;
+      const curtainBox = document.getElementById('lobbyCurtainToggle');
+      if (curtainBox && typeof r.curtain === 'boolean') curtainBox.checked = r.curtain;
 
       // Render players list in lobby
       renderLobbyPlayers();
@@ -1469,6 +1492,7 @@
     function selectTheme(themeId) {
       if (!gameState.isHost) return;
       gameState.theme = themeId;
+      playSoundEffect('pop');
       renderThemeCards();
       broadcastSettingsChange();
     }
@@ -1498,6 +1522,7 @@
     function selectBudget(amt) {
       if (!gameState.isHost) return;
       gameState.budget = amt;
+      playSoundEffect('pop');
       renderBudgetCards();
       broadcastSettingsChange();
     }
@@ -1506,13 +1531,15 @@
       if (!gameState.isHost) return;
       gameState.mode = document.getElementById('lobbyGameMode').value;
       gameState.curtain = document.getElementById('lobbyCurtainToggle').checked;
+      playSoundEffect('pop');
       broadcastSettingsChange();
     }
 
     function broadcastSettingsChange() {
-      if (isConnected && ws) {
+      if (isConnected && ws && ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({
           type: 'UPDATE_SETTINGS',
+          code: gameState.roomCode,
           theme: gameState.theme,
           budget: gameState.budget,
           mode: gameState.mode,
@@ -1634,8 +1661,12 @@
 
     function handleStartGameClick() {
       if (!gameState.isHost) return;
-      if (isConnected && ws) {
-        ws.send(JSON.stringify({ type: 'START_GAME' }));
+      playSoundEffect('buy');
+      if (isConnected && ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ 
+          type: 'START_GAME',
+          code: gameState.roomCode 
+        }));
       } else if (isOfflineDemo) {
         startLocalRound();
       }
