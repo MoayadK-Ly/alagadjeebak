@@ -492,7 +492,7 @@ function createRoom(hostPlayer, options = {}) {
     round: 0,
     totalRounds: 6,
     currentOffer: null,
-    roundTimerSec: 20,
+    roundTimerSec: 30,
     roundTimerInterval: null,
     codeTimerInterval: null,
     auctionData: null,
@@ -651,14 +651,14 @@ function startNextRound(room) {
   const offerIndex = (room.round - 1) % themeData.upgrades.length;
   room.currentOffer = themeData.upgrades[offerIndex];
 
-  // Setup Live Auction for this item
+  // Setup Live Auction for this item (30 seconds per round)
   room.liveAuction = {
     currentOffer: room.currentOffer,
     highestBid: 0,
     highestBidderId: null,
     highestBidderName: null,
     highestBidderAvatar: null,
-    timerSec: 15
+    timerSec: 30
   };
 
   // Reset player choices for this round

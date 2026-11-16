@@ -455,75 +455,76 @@
         <!-- Current Offer & Competitors Curtain Bar -->
         <div class="lg:col-span-5 flex flex-col gap-4">
           
-          <!-- Live Bidding Arena Card -->
-          <div class="bg-slate-900 border-2 border-amber-500/60 rounded-3xl p-5 space-y-3 shadow-xl relative overflow-hidden">
+          <!-- Live Bidding Arena Card (Clean, Modern & Intuitive) -->
+          <div class="bg-slate-900 border-2 border-amber-500/50 rounded-3xl p-5 space-y-4 shadow-2xl relative overflow-hidden">
+            
+            <!-- Header: Tag & Points -->
             <div class="flex items-center justify-between">
-              <span class="text-[10px] font-black text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/30 flex items-center gap-1">
-                <span>🔨</span> حراج ومزايدة حية
+              <span class="text-xs font-black text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/30 flex items-center gap-1.5 shadow-sm">
+                <span>🔨</span>
+                <span>حراج ومزايدة حية</span>
               </span>
-              <span id="offerScoreBonus" class="text-xs font-bold text-emerald-400">
+              <span id="offerScoreBonus" class="text-xs font-black text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/30">
                 +20 نقطة تميز
               </span>
             </div>
 
-            <div>
-              <h3 id="offerName" class="text-base font-black text-white">جنوط سبور مقاس 20</h3>
-              <p id="offerDesc" class="text-xs text-slate-400 mt-0.5">ثبات خرافي على المنعطفات ويعطي شكل هجومي للسيارة</p>
+            <!-- Item Name & Desc -->
+            <div class="text-right">
+              <h3 id="offerName" class="text-lg font-black text-white tracking-wide">جنوط سبور مقاس 20</h3>
+              <p id="offerDesc" class="text-xs text-slate-400 mt-1 line-clamp-2">ثبات خرافي على المنعطفات ويعطي شكل هجومي للسيارة</p>
             </div>
 
-            <!-- Spotlight: Current Highest Bid -->
-            <div class="bg-slate-950 border border-amber-500/40 rounded-2xl p-3 flex items-center justify-between shadow-inner">
+            <!-- Unified Clean Spotlight: Current Bid & Leader -->
+            <div class="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border border-amber-500/40 rounded-2xl p-4 flex items-center justify-between shadow-lg">
               <div class="text-right">
-                <span class="text-[10px] text-slate-400 block font-bold">أعلى سومة حالياً:</span>
-                <div class="flex items-center gap-1">
-                  <span id="liveHighestBidVal" class="text-2xl font-black font-mono text-amber-300">0</span>
-                  <span class="text-xs font-bold text-amber-400">ر.س</span>
+                <span class="text-[11px] text-slate-400 font-bold block mb-0.5">أعلى سومة حالياً:</span>
+                <div class="flex items-baseline gap-1.5">
+                  <span id="liveHighestBidVal" class="text-3xl font-black font-mono text-amber-300">0</span>
+                  <span class="text-sm font-bold text-amber-400">ر.س</span>
                 </div>
               </div>
 
-              <div class="text-left bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl">
-                <span class="text-[9px] text-slate-400 block font-bold">المتصدر بالسومة:</span>
-                <span id="liveHighestBidderName" class="text-xs font-black text-white flex items-center gap-1">
-                  لا توجد سومة بعد
+              <div class="text-left bg-slate-950/80 border border-slate-800 px-3.5 py-2 rounded-xl max-w-[55%]">
+                <span class="text-[10px] text-slate-400 font-bold block">المتصدر:</span>
+                <span id="liveHighestBidderName" class="text-xs font-black text-white truncate block">
+                  لا توجد سومة حتى الآن
                 </span>
               </div>
             </div>
 
-            <!-- Bidding Controls: Stepper & Quick Boosts -->
-            <div id="bidControlsArea" class="space-y-2 pt-1">
-              <!-- Stepper -->
-              <div class="flex items-center justify-between bg-slate-950 border border-slate-800 rounded-2xl px-3 py-1.5">
-                <span class="text-xs font-bold text-slate-300">سومتي القادمة:</span>
-                <div class="flex items-center gap-2">
-                  <button type="button" onclick="adjustProposedBid(-1)" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-base flex items-center justify-center transition active:scale-90">-</button>
-                  <span id="proposedBidVal" class="text-lg font-mono font-black text-amber-300 w-12 text-center">1</span>
-                  <span class="text-xs text-slate-400 font-bold">ر.س</span>
-                  <button type="button" onclick="adjustProposedBid(1)" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-base flex items-center justify-center transition active:scale-90">+</button>
-                </div>
-              </div>
+            <!-- Simple Direct 1-Click Bidding Controls -->
+            <div id="bidControlsArea" class="space-y-2.5 pt-1">
+              
+              <!-- Primary Instant Bid Button (+1 SAR) -->
+              <button id="btnSubmitBid" onclick="executeInstantBid(1)" class="w-full py-4 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 hover:from-emerald-500 hover:to-teal-400 text-white font-black rounded-2xl text-base shadow-xl shadow-emerald-600/30 transition transform active:scale-98 flex items-center justify-center gap-2 border border-emerald-400/40">
+                <span class="text-xl">🔨</span>
+                <span>زِد السومة بمقدار 1 ر.س</span>
+                <span class="bg-emerald-700/60 text-emerald-100 font-mono text-xs px-2 py-0.5 rounded-lg border border-emerald-400/30" id="nextBidAmount">1 ر.س</span>
+              </button>
 
-              <!-- Quick Boost Chips -->
-              <div class="flex items-center gap-1.5 justify-center">
-                <span class="text-[10px] text-slate-400 font-bold">زيادة سريعة:</span>
-                <button type="button" onclick="quickBoostBid(1)" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs font-bold text-amber-300 border border-slate-700 transition active:scale-95">+1 ر.س</button>
-                <button type="button" onclick="quickBoostBid(2)" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs font-bold text-amber-300 border border-slate-700 transition active:scale-95">+2 ر.س</button>
-                <button type="button" onclick="quickBoostBid(5)" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs font-bold text-amber-300 border border-slate-700 transition active:scale-95">+5 ر.س</button>
-              </div>
-
-              <!-- Main Bidding Action Buttons -->
-              <div class="grid grid-cols-2 gap-2 pt-1">
-                <button id="btnSubmitBid" onclick="handleSubmitBid()" class="py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black rounded-xl text-xs md:text-sm shadow-lg shadow-emerald-600/30 transition active:scale-95 flex items-center justify-center gap-1.5 border border-emerald-400/40">
-                  <span>🔨 زِد السومة</span>
-                  <span id="btnBidPriceText" class="font-mono text-emerald-100">(1 ر.س)</span>
+              <!-- Secondary Quick Power Bids (+2 and +5) & Pass Button -->
+              <div class="grid grid-cols-3 gap-2">
+                <button type="button" onclick="executeInstantBid(2)" class="py-2.5 bg-slate-950 hover:bg-slate-800 border border-amber-500/40 hover:border-amber-400 text-amber-300 font-bold rounded-xl text-xs flex flex-col items-center justify-center transition active:scale-95 shadow-sm">
+                  <span class="text-[11px] font-black">+2 ر.س (فرق سومة)</span>
+                  <span class="text-[10px] text-slate-400 font-mono" id="nextBidPlus2">2 ر.س</span>
                 </button>
-                <button id="btnPassBid" onclick="handlePassBid()" class="py-3 bg-slate-800 hover:bg-rose-950/60 hover:border-rose-500/50 text-slate-300 hover:text-rose-300 font-bold rounded-xl text-xs md:text-sm border border-slate-700 transition active:scale-95 flex items-center justify-center gap-1">
-                  <span>❌ ماني مزايد / خلها له</span>
+
+                <button type="button" onclick="executeInstantBid(5)" class="py-2.5 bg-slate-950 hover:bg-slate-800 border border-purple-500/40 hover:border-purple-400 text-purple-300 font-bold rounded-xl text-xs flex flex-col items-center justify-center transition active:scale-95 shadow-sm">
+                  <span class="text-[11px] font-black">+5 ر.س (ضربة قاضية)</span>
+                  <span class="text-[10px] text-slate-400 font-mono" id="nextBidPlus5">5 ر.س</span>
+                </button>
+
+                <button id="btnPassBid" onclick="handlePassBid()" class="py-2.5 bg-slate-950 hover:bg-rose-950/40 border border-slate-700 hover:border-rose-500/50 text-slate-400 hover:text-rose-300 font-bold rounded-xl text-xs flex flex-col items-center justify-center transition active:scale-95">
+                  <span class="text-[11px] font-black">🏳️ انسحاب</span>
+                  <span class="text-[10px] text-slate-500">خلها لهم</span>
                 </button>
               </div>
+
             </div>
 
             <!-- Status Notice -->
-            <p id="bidStatusNotice" class="text-xs text-center font-bold min-h-[16px] text-amber-300"></p>
+            <p id="bidStatusNotice" class="text-xs text-center font-black min-h-[16px] text-amber-300"></p>
           </div>
 
           <!-- Competitors Grid with Secret Curtain & Peek 👁️ -->
@@ -1204,7 +1205,7 @@
           gameState.round = msg.round;
           gameState.totalRounds = msg.totalRounds;
           gameState.currentOffer = msg.offer;
-          gameState.timer = msg.timer || 15;
+          gameState.timer = msg.timer || 30;
           currentHighestBid = msg.highestBid || 0;
           currentHighestBidder = msg.highestBidderName || 'لا توجد سومة بعد';
           currentProposedBid = currentHighestBid + 1;
@@ -1834,88 +1835,91 @@
 
       const btnSubmit = document.getElementById('btnSubmitBid');
       const btnPass = document.getElementById('btnPassBid');
-      btnSubmit.disabled = false;
-      btnPass.disabled = false;
-      btnSubmit.classList.remove('opacity-40');
-      btnPass.classList.remove('opacity-40');
+      if (btnSubmit) {
+        btnSubmit.disabled = false;
+        btnSubmit.classList.remove('opacity-40', 'pointer-events-none');
+      }
+      if (btnPass) {
+        btnPass.disabled = false;
+        btnPass.classList.remove('opacity-40', 'pointer-events-none');
+      }
 
       updateLiveBidSpotlight();
       updateProposedBidDisplay();
       updateMyProjectView();
       renderCompetitorsGrid();
-      startRoundTimerCountdown(gameState.timer || 15);
-    }
-
-    function updateProposedBidDisplay() {
-      const valEl = document.getElementById('proposedBidVal');
-      const btnText = document.getElementById('btnBidPriceText');
-      if (valEl) valEl.innerText = currentProposedBid;
-      if (btnText) btnText.innerText = `(${currentProposedBid} ر.س)`;
-    }
-
-    function adjustProposedBid(delta) {
-      if (myHasPassed) return;
-      const minBid = currentHighestBid + 1;
-      const me = gameState.players.find(p => p.id === gameState.myPlayerId) || { budget: gameState.budget };
-      const maxBid = me.budget || 25;
-
-      currentProposedBid = Math.max(minBid, Math.min(maxBid, currentProposedBid + delta));
-      updateProposedBidDisplay();
-    }
-
-    function quickBoostBid(amt) {
-      if (myHasPassed) return;
-      const me = gameState.players.find(p => p.id === gameState.myPlayerId) || { budget: gameState.budget };
-      const maxBid = me.budget || 25;
-
-      currentProposedBid = Math.min(maxBid, currentHighestBid + amt);
-      updateProposedBidDisplay();
+      startRoundTimerCountdown(gameState.timer || 30);
     }
 
     function updateLiveBidSpotlight() {
       const valEl = document.getElementById('liveHighestBidVal');
       const bidderEl = document.getElementById('liveHighestBidderName');
+      const nextBidAmountEl = document.getElementById('nextBidAmount');
+      const nextBidPlus2El = document.getElementById('nextBidPlus2');
+      const nextBidPlus5El = document.getElementById('nextBidPlus5');
+
       if (valEl) valEl.innerText = currentHighestBid;
       if (bidderEl) bidderEl.innerText = currentHighestBidder;
+      if (nextBidAmountEl) nextBidAmountEl.innerText = `${currentHighestBid + 1} ر.س`;
+      if (nextBidPlus2El) nextBidPlus2El.innerText = `${currentHighestBid + 2} ر.س`;
+      if (nextBidPlus5El) nextBidPlus5El.innerText = `${currentHighestBid + 5} ر.س`;
 
       const notice = document.getElementById('bidStatusNotice');
       if (myHasPassed) {
         if (notice) notice.innerText = '🏳️ لقد انسحبت من المزايدة على هذه القطعة!';
-      } else if (currentHighestBidder.includes(myProfile.name)) {
-        if (notice) notice.innerText = '👑 أنت صاحب أعلى سومة حالياً! بانتظار المطرقة...';
+      } else if (currentHighestBidder && currentHighestBidder.includes(myProfile.name)) {
+        if (notice) notice.innerText = '👑 أنت المتصدر بأعلى سومة حالياً! في طريقك للفوز...';
       } else {
         if (notice) notice.innerText = '';
       }
     }
 
-    function handleSubmitBid() {
+    function updateProposedBidDisplay() {
+      updateLiveBidSpotlight();
+    }
+
+    // Direct 1-Click Instant Bidding (Simplified & Clutter-Free)
+    function executeInstantBid(increment = 1) {
       if (myHasPassed) return;
       const me = gameState.players.find(p => p.id === gameState.myPlayerId) || { budget: gameState.budget };
-      if (currentProposedBid <= currentHighestBid) {
-        alert(`يجب أن تزايد بمبلغ أعلى من ${currentHighestBid} ر.س!`);
+      const bidAmount = currentHighestBid + increment;
+
+      if (bidAmount <= currentHighestBid) {
+        showFloatingNotification(`⚠️ السومة يجب أن تكون أعلى من ${currentHighestBid} ر.س!`);
         return;
       }
-      if (currentProposedBid > me.budget) {
-        alert('ميزانيتك لا تكفي لهذه السومة!');
+      if (bidAmount > me.budget) {
+        playSoundEffect('buzz');
+        showFloatingNotification('⚠️ رصيدك المتبقي لا يكفي لهذه السومة!');
         return;
       }
 
-      if (isConnected && ws) {
-        ws.send(JSON.stringify({ type: 'PLACE_BID', amount: currentProposedBid }));
+      playSoundEffect('hammer');
+      currentProposedBid = bidAmount;
+
+      if (isConnected && ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'PLACE_BID', amount: bidAmount }));
       } else if (isOfflineDemo) {
-        handleLocalPlaceBid(currentProposedBid);
+        handleLocalPlaceBid(bidAmount);
       }
     }
 
     function handlePassBid() {
       myHasPassed = true;
+      playSoundEffect('skip');
       document.getElementById('bidStatusNotice').innerText = '🏳️ لقد انسحبت من المزايدة على هذه القطعة!';
-      document.getElementById('btnSubmitBid').disabled = true;
-      document.getElementById('btnSubmitBid').classList.add('opacity-40');
-      document.getElementById('btnPassBid').disabled = true;
-      document.getElementById('btnPassBid').classList.add('opacity-40');
+      const submitBtn = document.getElementById('btnSubmitBid');
+      const passBtn = document.getElementById('btnPassBid');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.classList.add('opacity-40', 'pointer-events-none');
+      }
+      if (passBtn) {
+        passBtn.disabled = true;
+        passBtn.classList.add('opacity-40', 'pointer-events-none');
+      }
 
-      if (isConnected && ws) {
+      if (isConnected && ws && ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({ type: 'PASS_BID' }));
       } else if (isOfflineDemo) {
         handleLocalPassBid();
@@ -2747,7 +2751,7 @@
       const themeData = THEMES[gameState.theme];
       const off = themeData.upgrades[(gameState.round - 1) % themeData.upgrades.length];
       gameState.currentOffer = off;
-      gameState.timer = 15;
+      gameState.timer = 30;
       currentHighestBid = 0;
       currentHighestBidder = 'لا توجد سومة بعد';
       currentProposedBid = 1;
