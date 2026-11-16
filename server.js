@@ -1241,6 +1241,17 @@ wss.on('connection', (ws) => {
           const roomCode = playerSession.roomCode || (data.code ? String(data.code).replace('#', '').trim() : null);
           const room = rooms.get(roomCode);
           if (!room || room.hostId !== playerSession.id || room.state !== 'lobby') return;
+
+          // Strictly enforce: ALL players must be ready!
+          const unready = room.players.filter(p => !p.isReady);
+          if (unready.length > 0) {
+            const names = unready.map(p => p.name).join('، ');
+            return ws.send(JSON.stringify({
+              type: 'ERROR',
+              message: `⚠️ لا يمكن بدء التحدي! بانتظار ضغط زر "جاهز" من: ${names}`
+            }));
+          }
+
           if (data.theme && THEMES[data.theme]) {
             room.theme = data.theme;
           }

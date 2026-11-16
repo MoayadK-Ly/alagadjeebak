@@ -1867,6 +1867,36 @@
           `;
         }
       }
+
+      // 4. Strictly Update Host Start Game Button based on readiness of ALL players
+      const startBtn = document.getElementById('startGameBtn');
+      if (startBtn && gameState.isHost) {
+        const unreadyPlayers = gameState.players.filter(p => !p.isReady);
+        const allReady = unreadyPlayers.length === 0;
+        const readyCount = gameState.players.filter(p => p.isReady).length;
+
+        if (!allReady) {
+          startBtn.disabled = true;
+          startBtn.className = 'w-full py-3.5 sm:py-4 bg-slate-800/90 text-slate-400 font-black text-xs sm:text-sm rounded-2xl border border-slate-700/80 shadow-md cursor-not-allowed transition flex flex-col items-center justify-center gap-1 opacity-75';
+          const unreadyNames = unreadyPlayers.map(p => p.name).join('، ');
+          startBtn.innerHTML = `
+            <div class="flex items-center gap-1.5 text-amber-300 font-black">
+              <span class="animate-spin">⏳</span>
+              <span>بانتظار جاهزية الجميع (${readyCount} / ${gameState.players.length} جاهز)</span>
+            </div>
+            <span class="text-[10px] text-slate-400 font-bold truncate max-w-[90%]">
+              بانتظار ضغط "جاهز": ${unreadyNames}
+            </span>
+          `;
+        } else {
+          startBtn.disabled = false;
+          startBtn.className = 'w-full py-4 bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white font-black text-base sm:text-lg rounded-2xl shadow-xl shadow-emerald-600/30 transition transform active:scale-98 flex items-center justify-center gap-2 border border-emerald-400/40 animate-pulse cursor-pointer';
+          startBtn.innerHTML = `
+            <span class="text-xl">🚀</span>
+            <span>ابدأ التحدي الآن! (الجميع جاهز ✅)</span>
+          `;
+        }
+      }
     }
 
     function handleToggleReady() {
@@ -1972,6 +2002,19 @@
 
     function handleStartGameClick() {
       if (!gameState.isHost) return;
+
+      const unreadyPlayers = gameState.players.filter(p => !p.isReady);
+      if (unreadyPlayers.length > 0) {
+        playSoundEffect('buzz');
+        const names = unreadyPlayers.map(p => p.name).join('، ');
+        showFloatingNotification(`⚠️ لا يمكنك بدء اللعبة! بانتظار جاهزية: ${names}`);
+        alert(`⚠️ لا يمكنك بدء اللعبة حتى يضغط جميع اللاعبين على زر "جاهز"!
+
+اللاعبون غير الجاهزين حالياً:
+⏳ ${names}`);
+        return;
+      }
+
       playSoundEffect('buy');
       if (isConnected && ws && ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({ 
