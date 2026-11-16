@@ -444,6 +444,22 @@
             <p id="offerDesc" class="text-xs text-slate-400 line-clamp-2">ثبات خرافي على المنعطفات ويعطي شكل هجومي للسيارة</p>
           </div>
 
+          <!-- Visual Item Card (ملامح وتفاصيل القطعة المعروضة حياً) -->
+          <div class="bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 border border-slate-800 rounded-2xl p-2.5 flex flex-col items-center justify-center relative shadow-inner overflow-hidden group">
+            <div class="w-full flex items-center justify-between text-[10px] font-bold text-slate-400 pb-1 border-b border-slate-800/80 mb-1">
+              <span class="flex items-center gap-1 text-amber-300">
+                <span>🔍</span>
+                <span>ملامح السلعة المعروضة</span>
+              </span>
+              <span class="text-[9px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                أصلية VIP
+              </span>
+            </div>
+            <div id="offerVisualCanvas" class="w-full h-24 flex items-center justify-center">
+              <!-- Injected Dynamic Item SVG -->
+            </div>
+          </div>
+
           <!-- Project Need Indicator Banner (Shows whether project needs this item) -->
           <div id="offerNeedBanner" class="p-2 rounded-xl text-xs font-black flex items-center justify-between gap-2 bg-emerald-950/40 border border-emerald-500/30 text-emerald-300">
             <span class="flex items-center gap-1.5">
@@ -518,6 +534,17 @@
               </span>
               <span id="myProjectScore" class="text-xs font-mono font-black text-amber-400">💎 10 نقطة فخامة</span>
             </div>
+          </div>
+
+          <!-- Live Target Spot indicator on Project (معاينة موضع التركيب قبل الشراء) -->
+          <div id="projectPreviewSpotBanner" class="bg-indigo-950/70 border border-indigo-500/40 rounded-xl px-3 py-1.5 flex items-center justify-between text-xs font-bold text-indigo-200 shadow-sm">
+            <span class="flex items-center gap-1.5">
+              <span class="text-sm animate-pulse">🎯</span>
+              <span id="projectPreviewSpotText">موضع التركيب في مشروعك: جاري المعاينة...</span>
+            </span>
+            <span class="text-[10px] text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 font-mono">
+              معاينة حية ✨
+            </span>
           </div>
 
           <!-- Dynamic SVG Drawing Area (Centered, No Ugly Blank Void) -->
@@ -708,7 +735,7 @@
         id: 'car',
         title: '🏎️ سيارة رياضية خارقة',
         desc: 'حوّل سيارة متهالكة لوحش كربوني فخم مع نيترو وأبواب لمبو',
-        svgRender: (upgrades) => renderCarSVG(upgrades),
+        svgRender: (upgrades, preview = null) => renderCarSVG(upgrades, preview),
         upgrades: [
           { id: 'c1', name: 'مراتب جلد أحمر تطريز ملكي', price: 3, score: 15, tag: 'interior', desc: 'راحة فائقة ومظهر فاره' },
           { id: 'c2', name: 'جنوط سبور أصلية مقاس 20', price: 4, score: 20, tag: 'wheels', desc: 'ثبات خرافي على المنعطفات' },
@@ -744,7 +771,7 @@
         id: 'villa',
         title: '🏡 فيلا وقصر الأحلام',
         desc: 'ابنِ قصراً أسطورياً من الأرض إلى مهبط الهليكوبتر والمسبح',
-        svgRender: (upgrades) => renderVillaSVG(upgrades),
+        svgRender: (upgrades, preview = null) => renderVillaSVG(upgrades, preview),
         upgrades: [
           { id: 'v1', name: 'واجهة زجاجية سمارت بانورامية', price: 4, score: 20, tag: 'glass', desc: 'إطلالة عصرية وإنارة طبيعية' },
           { id: 'v2', name: 'مسبح أولمبي إنفينيتي وشلال صخري', price: 6, score: 32, tag: 'pool', desc: 'استرخاء مائي فاخر يسر الناظرين' },
@@ -780,7 +807,7 @@
         id: 'cafe',
         title: '☕ مقهى وكافيه عصري',
         desc: 'أسس أرقى كافيه بالمدينة مع ماكينة إيطالية وجلسات خارجية',
-        svgRender: (upgrades) => renderCafeSVG(upgrades),
+        svgRender: (upgrades, preview = null) => renderCafeSVG(upgrades, preview),
         upgrades: [
           { id: 'k1', name: 'ماكينة إسبريسو لامارزوكو مذهبة مع بخار', price: 6, score: 32, tag: 'machine', desc: 'استخلاص قهوة مثالي ورغوة مخملية' },
           { id: 'k2', name: 'لوحة نيون مضيئة بعبارة ترند', price: 2, score: 12, tag: 'neon', desc: 'منطقة تصوير سناب وتيك توك' },
@@ -816,7 +843,7 @@
         id: 'restaurant',
         title: '🍔 مطعم فاخر وسحابي',
         desc: 'مطبخ مفتوح، عازف بيانو كلاسيكي، وطاولات رخامية أرستقراطية',
-        svgRender: (upgrades) => renderRestaurantSVG(upgrades),
+        svgRender: (upgrades, preview = null) => renderRestaurantSVG(upgrades, preview),
         upgrades: [
           { id: 'r1', name: 'طاولات رخام إيطالي ومقاعد مخمل كرزي', price: 4, score: 20, tag: 'tables', desc: 'جلسات ضيافة بالغة الرقي' },
           { id: 'r2', name: 'مطبخ مفتوح Open Kitchen وشواية حطب', price: 6, score: 32, tag: 'kitchen', desc: 'شوو حي ورائحة شواء تأسر القلوب' },
@@ -852,7 +879,7 @@
         id: 'tower',
         title: '🏢 برج وناطحة سحاب',
         desc: 'شيّد ناطحة سحاب شامخة مع مطعم دوار ومهبط تاكسي طائر',
-        svgRender: (upgrades) => renderTowerSVG(upgrades),
+        svgRender: (upgrades, preview = null) => renderTowerSVG(upgrades, preview),
         upgrades: [
           { id: 't1', name: 'طوابق زجاجية شاهقة وعاكسة للشمس', price: 5, score: 25, tag: 'glass', desc: 'ارتفاع شاهق وتصميم مستقبلي' },
           { id: 't2', name: 'مطعم دوار 360 درجة بأعلى قمة البرج', price: 7, score: 38, tag: 'restaurant', desc: 'إطلالة كاملة على أفق المدينة' },
@@ -888,7 +915,7 @@
         id: 'jet',
         title: '✈️ طائرة خاصة فاخرة',
         desc: 'جهّز طائرة نفاثة عابرة للقارات بجناح نوم وجاكوزي بالسماء',
-        svgRender: (upgrades) => renderJetSVG(upgrades),
+        svgRender: (upgrades, preview = null) => renderJetSVG(upgrades, preview),
         upgrades: [
           { id: 'j1', name: 'أجنحة ذهبية وتطعيمات خارجية ملكية', price: 5, score: 26, tag: 'gold', desc: 'هيبة طيران تلفت كل المطارات' },
           { id: 'j2', name: 'محركات نفاثة مزدوجة بتوهج حراري وهدوء', price: 8, score: 42, tag: 'engines', desc: 'سرعة تفوق الصوت بدون إزعاج' },
@@ -2042,6 +2069,257 @@
     let currentHighestBid = 0;
     let currentHighestBidder = 'لا توجد سومة بعد';
 
+
+    // ==========================================
+    // 1c. ITEM VISUAL ILLUSTRATIONS & GHOST PREVIEWS (ملامح السلعة وموضع التركيب)
+    // ==========================================
+    function renderOfferIllustration(offer, theme) {
+      if (!offer) return '';
+      const tag = (offer.tag || '').toLowerCase();
+      const name = (offer.name || '').toLowerCase();
+
+      // CAR THEME ILLUSTRATIONS
+      if (theme === 'car') {
+        if (tag.includes('hud') || name.includes('hud') || name.includes('بروجكتر') || name.includes('شاشة')) {
+          return `
+            <svg viewBox="0 0 160 90" class="w-full h-full max-h-24 select-none drop-shadow-lg" xmlns="http://www.w3.org/2000/svg">
+              <rect x="15" y="10" width="130" height="70" rx="12" fill="#030712" stroke="#0284c7" stroke-width="2" />
+              <path d="M 25 50 Q 80 20 135 50" stroke="#38bdf8" stroke-width="1.5" fill="none" stroke-dasharray="3,3" />
+              <circle cx="80" cy="45" r="16" fill="none" stroke="#06b6d4" stroke-width="2" class="animate-pulse" />
+              <line x1="80" y1="20" x2="80" y2="70" stroke="#06b6d4" stroke-width="1" stroke-dasharray="2,2" />
+              <line x1="55" y1="45" x2="105" y2="45" stroke="#06b6d4" stroke-width="1" stroke-dasharray="2,2" />
+              <text x="80" y="49" fill="#38bdf8" font-size="9" font-weight="black" font-family="monospace" text-anchor="middle">240 KM/H</text>
+              <text x="80" y="72" fill="#94a3b8" font-size="7" font-weight="bold" text-anchor="middle">HOLOGRAPHIC HUD</text>
+            </svg>
+          `;
+        }
+        if (tag.includes('engine') || tag.includes('boost') || name.includes('تيربو') || name.includes('محرك') || name.includes('ميثانول')) {
+          return `
+            <svg viewBox="0 0 160 90" class="w-full h-full max-h-24 select-none drop-shadow-lg" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="65" cy="45" r="26" fill="#1e293b" stroke="#f59e0b" stroke-width="3" />
+              <circle cx="65" cy="45" r="18" fill="#0f172a" stroke="#ca8a04" stroke-width="2" />
+              <!-- Turbine blades -->
+              <path d="M 65 25 L 65 65 M 45 45 L 85 45 M 51 31 L 79 59 M 51 59 L 79 31" stroke="#f59e0b" stroke-width="2" class="animate-spin origin-center" />
+              <path d="M 85 35 L 125 25 L 135 55 L 90 55 Z" fill="#334155" stroke="#f59e0b" stroke-width="1.5" />
+              <text x="110" y="45" fill="#fde047" font-size="8" font-weight="black">TWIN TURBO</text>
+              <polygon points="125,25 145,20 135,55" fill="#ef4444" opacity="0.8" class="animate-pulse" />
+            </svg>
+          `;
+        }
+        if (tag.includes('wheels') || tag.includes('tires') || tag.includes('stance') || name.includes('جنوط') || name.includes('كفرات')) {
+          return `
+            <svg viewBox="0 0 160 90" class="w-full h-full max-h-24 select-none drop-shadow-lg" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="80" cy="45" r="32" fill="#020617" stroke="#334155" stroke-width="5" />
+              <circle cx="80" cy="45" r="25" fill="#0f172a" stroke="#eab308" stroke-width="3" />
+              <!-- Multi spokes -->
+              <circle cx="80" cy="45" r="8" fill="#ca8a04" />
+              <line x1="80" y1="20" x2="80" y2="70" stroke="#fef08a" stroke-width="2.5" />
+              <line x1="55" y1="45" x2="105" y2="45" stroke="#fef08a" stroke-width="2.5" />
+              <line x1="62" y1="27" x2="98" y2="63" stroke="#fef08a" stroke-width="2.5" />
+              <line x1="62" y1="63" x2="98" y2="27" stroke="#fef08a" stroke-width="2.5" />
+              <!-- Red Brembo brake caliper -->
+              <path d="M 98 32 A 25 25 0 0 1 104 48" stroke="#dc2626" stroke-width="6" fill="none" stroke-linecap="round" />
+            </svg>
+          `;
+        }
+        if (tag.includes('spoiler') || tag.includes('diffuser') || name.includes('جناح') || name.includes('ديفيوزر')) {
+          return `
+            <svg viewBox="0 0 160 90" class="w-full h-full max-h-24 select-none drop-shadow-lg" xmlns="http://www.w3.org/2000/svg">
+              <rect x="20" y="32" width="120" height="9" rx="3" fill="#020617" stroke="#a855f7" stroke-width="2" />
+              <line x1="45" y1="41" x2="35" y2="65" stroke="#64748b" stroke-width="4" stroke-linecap="round" />
+              <line x1="115" y1="41" x2="125" y2="65" stroke="#64748b" stroke-width="4" stroke-linecap="round" />
+              <!-- Aerodynamic wingtips -->
+              <polygon points="18,25 22,42 14,40" fill="#a855f7" />
+              <polygon points="142,25 138,42 146,40" fill="#a855f7" />
+              <text x="80" y="60" fill="#c084fc" font-size="8" font-weight="black" text-anchor="middle">GT CARBON WING</text>
+            </svg>
+          `;
+        }
+        if (tag.includes('doors') || name.includes('لمبو') || name.includes('أبواب')) {
+          return `
+            <svg viewBox="0 0 160 90" class="w-full h-full max-h-24 select-none drop-shadow-lg" xmlns="http://www.w3.org/2000/svg">
+              <path d="M 40 70 L 110 70 L 90 20 Z" fill="#e11d48" opacity="0.8" stroke="#f43f5e" stroke-width="2" class="animate-pulse" />
+              <line x1="40" y1="70" x2="90" y2="20" stroke="#fda4af" stroke-width="4" stroke-linecap="round" />
+              <text x="80" y="65" fill="#fff" font-size="8" font-weight="black" text-anchor="middle">LAMBO SCISSOR DOORS</text>
+            </svg>
+          `;
+        }
+        if (tag.includes('interior') || tag.includes('massage') || name.includes('جلد') || name.includes('مراتب')) {
+          return `
+            <svg viewBox="0 0 160 90" class="w-full h-full max-h-24 select-none drop-shadow-lg" xmlns="http://www.w3.org/2000/svg">
+              <rect x="55" y="15" width="50" height="45" rx="8" fill="#991b1b" stroke="#f87171" stroke-width="2" />
+              <rect x="50" y="55" width="60" height="22" rx="6" fill="#7f1d1d" stroke="#f87171" stroke-width="2" />
+              <circle cx="80" cy="28" r="8" fill="#b91c1c" />
+              <line x1="68" y1="20" x2="68" y2="55" stroke="#fca5a5" stroke-width="1.5" stroke-dasharray="2,2" />
+              <line x1="92" y1="20" x2="92" y2="55" stroke="#fca5a5" stroke-width="1.5" stroke-dasharray="2,2" />
+              <text x="80" y="70" fill="#fecaca" font-size="7.5" font-weight="black" text-anchor="middle">ROYAL LEATHER</text>
+            </svg>
+          `;
+        }
+        if (tag.includes('nitro') || tag.includes('exhaust') || name.includes('نيترو') || name.includes('عادم')) {
+          return `
+            <svg viewBox="0 0 160 90" class="w-full h-full max-h-24 select-none drop-shadow-lg" xmlns="http://www.w3.org/2000/svg">
+              <rect x="35" y="30" width="70" height="28" rx="14" fill="#0284c7" stroke="#38bdf8" stroke-width="2.5" />
+              <rect x="100" y="37" width="12" height="14" fill="#94a3b8" />
+              <text x="70" y="48" fill="#fff" font-size="11" font-weight="black" font-family="monospace">NOS</text>
+              <polygon points="115,35 155,44 115,53" fill="#38bdf8" class="animate-pulse" />
+            </svg>
+          `;
+        }
+      }
+
+      // VILLA THEME ILLUSTRATIONS
+      if (theme === 'villa') {
+        if (tag.includes('pool') || tag.includes('jacuzzi') || name.includes('مسبح') || name.includes('جاكوزي')) {
+          return `
+            <svg viewBox="0 0 160 90" class="w-full h-full max-h-24 select-none drop-shadow-lg" xmlns="http://www.w3.org/2000/svg">
+              <rect x="20" y="25" width="120" height="45" rx="10" fill="#0891b2" stroke="#38bdf8" stroke-width="2" />
+              <path d="M 25 40 Q 50 35 75 40 T 135 40" stroke="#cffafe" stroke-width="2" fill="none" class="animate-pulse" />
+              <path d="M 25 55 Q 50 50 75 55 T 135 55" stroke="#cffafe" stroke-width="2" fill="none" class="animate-pulse" />
+              <!-- Diving board / rock -->
+              <rect x="20" y="20" width="30" height="8" rx="2" fill="#ca8a04" />
+              <text x="80" y="62" fill="#ecfeff" font-size="8" font-weight="black" text-anchor="middle">INFINITY POOL</text>
+            </svg>
+          `;
+        }
+        if (tag.includes('helipad') || name.includes('هليكوبتر')) {
+          return `
+            <svg viewBox="0 0 160 90" class="w-full h-full max-h-24 select-none drop-shadow-lg" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="80" cy="45" r="32" fill="#1e293b" stroke="#eab308" stroke-width="3" />
+              <circle cx="80" cy="45" r="24" fill="none" stroke="#fde047" stroke-width="2" stroke-dasharray="4,4" />
+              <text x="80" y="55" fill="#fde047" font-size="28" font-weight="black" font-family="monospace" text-anchor="middle">H</text>
+            </svg>
+          `;
+        }
+        if (tag.includes('cinema') || name.includes('سينما')) {
+          return `
+            <svg viewBox="0 0 160 90" class="w-full h-full max-h-24 select-none drop-shadow-lg" xmlns="http://www.w3.org/2000/svg">
+              <rect x="25" y="15" width="110" height="50" rx="6" fill="#020617" stroke="#6366f1" stroke-width="2" />
+              <polygon points="70,30 95,40 70,50" fill="#818cf8" class="animate-pulse" />
+              <text x="80" y="78" fill="#a5b4fc" font-size="8" font-weight="bold" text-anchor="middle">VIP HOME CINEMA</text>
+            </svg>
+          `;
+        }
+        if (tag.includes('garden') || tag.includes('palms') || name.includes('حديقة') || name.includes('نخيل')) {
+          return `
+            <svg viewBox="0 0 160 90" class="w-full h-full max-h-24 select-none drop-shadow-lg" xmlns="http://www.w3.org/2000/svg">
+              <rect x="20" y="65" width="120" height="15" rx="4" fill="#166534" />
+              <line x1="80" y1="35" x2="80" y2="65" stroke="#78350f" stroke-width="6" stroke-linecap="round" />
+              <circle cx="80" cy="30" r="18" fill="#22c55e" stroke="#15803d" stroke-width="2" />
+              <text x="80" y="76" fill="#dcfce7" font-size="8" font-weight="bold" text-anchor="middle">ROYAL GARDENS</text>
+            </svg>
+          `;
+        }
+      }
+
+      // CAFE THEME ILLUSTRATIONS
+      if (theme === 'cafe') {
+        if (tag.includes('machine') || name.includes('إسبريسو') || name.includes('ماكينة')) {
+          return `
+            <svg viewBox="0 0 160 90" class="w-full h-full max-h-24 select-none drop-shadow-lg" xmlns="http://www.w3.org/2000/svg">
+              <rect x="35" y="20" width="90" height="50" rx="8" fill="#334155" stroke="#eab308" stroke-width="2" />
+              <circle cx="65" cy="45" r="8" fill="#1e293b" stroke="#94a3b8" />
+              <circle cx="95" cy="45" r="8" fill="#1e293b" stroke="#94a3b8" />
+              <!-- Steam -->
+              <path d="M 65 32 Q 62 25 65 18" stroke="#f1f5f9" stroke-width="2" fill="none" class="animate-pulse" />
+              <path d="M 95 32 Q 98 25 95 18" stroke="#f1f5f9" stroke-width="2" fill="none" class="animate-pulse" />
+              <text x="80" y="62" fill="#fde047" font-size="7.5" font-weight="black" text-anchor="middle">LA MARZOCCO</text>
+            </svg>
+          `;
+        }
+        if (tag.includes('neon') || name.includes('نيون')) {
+          return `
+            <svg viewBox="0 0 160 90" class="w-full h-full max-h-24 select-none drop-shadow-lg" xmlns="http://www.w3.org/2000/svg">
+              <rect x="20" y="20" width="120" height="50" rx="10" fill="#030712" stroke="#ec4899" stroke-width="2" />
+              <text x="80" y="50" fill="#f43f5e" font-size="12" font-weight="black" font-family="cursive" text-anchor="middle" class="animate-pulse">Coffee & Vibes</text>
+            </svg>
+          `;
+        }
+      }
+
+      // RESTAURANT THEME ILLUSTRATIONS
+      if (theme === 'restaurant') {
+        if (tag.includes('chef') || name.includes('شيف') || name.includes('ميشلان')) {
+          return `
+            <svg viewBox="0 0 160 90" class="w-full h-full max-h-24 select-none drop-shadow-lg" xmlns="http://www.w3.org/2000/svg">
+              <path d="M 50 65 L 110 65 L 105 45 C 115 35 105 18 80 18 C 55 18 45 35 55 45 Z" fill="#f8fafc" stroke="#e2e8f0" stroke-width="2" />
+              <circle cx="70" cy="55" r="3" fill="#eab308" />
+              <circle cx="80" cy="55" r="3" fill="#eab308" />
+              <circle cx="90" cy="55" r="3" fill="#eab308" />
+              <text x="80" y="78" fill="#fde047" font-size="8" font-weight="black" text-anchor="middle">MICHELIN CHEF 3★</text>
+            </svg>
+          `;
+        }
+        if (tag.includes('wagyu') || tag.includes('steak') || name.includes('واغيو') || name.includes('ستيك')) {
+          return `
+            <svg viewBox="0 0 160 90" class="w-full h-full max-h-24 select-none drop-shadow-lg" xmlns="http://www.w3.org/2000/svg">
+              <ellipse cx="80" cy="48" rx="45" ry="24" fill="#881337" stroke="#f43f5e" stroke-width="2.5" />
+              <!-- Marbling lines -->
+              <path d="M 55 45 Q 75 35 95 45 M 65 52 Q 85 42 105 52" stroke="#ffe4e6" stroke-width="2" fill="none" stroke-linecap="round" />
+              <text x="80" y="65" fill="#fecdd3" font-size="8" font-weight="black" text-anchor="middle">A5 WAGYU STEAK</text>
+            </svg>
+          `;
+        }
+      }
+
+      // TOWER THEME ILLUSTRATIONS
+      if (theme === 'tower') {
+        if (tag.includes('restaurant') || name.includes('دوار') || name.includes('مطعم')) {
+          return `
+            <svg viewBox="0 0 160 90" class="w-full h-full max-h-24 select-none drop-shadow-lg" xmlns="http://www.w3.org/2000/svg">
+              <ellipse cx="80" cy="45" rx="55" ry="18" fill="#0284c7" stroke="#38bdf8" stroke-width="2.5" />
+              <circle cx="80" cy="45" r="22" fill="#0f172a" stroke="#ca8a04" stroke-width="2" />
+              <text x="80" y="48" fill="#fde047" font-size="7" font-weight="black" text-anchor="middle">360° REVOLVING</text>
+            </svg>
+          `;
+        }
+        if (tag.includes('evtol') || name.includes('تاكسي') || name.includes('طائر')) {
+          return `
+            <svg viewBox="0 0 160 90" class="w-full h-full max-h-24 select-none drop-shadow-lg" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="80" cy="50" r="28" fill="#0f172a" stroke="#10b981" stroke-width="2.5" />
+              <polygon points="80,25 95,50 65,50" fill="#34d399" class="animate-pulse" />
+              <text x="80" y="65" fill="#6ee7b7" font-size="7.5" font-weight="bold" text-anchor="middle">EVTOL SKYPORT</text>
+            </svg>
+          `;
+        }
+      }
+
+      // JET THEME ILLUSTRATIONS
+      if (theme === 'jet') {
+        if (tag.includes('engines') || name.includes('محركات') || name.includes('نفاثة')) {
+          return `
+            <svg viewBox="0 0 160 90" class="w-full h-full max-h-24 select-none drop-shadow-lg" xmlns="http://www.w3.org/2000/svg">
+              <rect x="35" y="30" width="75" height="30" rx="8" fill="#334155" stroke="#38bdf8" stroke-width="2" />
+              <ellipse cx="35" cy="45" rx="6" ry="15" fill="#0284c7" />
+              <polygon points="110,32 150,45 110,58" fill="#f97316" opacity="0.9" class="animate-pulse" />
+              <text x="70" y="49" fill="#fff" font-size="8" font-weight="black">JET TURBINE</text>
+            </svg>
+          `;
+        }
+        if (tag.includes('bedroom') || name.includes('سرير') || name.includes('نوم')) {
+          return `
+            <svg viewBox="0 0 160 90" class="w-full h-full max-h-24 select-none drop-shadow-lg" xmlns="http://www.w3.org/2000/svg">
+              <rect x="30" y="25" width="100" height="45" rx="8" fill="#1e1b4b" stroke="#818cf8" stroke-width="2" />
+              <rect x="35" y="30" width="90" height="25" rx="4" fill="#312e81" />
+              <circle cx="50" cy="38" r="6" fill="#c7d2fe" />
+              <circle cx="110" cy="38" r="6" fill="#c7d2fe" />
+              <text x="80" y="62" fill="#e0e7ff" font-size="8" font-weight="bold" text-anchor="middle">MASTER SKY SUITE</text>
+            </svg>
+          `;
+        }
+      }
+
+      // GENERIC ELEGANT FALLBACK BADGE
+      return `
+        <svg viewBox="0 0 160 90" class="w-full h-full max-h-24 select-none drop-shadow-lg" xmlns="http://www.w3.org/2000/svg">
+          <rect x="25" y="15" width="110" height="60" rx="14" fill="#090d16" stroke="#38bdf8" stroke-width="2" />
+          <circle cx="80" cy="40" r="16" fill="#0f172a" stroke="#f59e0b" stroke-width="2" class="animate-pulse" />
+          <text x="80" y="44" fill="#fde047" font-size="14" font-weight="black" text-anchor="middle">★</text>
+          <text x="80" y="65" fill="#94a3b8" font-size="7.5" font-weight="bold" text-anchor="middle">PREMIUM SPEC</text>
+        </svg>
+      `;
+    }
+
     function renderAuctionRound() {
       const themeData = THEMES[gameState.theme] || THEMES.car;
       document.getElementById('playThemeTitle').innerText = themeData.title;
@@ -2072,6 +2350,18 @@
           if (u.tag && offerSlot.tags.includes(u.tag)) return true;
           return offerSlot.tags.some(t => (u.name || '').includes(t));
         });
+
+        // Render Visual Item Card
+        const visualCanvas = document.getElementById('offerVisualCanvas');
+        if (visualCanvas) {
+          visualCanvas.innerHTML = renderOfferIllustration(off, gameState.theme);
+        }
+
+        // Update Project Target Placement Spot Banner
+        const spotText = document.getElementById('projectPreviewSpotText');
+        if (spotText) {
+          spotText.innerText = `موضع تركيب السلعة: قسم [${offerSlot.icon} ${offerSlot.name}] (ستُثبّت فوراً عند فوزك بالسومة)`;
+        }
 
         const needBanner = document.getElementById('offerNeedBanner');
         const needIcon = document.getElementById('offerNeedIcon');
@@ -2244,7 +2534,7 @@
       const themeData = THEMES[gameState.theme] || THEMES.car;
       const svgViewport = document.getElementById('svgViewport');
       if (svgViewport) {
-        svgViewport.innerHTML = themeData.svgRender(me.upgrades || []);
+        svgViewport.innerHTML = themeData.svgRender(me.upgrades || [], gameState.currentOffer);
       }
 
       // Render the 6 Core Blueprint Slots (ملامح وخانات المشروع الستة)
@@ -2693,7 +2983,15 @@
     // ==========================================
     // 13. DYNAMIC VECTOR SVG RENDERING ENGINES
     // ==========================================
-    function renderCarSVG(upgrades = []) {
+    function renderCarSVG(upgrades = [], previewOffer = null) {
+      const pTag = previewOffer ? (previewOffer.tag || '').toLowerCase() : '';
+      const pName = previewOffer ? (previewOffer.name || '').toLowerCase() : '';
+      const previewIsHud = pTag.includes('hud') || pName.includes('hud') || pName.includes('بروجكتر') || pName.includes('شاشة');
+      const previewIsTurbo = pTag.includes('engine') || pTag.includes('boost') || pName.includes('تيربو') || pName.includes('محرك');
+      const previewIsSpoiler = pTag.includes('spoiler') || pTag.includes('diffuser') || pName.includes('جناح');
+      const previewIsWheels = pTag.includes('wheels') || pTag.includes('tires') || pName.includes('جنوط');
+      const previewIsLambo = pTag.includes('doors') || pName.includes('لمبو');
+      const previewIsSeats = pTag.includes('interior') || pName.includes('جلد') || pName.includes('مراتب');
       const uNames = upgrades.map(u => u.name || '');
       const hasGold = uNames.some(n => n.includes('ذهبي'));
       const hasWheels = uNames.some(n => n.includes('جنوط'));
@@ -2792,6 +3090,37 @@
             <circle cx="0" cy="0" r="${tireSize}" fill="#0f172a" stroke="#334155" stroke-width="3" />
             ${hasWheels ? `<circle cx="0" cy="0" r="10" fill="#e2e8f0" stroke="#ca8a04" stroke-width="2" />` : `<circle cx="0" cy="0" r="8" fill="#475569" />`}
           </g>
+
+          <!-- LIVE GHOST PREVIEW HIGHLIGHTS (تومض بموضع التركيب أثناء المزايدة) -->
+          ${previewIsHud && !hasHud ? `
+            <g class="animate-pulse">
+              <rect x="205" y="66" width="45" height="24" rx="4" fill="#06b6d4" opacity="0.35" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="3,3" />
+              <text x="227" y="80" fill="#cffafe" font-size="7" font-weight="black" text-anchor="middle">🎯 مكان الـ HUD</text>
+            </g>
+          ` : ''}
+
+          ${previewIsTurbo && !hasTurbo ? `
+            <g class="animate-pulse">
+              <rect x="235" y="85" width="40" height="15" rx="3" fill="#f59e0b" opacity="0.35" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3,3" />
+              <text x="255" y="96" fill="#fef08a" font-size="7" font-weight="black" text-anchor="middle">🎯 موضع التيربو</text>
+            </g>
+          ` : ''}
+
+          ${previewIsSpoiler && !hasSpoiler ? `
+            <g class="animate-pulse">
+              <rect x="20" y="60" width="55" height="12" rx="3" fill="#a855f7" opacity="0.4" stroke="#c084fc" stroke-width="1.5" stroke-dasharray="3,3" />
+              <text x="47" y="69" fill="#f3e8ff" font-size="6.5" font-weight="black" text-anchor="middle">🎯 الجناح هنا</text>
+            </g>
+          ` : ''}
+
+          ${previewIsWheels && !hasWheels ? `
+            <circle cx="100" cy="138" r="15" fill="none" stroke="#eab308" stroke-width="2" stroke-dasharray="3,3" class="animate-spin" />
+            <circle cx="255" cy="138" r="15" fill="none" stroke="#eab308" stroke-width="2" stroke-dasharray="3,3" class="animate-spin" />
+          ` : ''}
+
+          ${previewIsSeats && !hasRedSeats ? `
+            <rect x="158" y="64" width="22" height="26" rx="4" fill="#dc2626" opacity="0.35" stroke="#f87171" stroke-width="1.5" stroke-dasharray="2,2" class="animate-pulse" />
+          ` : ''}
         </svg>
       `;
     }
