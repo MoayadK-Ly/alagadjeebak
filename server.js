@@ -47,7 +47,21 @@ const THEMES = {
       { id: 'c11', name: 'مكابح كاربون سيراميك حمراء بريمبو', price: 4, score: 22, tag: 'brakes', desc: 'توقف فوري وأمان قصوى' },
       { id: 'c12', name: 'فتحة سقف بانورامية مظللة بالذكاء', price: 4, score: 20, tag: 'roof', desc: 'رؤية سماوية وتحكم بالعزل' },
       { id: 'c13', name: 'نظام قيادة ذاتي بالذكاء الاصطناعي', price: 8, score: 40, tag: 'ai', desc: 'سيارة تفهم عليك وتصطف لحالها' },
-      { id: 'c14', name: 'مفتاح كريستال رقمي وتطعيمات ألماس', price: 5, score: 26, tag: 'key', desc: 'لمسة ترف تليق بالهوامير' }
+      { id: 'c14', name: 'مفتاح كريستال رقمي وتطعيمات ألماس', price: 5, score: 26, tag: 'key', desc: 'لمسة ترف تليق بالهوامير' },
+      { id: 'c15', name: 'عادم تيتانيوم رياضي مع قواطع لهب', price: 5, score: 26, tag: 'exhaust', desc: 'صوت طرب ونيران عند التبديل' },
+      { id: 'c16', name: 'نظام هيدروليك هوائي يوطي السيارة بلمسة زر', price: 4, score: 22, tag: 'stance', desc: 'نزلة أرضية وهيبة في التجمعات' },
+      { id: 'c17', name: 'دركسون فورملا 1 كربوني مع شاشة غيارات LED', price: 4, score: 24, tag: 'steering', desc: 'تحكم فائق وشعور حلبات حقيقي' },
+      { id: 'c18', name: 'لوحة سيارة ملكية مميزة أحادية الرقم', price: 6, score: 32, tag: 'plate', desc: 'فخامة استثنائية تلفت كل الأنظار' },
+      { id: 'c19', name: 'مشتت هواء كربوني أمريكي ديفيوزر سفلي', price: 3, score: 17, tag: 'diffuser', desc: 'انسيابية هوائية وثبات عالي السرعات' },
+      { id: 'c20', name: 'كاميرات 360 محيطية مع رادار كشف الحفر', price: 3, score: 18, tag: 'cameras', desc: 'رؤية شاملة وحماية من الصدمات والمخالفات' },
+      { id: 'c21', name: 'تبريد وتدفئة مراتب مع مساج حجري', price: 4, score: 21, tag: 'massage', desc: 'استرخاء تام في المشاوير الطويلة والزحمة' },
+      { id: 'c22', name: 'قاطع تيار أمني مع بصمة تشغيل بالوجه', price: 3, score: 16, tag: 'security', desc: 'حماية حديدية ضد أي محاولة سرقة' },
+      { id: 'c23', name: 'عازل حراري نانو سيراميك عالي الكتم 03', price: 3, score: 15, tag: 'tint', desc: 'برودة ثلج داخل المقصورة في عز صيف الرياض' },
+      { id: 'c24', name: 'حاقن ميثانول مضاعف لرفع بوست التيربو', price: 5, score: 27, tag: 'boost', desc: 'عزم جبار وانفجار في القوة الحصانية' },
+      { id: 'c25', name: 'إنارة ليزر أمامية زرقاء بمدى 600 متر', price: 4, score: 23, tag: 'laser_lights', desc: 'كشف الطريق ليلاً بوضوح النهار' },
+      { id: 'c26', name: 'ثلاجة مشروبات مدمجة بين المقاعد الخلفية', price: 3, score: 16, tag: 'fridge', desc: 'مشروبات باردة منعشة دائماً معك' },
+      { id: 'c27', name: 'كت هوائي كربوني عريض وايد بودي Rocket Bunny', price: 6, score: 34, tag: 'widebody', desc: 'وقفة عريضة متوحشة تهز الشارع' },
+      { id: 'c28', name: 'شاشة عرض بروجكتر HUD على الزجاج الأمامي', price: 4, score: 20, tag: 'hud', desc: 'عرض السرعة والملاحة كطائرة مقاتلة' },
     ]
   },
   villa: {
@@ -68,7 +82,21 @@ const THEMES = {
       { id: 'v11', name: 'نافورة راقصة بإضاءات خافتة بالمدخل', price: 3, score: 17, tag: 'fountain', desc: 'ترحيب ملكي يليق بالزوار' },
       { id: 'v12', name: 'نظام حماية أمني وكاميرات 360 بالذكاء', price: 3, score: 16, tag: 'security', desc: 'مراقبة وحماية بدون قلق' },
       { id: 'v13', name: 'جناح سبا متكامل وحمام بخار تركي', price: 5, score: 28, tag: 'spa', desc: 'نقاء واستجمام بعد عناء العمل' },
-      { id: 'v14', name: 'غرفة تحف ومقتنيات نادرة معزولة', price: 6, score: 30, tag: 'gallery', desc: 'لمسة أرستقراطية فريدة' }
+      { id: 'v14', name: 'غرفة تحف ومقتنيات نادرة معزولة', price: 6, score: 30, tag: 'gallery', desc: 'لمسة أرستقراطية فريدة' },
+      { id: 'v15', name: 'مجلس عربي ملكي فخم بديكور مشب تراثي', price: 5, score: 26, tag: 'majlis', desc: 'أصالة وضيافة لأكبر العزايم والمناسبات' },
+      { id: 'v16', name: 'صالة بولينج خاصة وبلياردو في القبو', price: 5, score: 27, tag: 'bowling', desc: 'ترفيه منزلي فاخر بلا حدود للشباب' },
+      { id: 'v17', name: 'غرفة ملابس ماستر بمساحة شقة كاملة', price: 4, score: 22, tag: 'wardrobe', desc: 'خزائن ذكية بإضاءات وأرفف عطور ومجوهرات' },
+      { id: 'v18', name: 'صالة ألعاب واقع افتراضي ومحاكي سباقات', price: 4, score: 23, tag: 'vr_room', desc: 'تجربة غامرة لألعاب الجيل الجديد' },
+      { id: 'v19', name: 'مزرعة منزلية ذكية ونخيل سكري مثمر', price: 3, score: 17, tag: 'palms', desc: 'رطب طازج وخضار عضوية من حديقتك' },
+      { id: 'v20', name: 'جاكوزي خارجي ساخن تحت مظلة البيرغولا', price: 4, score: 21, tag: 'outdoor_jacuzzi', desc: 'استرخاء مسائي شتوي تحت زخات المطر' },
+      { id: 'v21', name: 'نظام صوتي حدائقي مخفي على شكل صخور طبيعية', price: 3, score: 16, tag: 'garden_sound', desc: 'نغمات هادئة موزعة بين الشجر والنوافير' },
+      { id: 'v22', name: 'جناح ضيوف ملكي مستقل بمدخل خاص', price: 5, score: 28, tag: 'guest_suite', desc: 'خصوصية تامة لكبار الزوار والضيوف' },
+      { id: 'v23', name: 'أبواب خشب صاج أندلسية منحوتة باليد', price: 4, score: 20, tag: 'carved_doors', desc: 'هيبة مدخل لا تتكرر تدوم أجيالاً' },
+      { id: 'v24', name: 'ستائر كهربائية ذكية تتبع حركة الشمس', price: 3, score: 15, tag: 'smart_curtains', desc: 'تحكم بدرجة الإضاءة والحرارة أوتوماتيكياً' },
+      { id: 'v25', name: 'نظام تحلية وتنقية مياه مركزي بالأوزون', price: 3, score: 16, tag: 'water_purifier', desc: 'مياه نقية صالحة للشرب من كل صنبور' },
+      { id: 'v26', name: 'مهبط سكوترات كهربائية وشواحن تسلا جدارية', price: 4, score: 19, tag: 'ev_chargers', desc: 'جاهزية تامة لجميع سيارات المستقبل' },
+      { id: 'v27', name: 'نظام عزل صوتي كامل ثلاثي الطبقات للجدران', price: 4, score: 22, tag: 'soundproofing', desc: 'هدوء وسكينة مطلقة تنعزل بها عن صخب المدينة' },
+      { id: 'v28', name: 'رذاذ وتلطيف جو سويسري لكامل الفناء الخارجي', price: 4, score: 20, tag: 'cooling_mist', desc: 'تخفيض 15 درجة مئوية في عز حر الصيف' },
     ]
   },
   cafe: {
@@ -89,7 +117,21 @@ const THEMES = {
       { id: 'k11', name: 'إنترنت فايبر فائق السرعة وأفياش مدمجة', price: 2, score: 14, tag: 'wifi', desc: 'مغناطيس لأصحاب العمل الحر' },
       { id: 'k12', name: 'محطة مشروبات مبتكرة وخلطات صيفية', price: 3, score: 18, tag: 'drinks', desc: 'ماتشا وكركديه موهيتو منعش' },
       { id: 'k13', name: 'تطبيق ولاء رقمي ونظام مكافآت بالـ AI', price: 4, score: 24, tag: 'loyalty', desc: 'زبائن دائمين وتكرار زيارات' },
-      { id: 'k14', name: 'فرع VIP وسجل امتياز تجاري قابل للتوسع', price: 7, score: 38, tag: 'franchise', desc: 'تحويل المقهى لعلامة تجارية كبرى' }
+      { id: 'k14', name: 'فرع VIP وسجل امتياز تجاري قابل للتوسع', price: 7, score: 38, tag: 'franchise', desc: 'تحويل المقهى لعلامة تجارية كبرى' },
+      { id: 'k15', name: 'ركن تقطير يدوي V60 بحبوب بن جيشا نادرة', price: 5, score: 26, tag: 'v60', desc: 'لمحبي القهوة المختصة والتذوق العالي' },
+      { id: 'k16', name: 'شاشات طلب ذاتي رقمية تمنع طوابير الانتظار', price: 3, score: 17, tag: 'kiosk', desc: 'تسريع الخدمة ومضاعفة حجم الطلبات' },
+      { id: 'k17', name: 'فرن حلويات لايف وتشيز كيك سان سيباستيان', price: 4, score: 22, tag: 'oven', desc: 'رائحة الحلويات الطازجة تجذب المارة' },
+      { id: 'k18', name: 'أكواب حرارية تذكارية قابلة للتعبئة بشعار الكافيه', price: 3, score: 15, tag: 'tumbler', desc: 'أرباح مبيعات وهوية تتجول مع العملاء' },
+      { id: 'k19', name: 'اشتراكات قهوة شهرية مسبقة الدفع عبر البطاقات', price: 4, score: 23, tag: 'subscription', desc: 'دخل ثابت مضمون وتثبيت ولاء الزبائن' },
+      { id: 'k20', name: 'إضاءة تصوير سينمائية تبرز جمال اللاتيه آرت', price: 3, score: 16, tag: 'photo_light', desc: 'صور ترند يومية في ستوريات وتيك توك' },
+      { id: 'k21', name: 'كبائن دراسة فردية مع عزل صوتي وهدوء', price: 3, score: 18, tag: 'study_pods', desc: 'استقطاب طلاب الجامعات ومحبي التركيز' },
+      { id: 'k22', name: 'طابعة ليزرية لطباعة صور الزبائن على رغوة القهوة', price: 4, score: 21, tag: 'foam_art', desc: 'فكرة ترفيهية استثنائية يتسابق الزوار لتصويرها' },
+      { id: 'k23', name: 'مشروبات بنكهات سعودية (خزامى، ورد طائفي، هيل)', price: 4, score: 20, tag: 'saudi_flavors', desc: 'تميز بنكهات محلية ترند لا توجد عند المنافسين' },
+      { id: 'k24', name: 'عقد تدريب مع بطل باريستا دولي لتدريب الطاقم', price: 5, score: 27, tag: 'master_barista', desc: 'رفع جودة الاستخلاص والتقديم لأعلى مستوى عالمي' },
+      { id: 'k25', name: 'محطة فلاتر مياه متطورة لضبط معادن القهوة بدقة', price: 3, score: 17, tag: 'water_minerals', desc: 'حموضة ونكهة مثالية متوازنة لكل كوب' },
+      { id: 'k26', name: 'جلسات خارجية بدفايات لهب لأيام الشتاء', price: 3, score: 16, tag: 'patio_heaters', desc: 'بقاء الترّاس مزدحماً طوال أشهر البرد' },
+      { id: 'k27', name: 'خدمة استلام سريع من شباك السيارة عبر التطبيق', price: 4, score: 22, tag: 'curbside', desc: 'خدمة الزبون المستعجل بدون انتظار دقيقة واحدة' },
+      { id: 'k28', name: 'مكتبة كتب مختارة وألعاب طاولة وبلوت خشبية راقية', price: 3, score: 15, tag: 'board_games', desc: 'زيادة وقت بقاء الزبون ورفع متوسط فاتورته' },
     ]
   },
   restaurant: {
@@ -110,7 +152,21 @@ const THEMES = {
       { id: 'r11', name: 'بار حلويات استعراضي بالنيتروجين المثلج', price: 4, score: 21, tag: 'dessert', desc: 'تجربة حلى ساحرة ومبهرة' },
       { id: 'r12', name: 'عقود تموين لحوم محلية طازجة يومياً', price: 4, score: 19, tag: 'supply', desc: 'ثقة ومذاق بلدي مضمون' },
       { id: 'r13', name: 'روبوتات تقديم ذكية لنقل الطلبات', price: 5, score: 27, tag: 'robots', desc: 'تقنية مبهرة وسرعة في الخدمة' },
-      { id: 'r14', name: 'توثيق تقييمات المشاهير وتغطية إعلامية', price: 5, score: 25, tag: 'media', desc: 'ترند طوابير وزحمة يومية' }
+      { id: 'r14', name: 'توثيق تقييمات المشاهير وتغطية إعلامية', price: 5, score: 25, tag: 'media', desc: 'ترند طوابير وزحمة يومية' },
+      { id: 'r15', name: 'فرن بيتزا نابولي حجري أصلي على الحطب', price: 5, score: 26, tag: 'pizza_oven', desc: 'نكهة إيطالية أصلية مقرمشة في 90 ثانية' },
+      { id: 'r16', name: 'قبو تعتيق مشروبات وعصائر طبيعية منعشة', price: 4, score: 22, tag: 'mocktail_cellar', desc: 'تجارب تذوق حصرية ترافق الأطباق الرئيسية' },
+      { id: 'r17', name: 'محطة تقطيع ستيك استعراضية أمام طاولة الزبون', price: 4, score: 24, tag: 'steak_show', desc: 'عرض حي مذهل يشعل الهواتف بالتصوير' },
+      { id: 'r18', name: 'أواني تقديم وصحون خزفية مصممة يدوياً للشيف', price: 3, score: 16, tag: 'custom_plates', desc: 'لمسة فنية فريدة تبرز روعة كل وجبة' },
+      { id: 'r19', name: 'شرفة بإطلالة مائية مع نوافير تفاعلية خاصة', price: 5, score: 28, tag: 'fountain_terrace', desc: 'أجواء تجعل حجوزات المطعم ممتلئة دائماً' },
+      { id: 'r20', name: 'نظام حجوزات ذكي يمنع الانتظار ويدير الزوار بالـ AI', price: 3, score: 17, tag: 'smart_booking', desc: 'سلاسة تشغيلية وتجربة استثنائية بدون طوابير' },
+      { id: 'r21', name: 'حوض لوبستر ومأكولات بحرية حية طازجة', price: 6, score: 31, tag: 'live_seafood', desc: 'طزاجة لا تقاوم تجذب عشاق البحريات الفاخرة' },
+      { id: 'r22', name: 'قائمة تذوق سرية من 7 أطباق تتغير أسبوعياً', price: 5, score: 29, tag: 'secret_menu', desc: 'تشويق دائم للزبائن المخمليين لتكرار الزيارة' },
+      { id: 'r23', name: 'أزياء موحدة أنيقة لطاقم الخدمة من دار أزياء عالمية', price: 3, score: 15, tag: 'uniforms', desc: 'مظهر احترافي فخم يعكس مستوى المطعم الرفيع' },
+      { id: 'r24', name: 'نظام عزل وتشتيت ضوضاء متطور بين الطاولات', price: 4, score: 20, tag: 'acoustic_tables', desc: 'حديث خاص ومريح لكل طاولة بدون تداخل أصوات' },
+      { id: 'r25', name: 'مطبخ تجارب وابتكار أطباق جديدة تسبق السوق', price: 5, score: 26, tag: 'culinary_lab', desc: 'تجديد مستمر لقائمة الطعام وإبهار الذواقة' },
+      { id: 'r26', name: 'تغليف حراري فاخر لطلبات التوصيل VIP للمنازل', price: 3, score: 16, tag: 'thermal_pack', desc: 'وصول الأكل حاراً وبمظهر المطعم الفاخر' },
+      { id: 'r27', name: 'جدار زراعة هوائية للأعشاب العطرية الطازجة بالمطبخ', price: 3, score: 17, tag: 'herb_wall', desc: 'بهارات وأعشاب تُقطف مباشرة على الطبق' },
+      { id: 'r28', name: 'خدمة كونسيرج خاصة لترتيب مناسبات أعياد الميلاد والذكرى', price: 4, score: 23, tag: 'events_desk', desc: 'تنظيم احتفالات لا تُنسى تجلب أعلى عوائد' },
     ]
   },
   tower: {
@@ -131,7 +187,21 @@ const THEMES = {
       { id: 't11', name: 'نظام إدارة طاقة ذاتي وتوليد بالرياح', price: 4, score: 20, tag: 'green', desc: 'برج صديق للبيئة وشهادة بلاتينية' },
       { id: 't12', name: 'مواقف روبوتية ذكية تحت الأرض لـ 500 سيارة', price: 5, score: 25, tag: 'parking', desc: 'اصطفاف تلقائي بدون تدخل بشري' },
       { id: 't13', name: 'صالة مؤتمرات دبلوماسية مع ترجمة فورية بالذكاء', price: 5, score: 27, tag: 'summit', desc: 'استضافة كبرى القمم العالمية' },
-      { id: 't14', name: 'برج اتصالات 6G وربط فضائي مباشر', price: 6, score: 33, tag: 'telecom', desc: 'أسرع اتصال رقمي في المنطقة' }
+      { id: 't14', name: 'برج اتصالات 6G وربط فضائي مباشر', price: 6, score: 33, tag: 'telecom', desc: 'أسرع اتصال رقمي في المنطقة' },
+      { id: 't15', name: 'مسبح معلق زجاجي يبرز خارج البرج في الهواء الطلق', price: 7, score: 39, tag: 'glass_pool', desc: 'سباحة بين الغيوم على ارتفاع 300 متر تجذب العالم' },
+      { id: 't16', name: 'مركز بيانات سحابي فائق وخوادم AI بالبرج', price: 6, score: 32, tag: 'data_center', desc: 'استقطاب كبرى شركات التقنية العالمية للمكاتب' },
+      { id: 't17', name: 'صالة لياقة بدنية وسبا صحي بانورامي بالطابق الستين', price: 4, score: 23, tag: 'sky_gym', desc: 'تدريب واستجمام مع إطلالة تحبس الأنفاس' },
+      { id: 't18', name: 'شبكة روبوتات ودرونز لتنظيف زجاج الواجهات 24/7', price: 4, score: 21, tag: 'facade_drones', desc: 'لمعان كريستالي مستمر بدون مخاطر بشرية' },
+      { id: 't19', name: 'جسور هوائية مكيفة تربط البرج بالأبراج المجاورة', price: 5, score: 27, tag: 'skybridges', desc: 'تنقل سلس للرواد في كل الفصول دون الخروج للشارع' },
+      { id: 't20', name: 'نظام فلترة وتجديد هواء بتقنية الضغط الإيجابي', price: 4, score: 20, tag: 'air_filtration', desc: 'هواء نقي 100% يمنع دخول أي غبار أو أتربة' },
+      { id: 't21', name: 'بنتهاوس ملكي ثلاثي الأدوار مع مسبح خاص بالقمة', price: 8, score: 44, tag: 'penthouse', desc: 'أغلى وحدة سكنية بالمدينة ترفع قيمة المشروع' },
+      { id: 't22', name: 'نظام توليد طاقة كهرومائية من تصريف مياه البرج', price: 4, score: 22, tag: 'clean_energy', desc: 'استدامة بيئية وتوفير ملايين الريالات بالطاقة' },
+      { id: 't23', name: 'أجهزة بصمة عين وأبواب ذكاء اصطناعي للمصاعد', price: 3, score: 18, tag: 'iris_transit', desc: 'أمان فائق وسرعة دخول لكبار الشخصيات' },
+      { id: 't24', name: 'حدائق شتوية زجاجية مصغرة في ردهات كل خمسة أدوار', price: 3, score: 17, tag: 'atrium_gardens', desc: 'مساحات خضراء تبعث الراحة والبهجة للموظفين' },
+      { id: 't25', name: 'قاعة احتفالات كبرى معلقة بدون أعمدة تتسع لـ 1000 شخص', price: 6, score: 33, tag: 'ballroom', desc: 'استضافة أضخم الأعراس والمؤتمرات الدولية' },
+      { id: 't26', name: 'محطة شحن سريع لأسطول سيارات الليموزين التابعة للبرج', price: 4, score: 21, tag: 'ev_hub', desc: 'خدمات تنقل فاخرة للضيوف والنزلاء على مدار الساعة' },
+      { id: 't27', name: 'نظام مصدات زلازل ومثبط كتلي مذهب بالقمة', price: 5, score: 28, tag: 'mass_damper', desc: 'استقرار وثبات أسطوري مع معلم هندسي يبهر السياح' },
+      { id: 't28', name: 'شاشة هولوجرامية عملاقة ثلاثية الأبعاد على التاج', price: 6, score: 31, tag: 'hologram_crown', desc: 'عروض بصرية تبهر المدينة وتدر أرباحاً إعلانية هائلة' },
     ]
   },
   jet: {
@@ -152,7 +222,21 @@ const THEMES = {
       { id: 'j11', name: 'نظام تنقية هواء بأيونات الفضة والأكسجين', price: 3, score: 17, tag: 'air', desc: 'تنشيط دائم والقضاء على إجهاد السفر' },
       { id: 'j12', name: 'خزان وقود إضافي مدى 12,000 كم متواصل', price: 5, score: 27, tag: 'fuel', desc: 'من الرياض إلى نيويورك بدون توقف' },
       { id: 'j13', name: 'نظام دفاع جوي ذكي وتفادي مطبات بالليزر', price: 6, score: 31, tag: 'defense', desc: 'رحلة سلسة كالماء في أحلك الظروف' },
-      { id: 'j14', name: 'طلاء نانو ضد الخدوش وشهادة طيران دولية VIP', price: 4, score: 20, tag: 'nano', desc: 'حفاظ على قيمة الطائرة لسنوات' }
+      { id: 'j14', name: 'طلاء نانو ضد الخدوش وشهادة طيران دولية VIP', price: 4, score: 20, tag: 'nano', desc: 'حفاظ على قيمة الطائرة لسنوات' },
+      { id: 'j15', name: 'صالون عناية شخصية VIP مجهز بالكامل على الطائرة', price: 4, score: 22, tag: 'grooming', desc: 'وصول بكامل الأناقة مباشرة لأهم الاجتماعات' },
+      { id: 'j16', name: 'نظام عزل وتخميد ذبذبات المحركات بالموجات المضادة', price: 4, score: 23, tag: 'active_silence', desc: 'صمت مطبق كالبيت يتيح نوماً عميقاً كالريشة' },
+      { id: 'j17', name: 'أدوات مائدة من الفضة وكؤوس كريستال باكارا', price: 4, score: 21, tag: 'crystal_dining', desc: 'ضيافة أرستقراطية تليق بالملوك وكبار الوفود' },
+      { id: 'j18', name: 'سينما خاصة 4K بشاشة OLED 85 بوصة ومقاعد فخمة', price: 5, score: 27, tag: 'sky_cinema', desc: 'ترفيه سينمائي خيالي طوال ساعات السفر' },
+      { id: 'j19', name: 'مستودع سيارة خارقة داخل بطن الطائرة للشحن السريع', price: 7, score: 38, tag: 'supercar_bay', desc: 'سافر مع سيارتك الرياضية المفضلة أينما هبطت' },
+      { id: 'j20', name: 'نظام إضاءة سيركاديان يتكيف مع الوقت لمنع إجهاد السفر', price: 3, score: 18, tag: 'circadian_light', desc: 'استيقاظ بنشاط وانتعاش فوري عند الوصول لوجهتك' },
+      { id: 'j21', name: 'طاهٍ خاص متخصص في المأكولات الصحية والأطباق الملكية', price: 5, score: 26, tag: 'sky_chef', desc: 'وجبات طازجة تُطبخ لحظياً في فرن الحمل الحراري' },
+      { id: 'j22', name: 'رادار دوبلر لكشف المطبات الجوية قبل 100 ميل', price: 4, score: 24, tag: 'turbulence_radar', desc: 'تغيير المسار تلقائياً لتفادي أي اهتزاز أثناء الرحلة' },
+      { id: 'j23', name: 'أرضيات خشب ماهوجني مدفأة وسجاد كشميري يدوي', price: 4, score: 22, tag: 'mahogany_floor', desc: 'دفء وفخامة ملموسة تحت الأقدام في أعالي الجو' },
+      { id: 'j24', name: 'نظام هبوط آلي معتمد للضباب الكثيف بدون رؤية CAT-III', price: 5, score: 28, tag: 'autoland', desc: 'هبوط آمن وواثق في أي مطار حول العالم بلا تأخير' },
+      { id: 'j25', name: 'كبسولة أكسجين واستشفاء طبي سريع بالجناح', price: 5, score: 26, tag: 'oxygen_pod', desc: 'تجديد طاقة الجسم ونقاء الذهن أثناء الطيران' },
+      { id: 'j26', name: 'كاميرات خارجية تبث مناظر الطيران بجودة 8K للشاشات', price: 3, score: 17, tag: '8k_cameras', desc: 'الاستمتاع بمشاهدة الجبال والمحيطات بزوايا مذهلة' },
+      { id: 'j27', name: 'نظام اتصالات فضائي مشفر عسكري ضد أي تنصت', price: 4, score: 23, tag: 'secure_satcom', desc: 'سرية مطلقة للمكالمات والبيانات والصفقات الهامة' },
+      { id: 'j28', name: 'رخصة إقلاع وهبوط استثنائي في المطارات الدولية القصيرة', price: 4, score: 21, tag: 'short_runway', desc: 'وصولك لأقرب نقطة لوجهتك بدون تضييع دقيقة' },
     ]
   }
 };
@@ -496,6 +580,7 @@ function createRoom(hostPlayer, options = {}) {
     roundTimerInterval: null,
     codeTimerInterval: null,
     auctionData: null,
+    usedOfferIds: [],
     history: []
   };
 
@@ -611,6 +696,7 @@ function startGame(room) {
   if (room.players.length < 1) return;
   room.state = 'playing';
   room.round = 0;
+  room.usedOfferIds = [];
   room.totalRounds = calculateRounds(room.budget);
 
   // Distribute one random sabotage card to each player
@@ -648,8 +734,19 @@ function startNextRound(room) {
   }
 
   const themeData = THEMES[room.theme] || THEMES.car;
-  const offerIndex = (room.round - 1) % themeData.upgrades.length;
-  room.currentOffer = themeData.upgrades[offerIndex];
+  if (!room.usedOfferIds) room.usedOfferIds = [];
+
+  // Exclude previously presented items in this session to eliminate repetition
+  let availableOffers = themeData.upgrades.filter(u => !room.usedOfferIds.includes(u.id));
+  if (availableOffers.length === 0) {
+    room.usedOfferIds = [];
+    availableOffers = [...themeData.upgrades];
+  }
+
+  // Pick random item from available unused choices
+  const pickedIndex = Math.floor(Math.random() * availableOffers.length);
+  room.currentOffer = availableOffers[pickedIndex];
+  room.usedOfferIds.push(room.currentOffer.id);
 
   // Setup Live Auction for this item (30 seconds per round)
   room.liveAuction = {
