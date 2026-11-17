@@ -1,7 +1,7 @@
 /**
  * Raqeeb Terminal ASCII Art & Visual Elements
  * Tool: Alagadjeebak Raqeeb (على قد جيبك رقيب)
- * AI: Antigravity
+ * Target AI Inspector: Antigravity
  * Note: Terminal outputs are strictly in English per Raqeeb specification.
  */
 
@@ -15,9 +15,7 @@ const colors = {
   magenta: '\x1b[35m',
   cyan: '\x1b[36m',
   white: '\x1b[37m',
-  red: '\x1b[31m',
-  bgBlue: '\x1b[44m',
-  bgGreen: '\x1b[42m'
+  red: '\x1b[31m'
 };
 
 function banner(aiName = 'Antigravity') {
@@ -29,13 +27,13 @@ ${colors.cyan}${colors.bold}====================================================
   ██╔══██╗██╔══██║██║▄▄ ██║██╔══╝  ██╔══╝  ██╔══██╗
   ██║  ██║██║  ██║╚██████╔╝███████╗███████╗██████╔╝
   ╚═╝  ╚═╝╚═╝  ╚═╝ ╚══▀▀═╝ ╚══════╝╚══════╝╚═════╝ 
-        ALAGADJEEBAK RAQEEB - REALTIME TEST & AUDIT SUITE
-        Target AI Inspector: ${colors.yellow}${aiName}${colors.cyan}
+  ALAGADJEEBAK RAQEEB — REALTIME AUDIT & SIMULATION SUITE
+  Target AI Inspector: ${colors.yellow}${aiName}${colors.cyan}
 ======================================================================${colors.reset}
 `;
 }
 
-function progressBar(percent, width = 30) {
+function progressBar(percent, width = 32) {
   const p = Math.max(0, Math.min(100, percent));
   const filled = Math.round((p / 100) * width);
   const empty = width - filled;
@@ -48,17 +46,17 @@ const spinnerFrames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '
 function celebration() {
   return `
 ${colors.green}${colors.bold}
-  *************************************************************
-  *                                                           *
-  *    ███████╗██╗   ██╗ ██████╗ ██████╗███████╗███████╗      *
-  *    ██╔════╝██║   ██║██╔════╝██╔════╝██╔════╝██╔════╝      *
-  *    ███████╗██║   ██║██║     ██║     █████╗  ███████╗      *
-  *    ╚════██║██║   ██║██║     ██║     ██╔══╝  ╚════██║      *
-  *    ███████║╚██████╔╝╚██████╗╚██████╗███████╗███████║      *
-  *    ╚══════╝ ╚═════╝  ╚═════╝ ╚═════╝╚══════╝╚══════╝      *
-  *                                                           *
-  *        ALL CHECKS & REALTIME SIMULATIONS PASSED!         *
-  *************************************************************
+  **********************************************************************
+  *                                                                    *
+  *  ███████╗██╗   ██╗ ██████╗  ██████╗███████╗███████╗███████╗        *
+  *  ██╔════╝██║   ██║██╔════╝ ██╔════╝██╔════╝██╔════╝██╔════╝        *
+  *  ███████╗██║   ██║██║      ██║     █████╗  ███████╗███████╗        *
+  *  ╚════██║██║   ██║██║      ██║     ██╔══╝  ╚════██║╚════██║        *
+  *  ███████║╚██████╔╝╚██████╗ ╚██████╗███████╗███████║███████║        *
+  *  ╚══════╝ ╚═════╝  ╚═════╝  ╚═════╝╚══════╝╚══════╝╚══════╝        *
+  *                                                                    *
+  *            ALL CHECKS & REALTIME SIMULATIONS PASSED!               *
+  **********************************************************************
 ${colors.reset}`;
 }
 

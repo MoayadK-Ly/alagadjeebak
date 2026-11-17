@@ -10,7 +10,7 @@ const path = require('path');
 const readline = require('readline');
 const { exec, execSync } = require('child_process');
 
-const { colors, banner, progressBar, spinnerFrames, celebration } = require('./ascii_art');
+const { colors, banner, progressBar, celebration } = require('./ascii_art');
 const { runStaticChecks } = require('./static_checks');
 const { runLogicChecks } = require('./logic_checks');
 const { runMultiplayerSimulation } = require('./simulation_robot');
@@ -21,14 +21,19 @@ const PROJECT_ROOT = path.resolve(__dirname, '..');
 const COLLECTED_DIR = path.join(PROJECT_ROOT, 'collected');
 const AUTO_LOG_PATH = path.join(COLLECTED_DIR, 'auto.log');
 
-// Set Windows Terminal Title
-function setTerminalTitle(title) {
-  process.stdout.write(`\x1b]0;${title}\x07`);
+function setTerminalTitle(titleText) {
+  try {
+    if (process.platform === 'win32') {
+      execSync(`chcp 65001 > nul && title ${titleText}`, { stdio: 'ignore' });
+    } else {
+      process.stdout.write(`\x1b]0;${titleText}\x07`);
+    }
+  } catch (e) {}
 }
 
 function notifyUser(title, message) {
   try {
-    process.stdout.write('\x07'); // System audio beep
+    process.stdout.write('\x07');
     if (process.platform === 'win32') {
       const psCmd = `[Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] > $null; $template = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastText02); $textNodes = $template.GetElementsByTagName('text'); $textNodes.Item(0).AppendChild($template.CreateTextNode('${title}')) > $null; $textNodes.Item(1).AppendChild($template.CreateTextNode('${message}')) > $null; $toast = [Windows.UI.Notifications.ToastNotification]::new($template); [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('${TOOL_NAME}').Show($toast);`;
       exec(`powershell -NoProfile -Command "${psCmd}"`, { stdio: 'ignore' });
@@ -39,9 +44,8 @@ function notifyUser(title, message) {
 async function main() {
   const args = process.argv.slice(2);
   const isAuto = args.includes('--auto');
-  const isRunNow = args.includes('--run-now');
 
-  setTerminalTitle(`${TOOL_NAME} رقيب — Running`);
+  setTerminalTitle(`${RAQEEB_FULL_NAME} — يعمل`);
 
   if (!fs.existsSync(COLLECTED_DIR)) {
     fs.mkdirSync(COLLECTED_DIR, { recursive: true });
@@ -59,9 +63,8 @@ async function main() {
     console.log(banner(AI_NAME));
   }
 
-  // 15-minute global watchdog timer
   const globalWatchdog = setTimeout(() => {
-    console.error(`\n${colors.red}[RAQEEB] Global 15-minute timeout reached. Aborting.${colors.reset}`);
+    console.error(`\n${colors.red}[RAQEEB] Global 15-minute watchdog timeout reached. Aborting.${colors.reset}`);
     process.exit(1);
   }, 15 * 60 * 1000);
 
@@ -69,71 +72,93 @@ async function main() {
   const waseet = new WaseetBridge(AI_NAME);
 
   try {
-    // Stage 1: Static Audits & File Integrity (0% -> 30%)
+    // -------------------------------------------------------------
+    // STAGE 1: STATIC CODE INTEGRITY & SECURITY AUDITS
+    // -------------------------------------------------------------
     if (!isAuto) {
-      console.log(`\n${colors.cyan}[1/3] Running Static Code Integrity & Security Audits...${colors.reset}`);
-      console.log(progressBar(10));
+      console.log(`${colors.cyan}${colors.bold}[STAGE 1/3] STATIC CODE INTEGRITY & SECURITY AUDITS${colors.reset}`);
     }
     const staticRes = await runStaticChecks();
     testResults.push(...staticRes);
 
-    staticRes.forEach(t => {
-      if (!isAuto) {
-        console.log(`  ${t.passed ? colors.green + '✔' : colors.red + '✖'} ${t.name} (${t.durationMs}ms)${colors.reset}`);
-      }
-    });
-
-    if (!isAuto) console.log(progressBar(35));
-
-    // Stage 2: Logic & Ruleset Verification (35% -> 70%)
     if (!isAuto) {
-      console.log(`\n${colors.cyan}[2/3] Running Game Logic & Tie-Breaker Engine Checks...${colors.reset}`);
+      staticRes.forEach(t => {
+        const mark = t.passed ? `${colors.green}[✔]${colors.reset}` : `${colors.red}[✖]${colors.reset}`;
+        console.log(`  ${mark} ${t.name} ${colors.dim}(${t.durationMs}ms)${colors.reset}`);
+      });
+      console.log(`  Progress: ${progressBar(35)}\n`);
+    }
+
+    // -------------------------------------------------------------
+    // STAGE 2: GAMEPLAY LOGIC & RULESET VERIFICATION
+    // -------------------------------------------------------------
+    if (!isAuto) {
+      console.log(`${colors.cyan}${colors.bold}[STAGE 2/3] GAMEPLAY LOGIC & RULESET VERIFICATION${colors.reset}`);
     }
     const logicRes = await runLogicChecks();
     testResults.push(...logicRes);
 
-    logicRes.forEach(t => {
-      if (!isAuto) {
-        console.log(`  ${t.passed ? colors.green + '✔' : colors.red + '✖'} ${t.name} (${t.durationMs}ms)${colors.reset}`);
-      }
-    });
-
-    if (!isAuto) console.log(progressBar(70));
-
-    // Stage 3: Live Multiplayer Simulation Robot (70% -> 100%)
     if (!isAuto) {
-      console.log(`\n${colors.cyan}[3/3] Launching Realtime Multiplayer Simulation Robot...${colors.reset}`);
+      logicRes.forEach(t => {
+        const mark = t.passed ? `${colors.green}[✔]${colors.reset}` : `${colors.red}[✖]${colors.reset}`;
+        console.log(`  ${mark} ${t.name} ${colors.dim}(${t.durationMs}ms)${colors.reset}`);
+      });
+      console.log(`  Progress: ${progressBar(70)}\n`);
+    }
+
+    // -------------------------------------------------------------
+    // STAGE 3: REALTIME MULTIPLAYER SIMULATION ROBOT
+    // -------------------------------------------------------------
+    if (!isAuto) {
+      console.log(`${colors.cyan}${colors.bold}[STAGE 3/3] REALTIME MULTIPLAYER SIMULATION ROBOT${colors.reset}`);
     }
     const simRes = await runMultiplayerSimulation();
     testResults.push(simRes);
 
     if (!isAuto) {
-      console.log(`  ${simRes.passed ? colors.green + '✔' : colors.red + '✖'} ${simRes.name} (${simRes.durationMs}ms)${colors.reset}`);
-      console.log(progressBar(100));
+      const mark = simRes.passed ? `${colors.green}[✔]${colors.reset}` : `${colors.red}[✖]${colors.reset}`;
+      console.log(`  ${mark} ${simRes.name} ${colors.dim}(${simRes.durationMs}ms)${colors.reset}`);
+      
+      // Print detailed breakdown of simulation steps if passed
+      if (simRes.details) {
+        simRes.details.split('\n').filter(Boolean).forEach(line => {
+          const cleanLine = line.replace(/\[\d{4}-\d{2}-\d{2}T.*?\]\s*/, '');
+          console.log(`      ${colors.dim}↳ ${cleanLine}${colors.reset}`);
+        });
+      }
+      console.log(`  Progress: ${progressBar(100)}\n`);
     }
 
     clearTimeout(globalWatchdog);
 
-    // Generate Reports
+    // Generate Reports and Sync to Waseet
     const reportOutcome = generateReports(testResults);
     await waseet.syncToWaseet(reportOutcome.runId);
 
+    // -------------------------------------------------------------
+    // FINAL OUTCOME & CELEBRATION
+    // -------------------------------------------------------------
     if (reportOutcome.allPassed) {
-      setTerminalTitle(`${TOOL_NAME} رقيب — All Passed ✅`);
-      notifyUser(`${TOOL_NAME} رقيب`, 'جميع الفحوصات والمحاكاة نجحت بنسبة 100% بنجاح!');
+      setTerminalTitle(`${RAQEEB_FULL_NAME} — اكتمل بنجاح`);
+      notifyUser(RAQEEB_FULL_NAME, 'جميع الفحوصات والمحاكاة نجحت بنسبة 100% بنجاح!');
+
       if (!isAuto) {
         console.log(celebration());
-        console.log(`\n${colors.green}${colors.bold}[SUCCESS] All ${reportOutcome.total} checks passed flawlessly!${colors.reset}`);
-        console.log(`${colors.white}HTML Report: file://${reportOutcome.htmlPath.replace(/\\/g, '/')}${colors.reset}`);
-        console.log(`${colors.white}AI Report:   file://${reportOutcome.textReportPath.replace(/\\/g, '/')}${colors.reset}\n`);
+        console.log(`${colors.green}${colors.bold}[SUMMARY] ALL 12 CHECKS & REALTIME SIMULATIONS PASSED!${colors.reset}`);
+        console.log(`${colors.white}  • Total Tests: ${reportOutcome.total} | Passed: ${reportOutcome.passed} | Failed: 0`);
+        console.log(`  • Execution Duration: ${testResults.reduce((acc, t) => acc + (t.durationMs || 0), 0)}ms`);
+        console.log(`  • Visual Report:  file://${reportOutcome.htmlPath.replace(/\\/g, '/')}`);
+        console.log(`  • AI Text Report: file://${reportOutcome.textReportPath.replace(/\\/g, '/')}${colors.reset}\n`);
       } else {
         logAuto(`SUCCESS: All ${reportOutcome.total} checks passed.`);
       }
     } else {
-      setTerminalTitle(`${TOOL_NAME} رقيب — Failures Detected ⚠️`);
-      notifyUser(`${TOOL_NAME} رقيب`, `تم رصد تعثر في ${reportOutcome.failed} من أصل ${reportOutcome.total} فحص!`);
+      setTerminalTitle(`${RAQEEB_FULL_NAME} — تعثر الفحص`);
+      notifyUser(RAQEEB_FULL_NAME, `تم رصد تعثر في ${reportOutcome.failed} من أصل ${reportOutcome.total} فحص!`);
+
       if (!isAuto) {
-        console.log(`\n${colors.red}${colors.bold}[ACTION REQUIRED] ${reportOutcome.failed} checks failed. Report saved for ${AI_NAME}.${colors.reset}\n`);
+        console.log(`\n${colors.red}${colors.bold}[FAILURES DETECTED] ${reportOutcome.failed} checks failed.${colors.reset}`);
+        console.log(`${colors.white}  • Action: Report generated for ${AI_NAME} at ${reportOutcome.textReportPath}${colors.reset}\n`);
       } else {
         logAuto(`FAIL: ${reportOutcome.failed} checks failed.`);
       }
@@ -143,77 +168,54 @@ async function main() {
       process.exit(reportOutcome.allPassed ? 0 : 1);
     }
 
-    // Interactive Menu (Section 9 of specification)
-    await showMenu(reportOutcome, waseet);
+    // Section 6 & 9 Standard Menu
+    await showMenu(reportOutcome);
 
-  } catch (fatalErr) {
+  } catch (err) {
     clearTimeout(globalWatchdog);
-    console.error(`\n${colors.red}[FATAL] Raqeeb encountered an unexpected failure: ${fatalErr.message}${colors.reset}`);
-    if (isAuto) logAuto(`FATAL: ${fatalErr.message}`);
+    console.error(`\n${colors.red}[FATAL] Unexpected error: ${err.message}${colors.reset}`);
+    if (isAuto) logAuto(`FATAL: ${err.message}`);
     process.exit(1);
   }
 }
 
-async function showMenu(reportOutcome, waseet) {
+async function showMenu(reportOutcome) {
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
   });
 
   const promptUser = () => {
-    console.log(`\n${colors.yellow}${colors.bold}======================================================================${colors.reset}`);
+    console.log(`${colors.yellow}======================================================================${colors.reset}`);
     console.log(`${colors.bold}RAQEEB COMMAND MENU:${colors.reset}`);
-    console.log(`  ${colors.cyan}[6]${colors.reset} OPEN REPORT (Opens visual HTML dashboard in your browser)`);
-    console.log(`  ${colors.cyan}[7]${colors.reset} RUN ANOTHER CHECK (Re-executes all static & live simulation tests)`);
-    console.log(`  ${colors.cyan}[W]${colors.reset} WAIT FOR AI ANSWER (Polls Waseet bridge for ${AI_NAME}'s response)`);
-    console.log(`  ${colors.cyan}[Q]${colors.reset} QUIT`);
-    console.log(`${colors.yellow}${colors.bold}======================================================================${colors.reset}`);
+    console.log(`  ${colors.cyan}[6]${colors.reset} OPEN REPORT       (Opens visual HTML report in your browser)`);
+    console.log(`  ${colors.cyan}[7]${colors.reset} RUN ANOTHER CHECK (Re-executes all checks & simulation)`);
+    console.log(`  ${colors.cyan}[Q]${colors.reset} QUIT              (Exit Raqeeb)`);
+    console.log(`${colors.yellow}======================================================================${colors.reset}`);
 
-    rl.question(`${colors.bold}Select an option [6 / 7 / W / Q]: ${colors.reset}`, async (answer) => {
+    rl.question(`${colors.bold}Select an option [6 / 7 / Q]: ${colors.reset}`, (answer) => {
       const choice = (answer || '').trim().toUpperCase();
 
       if (choice === '6') {
         const startCmd = process.platform === 'win32' ? 'start ""' : 'open';
         exec(`${startCmd} "${reportOutcome.htmlPath}"`);
-        console.log(`${colors.green}Opened report in default browser.${colors.reset}`);
+        console.log(`${colors.green}Opened report in browser.${colors.reset}\n`);
         promptUser();
       } else if (choice === '7') {
         rl.close();
         main();
-      } else if (choice === 'W') {
-        await pollWaseetAnswer(reportOutcome.runId, waseet);
-        promptUser();
       } else if (choice === 'Q') {
         console.log(`${colors.cyan}Exiting Raqeeb. Goodbye!${colors.reset}`);
         rl.close();
         process.exit(0);
       } else {
-        console.log(`${colors.red}Invalid option. Please choose 6, 7, W, or Q.${colors.reset}`);
+        console.log(`${colors.red}Invalid choice. Enter 6, 7, or Q.${colors.reset}\n`);
         promptUser();
       }
     });
   };
 
   promptUser();
-}
-
-async function pollWaseetAnswer(runId, waseet) {
-  console.log(`\n${colors.cyan}Polling Waseet bridge for answer from ${AI_NAME} (Press Ctrl+C to cancel)...${colors.reset}`);
-  let frame = 0;
-
-  for (let i = 0; i < 20; i++) {
-    const answer = waseet.checkAnswer(runId);
-    if (answer) {
-      console.log(`\n${colors.green}${colors.bold}✔ Answer received from ${AI_NAME}!${colors.reset}`);
-      console.log(`\n${colors.white}${answer}${colors.reset}\n`);
-      return;
-    }
-    process.stdout.write(`\r${colors.yellow}${spinnerFrames[frame % spinnerFrames.length]} Waiting for answer... (${20 - i} checks remaining)${colors.reset}`);
-    frame++;
-    await new Promise(r => setTimeout(r, 1500));
-  }
-
-  console.log(`\n${colors.yellow}No new answer found in Waseet yet. Check again later.${colors.reset}`);
 }
 
 if (require.main === module) {
