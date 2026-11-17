@@ -476,190 +476,154 @@
         <span id="eventBannerText">🌪️ حدث طارئ!</span>
       </div>
 
-      <!-- Main Play Area: Project Blueprint (Right) & Live Bidding Arena (Left) -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-3.5 items-start">
+      <!-- Main Play Area: 2 Balanced, High-Clarity Columns (Bidding Arena & Project Blueprint) -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
         
-        <!-- Live Bidding Arena Card (Clean, Focused & Informative) - lg:col-span-5 -->
-        <div class="lg:col-span-5 bg-slate-900 border-2 border-amber-500/50 rounded-3xl p-4 sm:p-5 space-y-3.5 shadow-2xl relative overflow-hidden">
+        <!-- ================= 1. LIVE BIDDING ARENA (الحراج والمزايدة) ================= -->
+        <div class="bg-slate-900/95 border-2 border-amber-500/40 rounded-3xl p-4 sm:p-5 shadow-2xl space-y-3.5">
           
-          <!-- Header: Tag, Points & Category -->
+          <!-- Top Tag & Points -->
           <div class="flex items-center justify-between">
             <span class="text-xs font-black text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/30 flex items-center gap-1.5 shadow-sm">
               <span>🔨</span>
               <span>حراج ومزايدة حية</span>
             </span>
-            <span id="offerScoreBonus" class="text-xs font-black text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/30">
-              +20 نقطة تميز
-            </span>
-          </div>
-
-          <!-- Item Name & Desc with Category Badge -->
-          <div class="text-right space-y-1">
-            <div class="flex items-center justify-between gap-2">
-              <h3 id="offerName" class="text-base sm:text-lg font-black text-white tracking-wide">جنوط سبور مقاس 20</h3>
-              <span id="offerCategoryBadge" class="text-[10px] font-bold text-slate-300 bg-slate-800 px-2.5 py-0.5 rounded-lg border border-slate-700 whitespace-nowrap">
-                🛞 الجنوط والكفرات
-              </span>
-            </div>
-            <p id="offerDesc" class="text-xs text-slate-400 line-clamp-2">ثبات خرافي على المنعطفات ويعطي شكل هجومي للسيارة</p>
-          </div>
-
-          <!-- Visual Item Card (ملامح وتفاصيل القطعة المعروضة حياً) -->
-          <div class="bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 border border-slate-800 rounded-2xl p-2.5 flex flex-col items-center justify-center relative shadow-inner overflow-hidden group">
-            <div class="w-full flex items-center justify-between text-[10px] font-bold text-slate-400 pb-1 border-b border-slate-800/80 mb-1">
-              <span class="flex items-center gap-1 text-amber-300">
-                <span>🔍</span>
-                <span>ملامح السلعة المعروضة</span>
-              </span>
-              <span class="text-[9px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                أصلية VIP
-              </span>
-            </div>
-            <div id="offerVisualCanvas" class="w-full h-24 flex items-center justify-center">
-              <!-- Injected Dynamic Item SVG -->
+            <div class="flex items-center gap-2">
+              <span id="offerCategoryBadge" class="text-[11px] font-bold text-slate-300 bg-slate-800/90 px-2.5 py-1 rounded-xl border border-slate-700/80"></span>
+              <span id="offerScoreBonus" class="text-xs font-black text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/30 font-mono">+20p</span>
             </div>
           </div>
 
-          <!-- Project Need Indicator Banner (Shows whether project needs this item) -->
-          <div id="offerNeedBanner" class="p-2 rounded-xl text-xs font-black flex items-center justify-between gap-2 bg-emerald-950/40 border border-emerald-500/30 text-emerald-300">
-            <span class="flex items-center gap-1.5">
+          <!-- Item Title & Visual Showcase -->
+          <div class="text-center space-y-1.5 py-0.5">
+            <h3 id="offerName" class="text-lg sm:text-xl font-black text-white tracking-wide"></h3>
+            <p id="offerDesc" class="text-xs text-slate-400 max-w-md mx-auto line-clamp-1 leading-relaxed"></p>
+            
+            <!-- Clean SVG Canvas -->
+            <div id="offerVisualCanvas" class="w-full h-24 sm:h-28 flex items-center justify-center bg-slate-950/70 border border-slate-800/80 rounded-2xl shadow-inner my-1.5"></div>
+            
+            <!-- Minimal Smart Need Pill -->
+            <div id="offerNeedBanner" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition shadow-sm">
               <span id="offerNeedIcon">💡</span>
-              <span id="offerNeedText">مشروعك يحتاج هذه القطعة! (خانة شاغرة)</span>
-            </span>
-            <span id="offerNeedBadge" class="text-[10px] bg-emerald-500/20 px-2 py-0.5 rounded-md font-mono">موصى به ⭐</span>
+              <span id="offerNeedText">شاغر في مشروعك</span>
+              <span id="offerNeedBadge" class="hidden"></span>
+            </div>
           </div>
 
-          <!-- Unified Clean Spotlight: Current Bid & Leader -->
+          <!-- Spotlight: Current Bid & Leader -->
           <div class="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border border-amber-500/40 rounded-2xl p-3.5 flex items-center justify-between shadow-lg">
             <div class="text-right">
               <span class="text-[10px] text-slate-400 font-bold block mb-0.5">أعلى سومة حالياً:</span>
-              <div class="flex items-baseline gap-1">
+              <div class="flex items-baseline gap-1.5">
                 <span id="liveHighestBidVal" class="text-2xl sm:text-3xl font-black font-mono text-amber-300">0</span>
                 <span class="text-xs font-bold text-amber-400">ر.س</span>
               </div>
             </div>
 
-            <div class="text-left bg-slate-950/90 border border-slate-800 px-3 py-1.5 rounded-xl max-w-[58%]">
-              <span class="text-[9px] text-slate-400 font-bold block">المتصدر:</span>
-              <span id="liveHighestBidderName" class="text-xs font-black text-white truncate block">
+            <div class="text-left bg-slate-950/90 border border-slate-800 px-3 py-1.5 rounded-xl max-w-[55%]">
+              <span class="text-[9px] text-slate-400 font-bold block mb-0.5">المتصدر:</span>
+              <span id="liveHighestBidderName" class="text-xs sm:text-sm font-black text-white truncate block">
                 لا توجد سومة حتى الآن
               </span>
             </div>
           </div>
 
-          <!-- Simple Direct 1-Click Bidding Controls -->
+          <!-- Bidding Actions (Simple & Direct) -->
           <div id="bidControlsArea" class="space-y-2 pt-0.5">
-            <!-- Primary Instant Bid Button (+1 SAR) -->
-            <button id="btnSubmitBid" onclick="executeInstantBid(1)" class="w-full py-3 sm:py-3.5 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 hover:from-emerald-500 hover:to-teal-400 text-white font-black rounded-2xl text-sm sm:text-base shadow-xl shadow-emerald-600/30 transition transform active:scale-98 flex items-center justify-center gap-2 border border-emerald-400/40">
+            <!-- Primary Big Bid Button -->
+            <button id="btnSubmitBid" onclick="executeInstantBid(1)" class="w-full py-3 sm:py-3.5 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 hover:from-emerald-500 hover:to-teal-400 text-white font-black rounded-2xl text-sm sm:text-base shadow-xl shadow-emerald-600/30 transition transform active:scale-98 flex items-center justify-center gap-2 border border-emerald-400/40 cursor-pointer">
               <span class="text-lg">🔨</span>
-              <span>زِد السومة بمقدار 1 ر.س</span>
-              <span class="bg-emerald-700/60 text-emerald-100 font-mono text-xs px-2 py-0.5 rounded-lg border border-emerald-400/30" id="nextBidAmount">1 ر.س</span>
+              <span>زِد السومة</span>
+              <span class="bg-emerald-700/80 text-emerald-100 font-mono text-xs px-2.5 py-0.5 rounded-xl border border-emerald-400/40" id="nextBidAmount">1 ر.س</span>
             </button>
 
-            <!-- Secondary Quick Power Bids (+2 and +5) & Pass Button -->
+            <!-- Quick Increments & Fold -->
             <div class="grid grid-cols-3 gap-2">
-              <button type="button" onclick="executeInstantBid(2)" class="py-2 bg-slate-950 hover:bg-slate-800 border border-amber-500/40 hover:border-amber-400 text-amber-300 font-bold rounded-xl text-xs flex flex-col items-center justify-center transition active:scale-95 shadow-sm">
-                <span class="text-[10px] font-black">+2 ر.س (فرق سومة)</span>
+              <button type="button" onclick="executeInstantBid(2)" class="py-2 bg-slate-950 hover:bg-slate-800/80 border border-amber-500/30 hover:border-amber-400 text-amber-300 font-black rounded-xl text-xs flex flex-col items-center justify-center transition active:scale-95 shadow-sm">
+                <span>+2 ر.س</span>
                 <span class="text-[10px] text-slate-400 font-mono" id="nextBidPlus2">2 ر.س</span>
               </button>
 
-              <button type="button" onclick="executeInstantBid(5)" class="py-2 bg-slate-950 hover:bg-slate-800 border border-purple-500/40 hover:border-purple-400 text-purple-300 font-bold rounded-xl text-xs flex flex-col items-center justify-center transition active:scale-95 shadow-sm">
-                <span class="text-[10px] font-black">+5 ر.س (ضربة قاضية)</span>
+              <button type="button" onclick="executeInstantBid(5)" class="py-2 bg-slate-950 hover:bg-slate-800/80 border border-purple-500/30 hover:border-purple-400 text-purple-300 font-black rounded-xl text-xs flex flex-col items-center justify-center transition active:scale-95 shadow-sm">
+                <span>+5 ر.س 🔥</span>
                 <span class="text-[10px] text-slate-400 font-mono" id="nextBidPlus5">5 ر.س</span>
               </button>
 
-              <button id="btnPassBid" onclick="handlePassBid()" class="py-2 bg-slate-950 hover:bg-rose-950/40 border border-slate-700 hover:border-rose-500/50 text-slate-400 hover:text-rose-300 font-bold rounded-xl text-xs flex flex-col items-center justify-center transition active:scale-95">
-                <span class="text-[10px] font-black">🏳️ انسحاب</span>
-                <span class="text-[9px] text-slate-500">خلها لهم</span>
+              <button id="btnPassBid" onclick="handlePassBid()" class="py-2 bg-slate-950 hover:bg-rose-950/40 border border-slate-800 hover:border-rose-500/50 text-slate-400 hover:text-rose-300 font-black rounded-xl text-xs flex flex-col items-center justify-center transition active:scale-95">
+                <span>🏳️ انسحاب</span>
+                <span class="text-[9px] text-slate-500">تخطي</span>
               </button>
             </div>
           </div>
 
-          <!-- Status Notice -->
           <p id="bidStatusNotice" class="text-xs text-center font-black min-h-[16px] text-amber-300"></p>
         </div>
 
-        <!-- Project Blueprint & Interactive Canvas (Right Column - lg:col-span-7) -->
-        <div class="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-5 flex flex-col justify-between shadow-xl space-y-3">
+        <!-- ================= 2. YOUR PROJECT & SLOTS (مشروعك ومحتوياته) ================= -->
+        <div class="bg-slate-900/95 border border-slate-800 rounded-3xl p-4 sm:p-5 shadow-xl space-y-3">
           
-          <!-- Project Header: Name, Score & Completion Indicator -->
-          <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+          <!-- Project Top Summary Bar -->
+          <div class="flex items-center justify-between pb-2 border-b border-slate-800/80">
             <div class="flex items-center gap-2">
               <span id="myProjectAvatar" class="text-lg">🏎️</span>
-              <span id="myProjectName" class="text-xs font-black text-white">مشروعك المباشر</span>
+              <span id="myProjectName" class="text-xs sm:text-sm font-black text-white">مشروعك</span>
             </div>
-            <div class="flex items-center gap-2">
-              <span id="projectSlotsProgress" class="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/20">
-                0 / 6 ملامح مكتملة
+            <div class="flex items-center gap-2 font-mono">
+              <span id="projectSlotsProgress" class="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-xl border border-emerald-500/20">
+                0 / 6 ملامح
               </span>
-              <span id="myProjectScore" class="text-xs font-mono font-black text-amber-400">💎 10 نقطة فخامة</span>
+              <span id="myProjectScore" class="text-xs font-black text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-xl border border-amber-500/20">
+                💎 10p
+              </span>
             </div>
           </div>
 
-          <!-- Live Target Spot indicator on Project (معاينة موضع التركيب قبل الشراء) -->
-          <div id="projectPreviewSpotBanner" class="bg-indigo-950/70 border border-indigo-500/40 rounded-xl px-3 py-1.5 flex items-center justify-between text-xs font-bold text-indigo-200 shadow-sm">
-            <span class="flex items-center gap-1.5">
-              <span class="text-sm animate-pulse">🎯</span>
-              <span id="projectPreviewSpotText">موضع التركيب في مشروعك: جاري المعاينة...</span>
-            </span>
-            <span class="text-[10px] text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 font-mono">
-              معاينة حية ✨
-            </span>
-          </div>
-
-          <!-- Dynamic SVG Drawing Area (Centered, No Ugly Blank Void) -->
-          <div class="flex items-center justify-center py-2 px-1 relative bg-gradient-to-b from-slate-950/70 to-slate-900/90 rounded-2xl border border-slate-800/80 shadow-inner" id="svgViewport">
-            <!-- Injected dynamic SVG for theme -->
-          </div>
-
-          <!-- Secret Contract Card (عقدك السري الخاص) -->
-          <div id="secretContractCard" class="bg-gradient-to-r from-purple-950/80 via-slate-900 to-indigo-950/80 border border-purple-500/50 rounded-2xl p-3 shadow-lg space-y-2">
-            <div class="flex items-center justify-between pb-1.5 border-b border-purple-500/30">
-              <div class="flex items-center gap-1.5">
-                <span class="text-base animate-pulse">📜</span>
-                <span class="text-xs font-black text-purple-200">عقدك السري الخاص:</span>
-                <span id="secretContractTitle" class="text-xs font-black text-amber-300">جاري تعيين العقد...</span>
+          <!-- Secret Contract Compact Banner -->
+          <div id="secretContractCard" class="bg-gradient-to-r from-purple-950/60 to-slate-950 border border-purple-500/40 rounded-2xl p-2.5 flex items-center justify-between gap-2 shadow-sm">
+            <div class="flex items-center gap-2 overflow-hidden flex-1">
+              <span class="text-base animate-pulse">📜</span>
+              <div class="text-right overflow-hidden flex-1">
+                <div class="flex items-center gap-1.5 truncate">
+                  <span class="text-[10px] text-purple-300 font-bold shrink-0">عقدك السري:</span>
+                  <span id="secretContractTitle" class="text-xs font-black text-amber-300 truncate"></span>
+                </div>
+                <div id="secretContractSlots" class="flex items-center gap-1 flex-wrap pt-1"></div>
               </div>
-              <span class="text-[10px] font-mono font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">
-                +35 نقطة بونص 🌟
-              </span>
             </div>
-            <p id="secretContractDesc" class="text-[11px] text-slate-300 font-medium leading-relaxed"></p>
-            <div id="secretContractSlots" class="flex items-center gap-1.5 flex-wrap pt-0.5">
-              <!-- Populated dynamically via updateMyProjectView -->
-            </div>
+            <span class="text-[10px] font-mono font-black text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded-lg border border-amber-500/30 shrink-0">
+              +35 بونص ⭐
+            </span>
           </div>
+          <span id="secretContractDesc" class="hidden"></span>
+          <span id="projectPreviewSpotText" class="hidden"></span>
 
-          <!-- Project Blueprint Checklist (6 Core Theme Features / Slots HUD) -->
-          <div class="bg-slate-950/80 border border-slate-800/90 rounded-2xl p-3 space-y-2">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-black text-slate-300 flex items-center gap-1.5">
-                <span>🛠️</span>
-                <span>ملامح وتجهيزات المشروع (ما تم وما يحتاجه):</span>
-              </span>
-              <span class="text-[10px] text-slate-400 font-bold">تتحدث مع كل سومة تفوز بها</span>
+          <!-- Dynamic Project SVG Visualization -->
+          <div class="flex items-center justify-center p-2 bg-gradient-to-b from-slate-950/80 to-slate-900/90 rounded-2xl border border-slate-800 shadow-inner" id="svgViewport"></div>
+
+          <!-- Project Slots Grid (Compact 6-Pills Format) -->
+          <div class="space-y-1.5 pt-0.5">
+            <div class="flex items-center justify-between text-[11px] font-bold text-slate-400 px-1">
+              <span>تجهيزات المشروع (الـ 6 ملامح):</span>
+              <span class="text-[10px] text-slate-500 font-mono">اضغط 💸 لاسترداد الكاش</span>
             </div>
-
-            <!-- The 6 Slots Grid -->
+            
             <div id="projectSlotsGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              <!-- Dynamically populated via JS -->
+              <!-- Dynamically populated clean compact pills -->
             </div>
           </div>
 
-          <!-- Sabotage & Floating Reactions Dock -->
-          <div class="pt-2 border-t border-slate-800 flex items-center justify-between gap-2">
-            <!-- Sabotage Cards Button -->
-            <button id="sabotageBtn" onclick="openSabotageModal()" class="px-3 py-1.5 bg-rose-600/30 hover:bg-rose-600/50 border border-rose-500/40 rounded-xl text-xs font-black text-rose-300 flex items-center gap-1 transition">
+          <!-- Sabotage Button & Quick Reactions -->
+          <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between gap-2">
+            <button id="sabotageBtn" onclick="openSabotageModal()" class="px-3 py-1.5 bg-rose-600/20 hover:bg-rose-600/40 border border-rose-500/40 rounded-xl text-xs font-black text-rose-300 flex items-center gap-1.5 transition active:scale-95 shadow-sm">
               <span>😈 مقلب</span>
-              <span id="sabotageBadge" class="bg-rose-500 text-white text-[9px] px-1 rounded-full font-mono">1</span>
+              <span id="sabotageBadge" class="bg-rose-500 text-white text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold">1</span>
             </button>
 
-            <!-- Quick Live Reaction Buttons -->
-            <div class="flex items-center gap-1">
-              <button onclick="sendQuickReaction('💸', 'طفرنا!')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs font-bold text-slate-300">💸 طفرنا!</button>
-              <button onclick="sendQuickReaction('😱', 'يا ساتر!')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs font-bold text-slate-300">😱 يا ساتر!</button>
-              <button onclick="sendQuickReaction('🤣', 'هههههه')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs font-bold text-slate-300">🤣 ضحك</button>
-              <button onclick="sendQuickReaction('🚀', 'ولعت!')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs font-bold text-slate-300">🚀 ولعت!</button>
+            <div class="flex items-center gap-1.5 overflow-x-auto py-0.5">
+              <button onclick="sendQuickReaction('💸', 'طفرنا!')" class="px-2.5 py-1 bg-slate-800/80 hover:bg-slate-700/90 border border-slate-700/50 rounded-xl text-xs font-bold text-slate-300 transition active:scale-95">💸 طفرنا!</button>
+              <button onclick="sendQuickReaction('😱', 'يا ساتر!')" class="px-2.5 py-1 bg-slate-800/80 hover:bg-slate-700/90 border border-slate-700/50 rounded-xl text-xs font-bold text-slate-300 transition active:scale-95">😱 يا ساتر!</button>
+              <button onclick="sendQuickReaction('🤣', 'هههههه')" class="px-2.5 py-1 bg-slate-800/80 hover:bg-slate-700/90 border border-slate-700/50 rounded-xl text-xs font-bold text-slate-300 transition active:scale-95">🤣 ضحك</button>
+              <button onclick="sendQuickReaction('🚀', 'ولعت!')" class="px-2.5 py-1 bg-slate-800/80 hover:bg-slate-700/90 border border-slate-700/50 rounded-xl text-xs font-bold text-slate-300 transition active:scale-95">🚀 ولعت!</button>
             </div>
           </div>
 
@@ -667,19 +631,16 @@
 
       </div>
 
-      <!-- Competitors Horizontal Curtain Strip (Bottom full width, No Page Stretch) -->
-      <div class="bg-slate-900 border border-slate-800 rounded-3xl p-3.5 space-y-2 shadow-xl">
+      <!-- Competitors Curtain Bar (Clean Minimal Strip) -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-3.5 space-y-2 shadow-lg">
         <div class="flex items-center justify-between px-1">
           <span class="text-xs font-black text-slate-300 flex items-center gap-1.5">
             <span>👥</span>
-            <span>المنافسون بالستارة المشفرة (اضغط 👁️ للمعاينة ثانية واحدة):</span>
+            <span>المنافسون (الستارة المشفرة):</span>
           </span>
-          <span class="text-[10px] text-slate-500 font-bold">تكشف الستارة بالكامل في حفل التتويج النهائي</span>
+          <span class="text-[10px] text-slate-500">اضغط 👁️ للمعاينة ثانية واحدة</span>
         </div>
-
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5" id="competitorsGrid">
-          <!-- Rendered via JS -->
-        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="competitorsGrid"></div>
       </div>
 
     </div>
@@ -2811,21 +2772,16 @@
         const needBanner = document.getElementById('offerNeedBanner');
         const needIcon = document.getElementById('offerNeedIcon');
         const needText = document.getElementById('offerNeedText');
-        const needBadge = document.getElementById('offerNeedBadge');
 
         if (needBanner && needText) {
           if (!hasSlotAlready) {
-            needBanner.className = 'p-2 rounded-xl text-xs font-black flex items-center justify-between gap-2 bg-emerald-950/60 border border-emerald-500/40 text-emerald-300';
-            needIcon.innerText = '💡';
-            needText.innerText = `مشروعك يحتاج هذه القطعة بشدة! (خانة ${offerSlot.name} شاغرة)`;
-            needBadge.className = 'text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-md font-bold';
-            needBadge.innerText = 'موصى به لمشروعك ⭐';
+            needBanner.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 shadow-sm';
+            needIcon.innerText = '⭐';
+            needText.innerText = `خانة (${offerSlot.name}) شاغرة في مشروعك!`;
           } else {
-            needBanner.className = 'p-2 rounded-xl text-xs font-black flex items-center justify-between gap-2 bg-indigo-950/50 border border-indigo-500/30 text-indigo-300';
+            needBanner.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-500/15 border border-indigo-500/30 text-indigo-300';
             needIcon.innerText = '⚡';
-            needText.innerText = `لديك تجهيز في (${offerSlot.name}) - ترقية إضافية للقوة والفخامة!`;
-            needBadge.className = 'text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-md font-bold';
-            needBadge.innerText = 'ترقية مضافة 🚀';
+            needText.innerText = `ترقية إضافية لـ (${offerSlot.name})`;
           }
         }
       }
@@ -3017,46 +2973,36 @@
 
           if (matchingUpgrade) {
             completedSlotsCount++;
+            const refund = Math.max(1, Math.round((matchingUpgrade.price || 5) * 0.6));
             return `
-              <div class="bg-gradient-to-r from-emerald-950/70 via-slate-900 to-emerald-950/50 border border-emerald-500/50 rounded-xl p-2 flex flex-col justify-between shadow-sm">
-                <div class="flex items-center justify-between gap-1">
-                  <span class="text-[11px] font-black text-emerald-300 flex items-center gap-1 truncate">
-                    <span>${slot.icon}</span>
-                    <span class="truncate">${slot.name}</span>
-                  </span>
-                  <span class="text-[9px] text-emerald-400 font-mono font-black">✅ جاهز</span>
-                </div>
-                <div class="mt-1 pt-1 border-t border-emerald-500/20 text-right">
-                  <div class="flex items-center justify-between">
-                    <span class="text-[10px] font-bold text-white truncate" title="${matchingUpgrade.name}">
+              <div class="bg-gradient-to-r from-emerald-950/70 via-slate-900 to-emerald-950/40 border border-emerald-500/50 rounded-xl px-2.5 py-1.5 flex items-center justify-between gap-1 shadow-sm transition hover:border-emerald-400">
+                <div class="flex items-center gap-1.5 overflow-hidden flex-1">
+                  <span class="text-sm shrink-0">${slot.icon}</span>
+                  <div class="truncate text-right">
+                    <span class="text-[11px] font-black text-emerald-200 truncate block" title="${matchingUpgrade.name}">
                       ${matchingUpgrade.name}
                     </span>
-                    <span class="text-[9px] font-mono text-amber-300">+${matchingUpgrade.score}p</span>
+                    <span class="text-[9px] text-slate-400 font-medium">${slot.name}</span>
                   </div>
-                  <!-- Resell to Bank Action Button (استرداد الكاش 💸) -->
-                  <button type="button" onclick="handleResellItem('${matchingUpgrade.id}', '${matchingUpgrade.name}', ${matchingUpgrade.price || 5})" class="mt-1 w-full py-0.5 px-1 bg-rose-950/60 hover:bg-rose-900 border border-rose-500/30 hover:border-rose-400 rounded text-[9px] font-bold text-rose-300 flex items-center justify-center gap-1 transition active:scale-95" title="بيع للبنك واسترد كاش فوراً">
-                    <span>💸 بيع للبنك</span>
-                    <span class="text-emerald-400 font-mono">+${Math.max(1, Math.round((matchingUpgrade.price || 5) * 0.6))} ر.س</span>
+                </div>
+                <div class="flex items-center gap-1 shrink-0">
+                  <span class="text-[9px] font-mono font-black text-amber-300 bg-amber-500/10 px-1 py-0.5 rounded border border-amber-500/20">+${matchingUpgrade.score}p</span>
+                  <button type="button" onclick="handleResellItem('${matchingUpgrade.id}', '${matchingUpgrade.name}', ${matchingUpgrade.price || 5})" 
+                          class="text-[9px] px-1.5 py-0.5 bg-rose-950/80 hover:bg-rose-900 border border-rose-500/40 text-rose-300 rounded-lg transition font-mono active:scale-95" 
+                          title="بيع للبنك واسترد ${refund} ر.س كاش">
+                    💸 +${refund}
                   </button>
                 </div>
               </div>
             `;
           } else {
             return `
-              <div class="bg-slate-950/60 border border-dashed border-slate-700/80 rounded-xl p-2 flex flex-col justify-between opacity-75 hover:opacity-100 transition">
-                <div class="flex items-center justify-between gap-1">
-                  <span class="text-[11px] font-black text-slate-300 flex items-center gap-1 truncate">
-                    <span>${slot.icon}</span>
-                    <span class="truncate">${slot.name}</span>
-                  </span>
-                  <span class="text-[9px] text-rose-400 font-bold">⭕ شاغر</span>
+              <div class="bg-slate-950/50 border border-dashed border-slate-800 rounded-xl px-2.5 py-1.5 flex items-center justify-between gap-1 opacity-70 hover:opacity-100 transition">
+                <div class="flex items-center gap-1.5 overflow-hidden">
+                  <span class="text-sm shrink-0 opacity-60">${slot.icon}</span>
+                  <span class="text-[11px] font-bold text-slate-400 truncate">${slot.name}</span>
                 </div>
-                <div class="mt-1 pt-1 border-t border-slate-800 text-right">
-                  <span class="text-[10px] text-amber-300/80 font-bold block">
-                    بحاجة لترقية
-                  </span>
-                  <span class="text-[9px] text-slate-500">غير مكتمل بعد</span>
-                </div>
+                <span class="text-[9px] font-mono text-slate-500 bg-slate-900/80 px-2 py-0.5 rounded border border-slate-800">شاغر</span>
               </div>
             `;
           }
@@ -3065,7 +3011,7 @@
 
       const progressEl = document.getElementById('projectSlotsProgress');
       if (progressEl) {
-        progressEl.innerText = `${completedSlotsCount} / 6 ملامح مكتملة`;
+        progressEl.innerText = `${completedSlotsCount} / 6 ملامح`;
       }
 
       // Update Secret Contract Card
